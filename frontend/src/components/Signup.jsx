@@ -4,6 +4,8 @@ import axios from "axios";
 import { useAuth } from "../context/AuthProvider";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import { signupUser } from "../api";
+
 function Signup() {
   const [authUser, setAuthUser] = useAuth();
   const {
@@ -22,29 +24,53 @@ function Signup() {
     return value === password || "Passwords do not match";
   };
 
+  // const onSubmit = async (data) => {
+  //   const userInfo = {
+  //     fullname: data.fullname,
+  //     email: data.email,
+  //     password: data.password,
+  //     confirmPassword: data.confirmPassword,
+  //   };
+  //   // console.log(userInfo);
+  //   await axios
+  //     .post("/api/user/signup", userInfo)
+  //     .then((response) => {
+  //       if (response.data) {
+  //         toast.success("Signup successful");
+  //       }
+  //       localStorage.setItem("ChatApp", JSON.stringify(response.data));
+  //       setAuthUser(response.data);
+  //     })
+  //     .catch((error) => {
+  //       if (error.response) {
+  //         toast.error("Error: " + error.response.data.error);
+  //       }
+  //     });
+
+    
+  // };
+
   const onSubmit = async (data) => {
-    const userInfo = {
-      fullname: data.fullname,
-      email: data.email,
-      password: data.password,
-      confirmPassword: data.confirmPassword,
-    };
-    // console.log(userInfo);
-    await axios
-      .post("/api/user/signup", userInfo)
-      .then((response) => {
-        if (response.data) {
+    try {
+      const response = await signupUser({
+        fullname: data.fullname,
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+      });
+
+      if (response.data) {
           toast.success("Signup successful");
-        }
+      }
         localStorage.setItem("ChatApp", JSON.stringify(response.data));
         setAuthUser(response.data);
-      })
-      .catch((error) => {
-        if (error.response) {
-          toast.error("Error: " + error.response.data.error);
-        }
-      });
+
+    } catch (error) {
+      if (error.response) toast.error("Error: " + error.response.data.error);
+      else toast.error("Something went wrong!");
+    }
   };
+
   return (
     <>
       <div className="flex h-screen items-center justify-center bg-blue-300">

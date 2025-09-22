@@ -13,9 +13,12 @@ export const SocketProvider = ({ children }) => {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [authUser] = useAuth();
 
+  // Use single environment variable for backend (API + Socket)
+  const BACKEND_URL = import.meta.env.VITE_API_URL; // same as api.js
+
   useEffect(() => {
     if (authUser) {
-      const socket = io("http://localhost:4002", {
+      const socket = io(BACKEND_URL, {
         query: {
           userId: authUser.user._id,
         },

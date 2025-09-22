@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "../context/AuthProvider";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import { loginUser } from "../api";
 
 function Login() {
   const [authUser, setAuthUser] = useAuth();
@@ -14,27 +15,49 @@ function Login() {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    const userInfo = {
+  // const onSubmit = (data) => {
+  //   const userInfo = {
+  //     email: data.email,
+  //     password: data.password,
+  //   };
+  //   // console.log(userInfo);
+  //   axios
+  //     .post("/api/user/login", userInfo)
+  //     .then((response) => {
+  //       if (response.data) {
+  //         toast.success("Login successful");
+  //       }
+  //       console.log("resp = ",response)
+  //       localStorage.setItem("ChatApp", JSON.stringify(response.data));
+  //       setAuthUser(response.data);
+  //     })
+  //     .catch((error) => {
+  //       if (error.response) {
+  //         toast.error("Error: " + error.response.data.error);
+  //       }
+  //     });
+  // };
+
+const onSubmit = async (data) => {
+  try {
+    const response = await loginUser({
       email: data.email,
       password: data.password,
-    };
-    // console.log(userInfo);
-    axios
-      .post("/api/user/login", userInfo)
-      .then((response) => {
-        if (response.data) {
-          toast.success("Login successful");
-        }
-        localStorage.setItem("ChatApp", JSON.stringify(response.data));
-        setAuthUser(response.data);
-      })
-      .catch((error) => {
-        if (error.response) {
-          toast.error("Error: " + error.response.data.error);
-        }
-      });
-  };
+    });
+
+    console.log("response = ",response)
+    if (response.data)  toast.success("Login successful");
+    localStorage.setItem("ChatApp", JSON.stringify(response.data));
+    setAuthUser(response.data);
+    
+  } catch (error) {
+    if (error.response) {
+      toast.error("Error: " + error.response.data.error);
+    }
+  }
+};
+
+  
   return (
     <>
       <div className="flex h-screen items-center justify-center bg-blue-300">
@@ -121,3 +144,4 @@ function Login() {
 }
 
 export default Login;
+
