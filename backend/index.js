@@ -16,12 +16,20 @@ app.use(cookieParser());
 // app.use(cors());
 
 const allowedOrigins = [
-  "http://localhost:3001",
-  "https://chatapp-pankaj-j656.onrender.com"
+  "https://chatapp-pankaj-j656.onrender.com", // deployed frontend URL
+  "http://localhost:5173"   // local frontend for testing
 ];
+// app.use(cors());
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true); // Postman, curl requests
+    if (!allowedOrigins.includes(origin)) {
+      return callback(new Error("Not allowed by CORS"), false);
+    }
+    return callback(null, true);
+  },
+  methods: ["GET","POST","PUT","DELETE"],
+  credentials: true
 }));
 
 const PORT = process.env.PORT || 4001;
