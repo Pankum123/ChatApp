@@ -17,7 +17,7 @@ app.use(cookieParser());
 
 const allowedOrigins = [
   "http://localhost:3001",
-  "https://your-frontend-url.com"
+  "https://chatapp-pankaj-j656.onrender.com"
 ];
 app.use(cors({
   origin: allowedOrigins,
