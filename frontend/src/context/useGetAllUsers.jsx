@@ -39,7 +39,6 @@
 
 // export default useGetAllUsers;
 
-
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
@@ -53,29 +52,24 @@ function useGetAllUsers() {
       setLoading(true);
 
       try {
-        const token = Cookies.get("jwt");
+        const API_URL = import.meta.env.VITE_API_URL;
 
-        if (!token) {
-          console.log("JWT token not found. User might not be logged in.");
-          setLoading(false);
-          return;
-        }
-
-        const API_URL = import.meta.env.VITE_API_URL; // works in prod and dev
-
+        // always send cookie, don't rely on reading it in frontend
         const response = await axios.get(`${API_URL}/api/user/allusers`, {
-          withCredentials: true, // ensures cookies are sent
+          withCredentials: true, 
           headers: {
-            Authorization: `Bearer ${token}`,
+            // optional: send token if present
+            Authorization: Cookies.get("jwt")
+              ? `Bearer ${Cookies.get("jwt")}`
+              : undefined,
           },
         });
 
         setAllUsers(response.data);
       } catch (error) {
         if (axios.isAxiosError(error) && error.response?.status === 401) {
-          console.log("Unauthorized! Token might be invalid or expired.");
-          // Optional: redirect to login page
-          // window.location.href = "/login";
+          console.log("Unauthorized! User might not be logged in.");
+          // optional: redirect to login
         } else {
           console.log("Error in useGetAllUsers:", error);
         }
