@@ -32,23 +32,16 @@ export const logoutUser = async () => {
   return response;
 };
 
-// // Get all users API
-// export const getAllUsers = async () => {
-//   const token = Cookies.get("jwt"); // get token like in your hook
-//   const res = await api.get("/user/allusers", {
-//     credentials: "include",
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   });
-//   return res;
-// };
-
 // Get all users API
 export const getAllUsers = async () => {
-  // No manual Authorization header; rely on cookie
-  const response = await api.get("/user/allusers");
-  return response;
+  const token = Cookies.get("jwt"); // get token like in your hook
+  const res = await api.get("/user/allusers", {
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res;
 };
 
 

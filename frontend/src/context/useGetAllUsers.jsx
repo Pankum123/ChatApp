@@ -16,7 +16,16 @@ function useGetAllUsers() {
         //     Authorization: `Bearer ${token}`,
         //   },
         // });
-        const response = await getAllUsers();
+        // Use VITE_API_URL from environment
+        const API_URL = import.meta.env.VITE_API_URL;
+
+        const response = await axios.get(`${API_URL}/user/allusers`, {
+          withCredentials: true, // use withCredentials instead of credentials in axios
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        // const response = await getAllUsers();
         setAllUsers(response.data);
         setLoading(false);
       } catch (error) {
