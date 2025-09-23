@@ -30,6 +30,8 @@ Authentication: JSON Web Token (JWT)
 
 👉 Chat App : https://chatapp-pankaj-j656.onrender.com
 
+👉 Video : https://drive.google.com/file/d/1izGp2uHALsXZSHAjnzxN867HRuzuIjFf/view?usp=sharing
+
 <img width="1919" height="1078" alt="Screenshot 2025-09-23 144255" src="https://github.com/user-attachments/assets/69c436d5-eb95-4069-9322-0ee082797629" />
 
 
