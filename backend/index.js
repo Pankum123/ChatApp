@@ -50,7 +50,7 @@ dotenv.config();
 // CORS middleware (before routes)
 // ----------------------
 const allowedOrigins = [
-  "http://localhost:5173",
+  "http://localhost:3001",
   "https://chatapp-pankaj-j656.onrender.com"
 ];
 
