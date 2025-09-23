@@ -9,8 +9,8 @@ export default defineConfig({
     port: 3001,      //frontend
     proxy: {
       "/api": {
-        // target: "http://localhost:4002",     //backend
-        target: "https://chatapp-backend-fauk.onrender.com",
+        target: "http://localhost:4002",     //backend
+        // target: "https://chatapp-backend-fauk.onrender.com,
         changeOrigin: true,
       },
     },
