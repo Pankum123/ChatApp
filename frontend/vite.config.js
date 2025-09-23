@@ -10,7 +10,7 @@ export default defineConfig({
     proxy: {
       "/api": {
         // target: "http://localhost:4002",     //backend
-        target: env.VITE_API_URL,
+        target: "https://chatapp-backend-fauk.onrender.com",
         changeOrigin: true,
       },
     },
