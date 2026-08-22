@@ -5,9 +5,9 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import dns from "node:dns/promises";
 
-import userRoute from "./routes/user.route.js";
-import messageRoute from "./routes/message.route.js";
-import { app, server } from "./SocketIO/server.js"; // use this app
+import userRoute from "./modules/user/user.route.js";
+import messageRoute from "./modules/message/message.route.js";
+import { app, server } from "./sockets/server.js"; // use this app
 
 dotenv.config();
 
