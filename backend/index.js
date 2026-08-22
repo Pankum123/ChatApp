@@ -3,12 +3,18 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import dns from "node:dns/promises";
 
 import userRoute from "./routes/user.route.js";
 import messageRoute from "./routes/message.route.js";
 import { app, server } from "./SocketIO/server.js"; // use this app
 
 dotenv.config();
+
+if (process.env.NODE_ENV !== "production") {
+  dns.setServers(["1.1.1.1", "8.8.8.8"]);
+  console.log("Local DNS Servers set.");
+}
 
 // ----------------------
 // CORS middleware (before routes)
