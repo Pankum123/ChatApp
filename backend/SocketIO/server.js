@@ -5,11 +5,17 @@ import express from "express";
 const app = express();
 
 const server = http.createServer(app);
+
+const allowedOrigins = [
+  "http://localhost:3001",
+  "https://chatapp-pankaj-j656.onrender.com"
+];
+
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3001",
-    origin: "https://chatapp-pankaj-j656.onrender.com",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
