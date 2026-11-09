@@ -1,4 +1,5 @@
 import React from "react";
+import { MdDone, MdDoneAll } from "react-icons/md";
 
 function Message({ message }) {
   const authUser = JSON.parse(localStorage.getItem("ChatApp"));
@@ -19,7 +20,19 @@ function Message({ message }) {
           <div className={`chat-bubble text-white ${chatColor}`}>
             {message.message}
           </div>
-          <div className="chat-footer">{formattedTime}</div>
+          <div className="chat-footer">{formattedTime}
+            {itsMe && message.status === "sent" && (
+              <MdDone className="text-gray-400 text-base" />
+            )}
+
+            {itsMe && message.status === "delivered" && (
+              <MdDoneAll className="text-gray-400 text-base" />
+            )}
+
+            {itsMe && message.status === "read" && (
+              <MdDoneAll className="text-blue-400 text-base" />
+            )}
+          </div>
         </div>
       </div>
     </div>
