@@ -120,7 +120,10 @@ io.on("connection", (socket) => {
   // used to listen client side events emitted by server side (server & client)
   socket.on("disconnect", () => {
     console.log("a user disconnected", socket.id);
-    delete users[userId];
+    // delete users[userId];
+    if (users[userId] === socket.id) {
+      delete users[userId];
+    }
     io.emit("getOnlineUsers", Object.keys(users));
   });
 });
