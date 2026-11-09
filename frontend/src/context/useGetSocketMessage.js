@@ -27,6 +27,10 @@ const useGetSocketMessage = () => {
         selectedConversation &&
         newMessage.senderId === selectedConversation._id
       ) {
+        // Naya message read hone ki confirmation
+        socket.emit("messagesRead", {
+          senderId: newMessage.senderId,
+        });
         const notification = new Audio(sound);
         notification.play();
 
