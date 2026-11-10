@@ -16,12 +16,6 @@ const useGetSocketMessage = () => {
       const selectedConversation =
         useConversation.getState().selectedConversation;
 
-      // Message delivered hone ki confirmation
-      // Ye har incoming message ke liye chalega
-      socket.emit("messageDelivered", {
-        messageId: newMessage._id,
-      });
-
       // Sirf selected conversation ke messages add honge
       if (
         selectedConversation &&

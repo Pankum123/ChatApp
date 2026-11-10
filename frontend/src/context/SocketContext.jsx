@@ -27,6 +27,11 @@ export const SocketProvider = ({ children }) => {
       socket.on("getOnlineUsers", (users) => {
         setOnlineUsers(users);
       });
+      socket.on("newMessage", (newMessage) => {
+        socket.emit("messageDelivered", {
+          messageId: newMessage._id,
+        });
+      });
       return () => socket.close();
     } else {
       if (socket) {
