@@ -28,7 +28,7 @@ export const getReceiverSocketId = (receiverId) => {
 const users = {};
 
 // used to listen events on server side.
-io.on("connection", (socket) => {
+io.on("connection", async(socket) => {
   console.log("a user connected", socket.id);
   const userId = socket.handshake.query.userId;
   if (userId) {
@@ -37,6 +37,36 @@ io.on("connection", (socket) => {
   }
   // used to send the events to all connected users
   io.emit("getOnlineUsers", Object.keys(users));
+
+    // Login hone par pending messages delivered mark karna
+  try {
+    const pendingMessages = await Message.find({
+      receiverId: userId,
+      status: "sent",
+    });
+
+    await Promise.all(
+      pendingMessages.map(async (message) => {
+        message.status = "delivered";
+        message.deliveredAt = new Date();
+        await message.save();
+
+        const senderSocketId = getReceiverSocketId(
+          message.senderId.toString()
+        );
+
+        if (senderSocketId) {
+          io.to(senderSocketId).emit("messageStatusUpdated", {
+            messageId: message._id.toString(),
+            status: "delivered",
+            deliveredAt: message.deliveredAt,
+          });
+        }
+      })
+    );
+  } catch (error) {
+    console.log("Pending messages delivery error:", error);
+  }
 
   // Message delivered event
   socket.on("messageDelivered", async ({ messageId } = {}) => {
