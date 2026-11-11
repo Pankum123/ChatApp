@@ -1,5 +1,6 @@
 import Group from "./group.model.js";
 import GroupMessage from "./groupMessage.model.js";
+import { io } from "../../sockets/server.js";
 
 export const createGroup = async (req, res) => {
   try {
@@ -62,6 +63,9 @@ export const sendGroupMessage = async (req, res) => {
       senderId,
       message,
     });
+
+    // Group ke sabhi connected members ko message bhejna
+    io.to(groupId).emit("newGroupMessage", newGroupMessage);
 
     res.status(201).json(newGroupMessage);
   } catch (error) {

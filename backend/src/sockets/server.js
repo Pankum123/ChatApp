@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import http from "http";
 import express from "express";
 import oneToOneSocket from "./oneToOneSocket.js";
+import groupSocket from "./groupSocket.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -42,6 +43,14 @@ io.on("connection", async (socket) => {
 
   // One-to-One Socket Events
   await oneToOneSocket(
+    io,
+    socket,
+    userId,
+    getReceiverSocketId
+  );
+
+  // Group Socket Events
+  await groupSocket(
     io,
     socket,
     userId,
