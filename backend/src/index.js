@@ -5,10 +5,10 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import dns from "node:dns/promises";
 
+import { app, server } from "./sockets/server.js"; // use this app
 import userRoute from "./modules/user/user.route.js";
 import messageRoute from "./modules/message/message.route.js";
-import { app, server } from "./sockets/server.js"; // use this app
-
+import groupRoute  from "./modules/group/group.route.js"
 dotenv.config();
 
 if (process.env.NODE_ENV !== "production") {
@@ -51,6 +51,7 @@ mongoose.connect(URI)
 // Routes
 app.use("/api/user", userRoute);
 app.use("/api/message", messageRoute);
+app.use("/api/group", groupRoute);
 
 // Start server
 server.listen(PORT, () => {
