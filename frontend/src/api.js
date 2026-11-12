@@ -59,5 +59,12 @@ export const sendMessageToConversation = async (conversationId, message) => {
   return res;
 };
 
+
+// ====== Group APIs ======
+export const createGroupAPI = async (groupData) => {
+  const response = await api.post("/group/create", groupData);
+  return response;
+};
+
 // Export axios instance if needed elsewhere
 export default api;
