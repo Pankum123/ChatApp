@@ -3,9 +3,13 @@ import User from "./User";
 import useGetAllUsers from "../../context/useGetAllUsers";
 import CreateGroup from "./Group/CreateGroup";
 import { createGroupAPI } from "../../api";
+import useGetGroups from "../../context/Group/useGetGroups";
+import GroupItem from "./Group/GroupItem";
 
 function Users() {
   const [allUsers, loading] = useGetAllUsers();
+  const [groups, groupsLoading, setGroups] = useGetGroups();
+
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [creatingGroup, setCreatingGroup] = useState(false);
 
@@ -18,6 +22,9 @@ function Users() {
       const response = await createGroupAPI(groupData);
 
       console.log("Group Created Successfully:", response.data);
+
+      // Add newly created group to the groups list
+      setGroups((prevGroups) => [response.data, ...prevGroups]);
 
       setShowCreateGroup(false);
     } catch (error) {
@@ -48,7 +55,16 @@ function Users() {
       <div
         className="py-2 flex-1 overflow-y-auto"
         style={{ maxHeight: "calc(84vh - 10vh)" }}
-      >
+      > 
+        {/* Groups */}
+        {groups.map((group) => (
+          <GroupItem
+            key={group._id}
+            group={group}
+          />
+        ))}
+
+        {/* Individual Users */}
         {allUsers.map((user, index) => (
           <User key={index} user={user} />
         ))}

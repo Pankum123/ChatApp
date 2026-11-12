@@ -66,5 +66,11 @@ export const createGroupAPI = async (groupData) => {
   return response;
 };
 
+// ===== all groups of the logged-in user ======
+export const getGroupsAPI = async () => {
+  const response = await api.get("/group/get");
+  return response;
+};
+
 // Export axios instance if needed elsewhere
 export default api;
