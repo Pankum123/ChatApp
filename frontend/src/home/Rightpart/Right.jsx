@@ -1,31 +1,49 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Chatuser from "./Chatuser";
 import Messages from "./Messages";
 import Typesend from "./Typesend";
+import GroupChatuser from "./Group/GroupChatuser";
+import GroupMessages from "./Group/GroupMessages";
+import GroupTypesend from "./Group/GroupTypesend";
 import useConversation from "../../zustand/useConversation.js";
 import { useAuth } from "../../context/AuthProvider.jsx";
 import { CiMenuFries } from "react-icons/ci";
 
 function Right() {
-  const { selectedConversation, setSelectedConversation } = useConversation();
-  useEffect(() => {
-    return setSelectedConversation(null);
-  }, [setSelectedConversation]);
+  const { selectedConversation, selectedGroup } = useConversation();
+
   return (
     <div className="w-full bg-slate-900 text-gray-300">
       <div>
-        {!selectedConversation ? (
+        {!selectedConversation && !selectedGroup ? (
           <NoChatSelected />
-        ) : (
+        ) : selectedConversation ? (
           <>
+            {/* Private Chat - Existing UI */}
             <Chatuser />
+
             <div
-              className=" flex-1 overflow-y-auto"
+              className="flex-1 overflow-y-auto"
               style={{ maxHeight: "calc(92vh - 8vh)" }}
             >
               <Messages />
             </div>
+
             <Typesend />
+          </>
+        ) : (
+          <>
+            {/* Group Chat - New UI */}
+            <GroupChatuser />
+
+            <div
+              className="flex-1 overflow-y-auto"
+              style={{ maxHeight: "calc(92vh - 8vh)" }}
+            >
+              <GroupMessages />
+            </div>
+
+            <GroupTypesend />
           </>
         )}
       </div>
@@ -37,7 +55,7 @@ export default Right;
 
 const NoChatSelected = () => {
   const [authUser] = useAuth();
-  console.log(authUser);
+
   return (
     <>
       <div className="relative">
@@ -47,6 +65,7 @@ const NoChatSelected = () => {
         >
           <CiMenuFries className="text-white text-xl" />
         </label>
+
         <div className="flex h-screen items-center justify-center">
           <h1 className="text-center">
             Welcome{" "}

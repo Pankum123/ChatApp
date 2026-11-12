@@ -1,10 +1,15 @@
-
 import React from "react";
+import useConversation from "../../../zustand/useConversation.js";
 
-function GroupItem({ group, onGroupSelect, isSelected }) {
+function GroupItem({ group }) {
+  const { selectedGroup, setSelectedGroup } = useConversation();
+
+  // Check whether this group is selected
+  const isSelected = selectedGroup?._id === group._id;
+
   return (
     <div
-      onClick={() => onGroupSelect?.(group)}
+      onClick={() => setSelectedGroup(group)}
       className={`hover:bg-slate-600 duration-300 ${
         isSelected ? "bg-slate-700" : ""
       }`}
