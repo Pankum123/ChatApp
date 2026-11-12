@@ -7,9 +7,18 @@ function Users() {
   console.log(allUsers);
   return (
     <div>
-      <h1 className="px-8 py-2 text-white font-semibold bg-slate-800 rounded-md">
-        Messages
-      </h1>
+      <div className="px-4 py-2 flex items-center justify-between text-white font-semibold bg-slate-800 rounded-md">
+        <h1>Messages</h1>
+
+        <button
+          type="button"
+          className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md flex items-center gap-1"
+        >
+          <span className="text-2xl font-bold leading-none">+</span>
+          New Group
+        </button>
+      </div>
+
       <div
         className="py-2 flex-1 overflow-y-auto"
         style={{ maxHeight: "calc(84vh - 10vh)" }}
