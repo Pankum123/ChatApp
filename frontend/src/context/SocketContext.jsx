@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthProvider";
 import io from "socket.io-client";
+import useGetGroupSocketMessage from "./Group/useGetGroupSocketMessage.js";
 const socketContext = createContext();
 
 // it is a hook.
@@ -12,6 +13,7 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [authUser] = useAuth();
+  useGetGroupSocketMessage(socket);
 
   // Use single environment variable for backend (API + Socket)
   const BACKEND_URL = import.meta.env.VITE_API_URL; // same as api.js

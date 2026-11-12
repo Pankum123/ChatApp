@@ -22,6 +22,15 @@ function Users() {
     if (!socket) return;
 
     const handleNewGroupCreated = (newGroup) => {
+      // Naye group ke room mein automatically join karo
+      if (newGroup?._id) {
+        socket.emit("joinGroup", { groupId: newGroup._id }, (response) => {
+          if (!response?.success) {
+            console.log("Group room join error:", response?.message);
+          }
+        });
+      }
+      
       setGroups((prevGroups) => {
         const alreadyExists = prevGroups.some(
           (group) => group._id === newGroup._id
