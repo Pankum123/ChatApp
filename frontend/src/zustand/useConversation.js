@@ -32,6 +32,17 @@ const useConversation = create((set) => ({
   // Messages
   messages: [],
   setMessage: (messages) => set({ messages }),
+
+  // Group Messages
+  groupMessages: [],
+  setGroupMessages: (groupMessages) =>
+    set((state) => ({
+      groupMessages:
+        typeof groupMessages === "function"
+          ? groupMessages(state.groupMessages)
+          : groupMessages,
+    })),
+
 }));
 
 export default useConversation;

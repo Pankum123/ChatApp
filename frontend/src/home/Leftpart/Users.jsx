@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import User from "./User";
 import useGetAllUsers from "../../context/useGetAllUsers";
 import CreateGroup from "./Group/CreateGroup";
 import { createGroupAPI } from "../../api";
 import useGetGroups from "../../context/Group/useGetGroups";
 import GroupItem from "./Group/GroupItem";
+import { useSocketContext } from "../../context/SocketContext.jsx";
 
 function Users() {
   const [allUsers, loading] = useGetAllUsers();
@@ -13,8 +15,32 @@ function Users() {
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [creatingGroup, setCreatingGroup] = useState(false);
 
-  console.log(allUsers);
+  const { socket } = useSocketContext();
 
+  // Real-time mein naye group receive karna
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewGroupCreated = (newGroup) => {
+      setGroups((prevGroups) => {
+        const alreadyExists = prevGroups.some(
+          (group) => group._id === newGroup._id
+        );
+
+        if (alreadyExists) return prevGroups;
+
+        return [newGroup, ...prevGroups];
+      });
+    };
+
+    socket.on("newGroupCreated", handleNewGroupCreated);
+
+    return () => {
+      socket.off("newGroupCreated", handleNewGroupCreated);
+    };
+  }, [socket, setGroups]);
+
+  // Group create karna
   const handleCreateGroup = async (groupData) => {
     try {
       setCreatingGroup(true);
@@ -23,8 +49,15 @@ function Users() {
 
       console.log("Group Created Successfully:", response.data);
 
-      // Add newly created group to the groups list
-      setGroups((prevGroups) => [response.data, ...prevGroups]);
+      setGroups((prevGroups) => {
+        const alreadyExists = prevGroups.some(
+          (group) => group._id === response.data._id
+        );
+
+        if (alreadyExists) return prevGroups;
+
+        return [response.data, ...prevGroups];
+      });
 
       setShowCreateGroup(false);
     } catch (error) {
@@ -55,13 +88,10 @@ function Users() {
       <div
         className="py-2 flex-1 overflow-y-auto"
         style={{ maxHeight: "calc(84vh - 10vh)" }}
-      > 
+      >
         {/* Groups */}
         {groups.map((group) => (
-          <GroupItem
-            key={group._id}
-            group={group}
-          />
+          <GroupItem key={group._id} group={group} />
         ))}
 
         {/* Individual Users */}

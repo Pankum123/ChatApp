@@ -33,8 +33,18 @@ io.on("connection", async (socket) => {
 
   const userId = socket.handshake.query.userId;
 
+  // if (userId) {
+  //   users[userId] = socket.id;
+  //   console.log("Hello ", users);
+  // }
+
   if (userId) {
     users[userId] = socket.id;
+
+    // User ko personal room mein join karwana
+    socket.join(userId.toString());
+
+    console.log("User joined personal room:", userId);
     console.log("Hello ", users);
   }
 

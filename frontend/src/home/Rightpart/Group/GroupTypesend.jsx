@@ -2,16 +2,19 @@
 import React, { useState } from "react";
 import { IoSend } from "react-icons/io5";
 
+import useSendGroupMessage from "../../../context/Group/useSendGroupMessage.js";
+
 function GroupTypesend() {
   const [message, setMessage] = useState("");
 
-  const handleSubmit = (e) => {
+  const { loading, sendGroupMessage } = useSendGroupMessage();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!message.trim()) return;
+    if (!message.trim() || loading) return;
 
-    // Temporary dummy send behavior
-    console.log("Group Message:", message);
+    await sendGroupMessage(message.trim());
 
     setMessage("");
   };
@@ -29,7 +32,7 @@ function GroupTypesend() {
           />
         </div>
 
-        <button type="submit">
+        <button type="submit" disabled={loading || !message.trim()}>
           <IoSend className="text-3xl" />
         </button>
       </div>

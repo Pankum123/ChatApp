@@ -72,5 +72,24 @@ export const getGroupsAPI = async () => {
   return response;
 };
 
+// ====== Group Messages APIs ======
+
+export const getGroupMessagesAPI = async (groupId) => {
+  if (!groupId) throw new Error("Group ID is required");
+
+  const response = await api.get(`/group/messages/${groupId}`);
+  return response;
+};
+
+export const sendGroupMessageAPI = async (groupId, message) => {
+  if (!groupId) throw new Error("Group ID is required");
+
+  const response = await api.post(`/group/send/${groupId}`, {
+    message,
+  });
+
+  return response;
+};
+
 // Export axios instance if needed elsewhere
 export default api;

@@ -2,6 +2,7 @@ import Group from "./group.model.js";
 import GroupMessage from "./groupMessage.model.js";
 import { io } from "../../sockets/server.js";
 
+
 export const createGroup = async (req, res) => {
   try {
     const { groupName, members } = req.body;
@@ -13,12 +14,26 @@ export const createGroup = async (req, res) => {
       admin,
     });
 
-    res.status(201).json(group);
+    // Group ko members aur admin ke saath populate karna
+    const populatedGroup = await Group.findById(group._id)
+      .populate("members", "fullname email")
+      .populate("admin", "fullname email");
+
+    // Har connected member ko naye group ki information bhejna
+    populatedGroup.members.forEach((member) => {
+      io.to(member._id.toString()).emit(
+        "newGroupCreated",
+        populatedGroup
+      );
+    });
+
+    res.status(201).json(populatedGroup);
   } catch (error) {
     console.log("Error in createGroup", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 
 

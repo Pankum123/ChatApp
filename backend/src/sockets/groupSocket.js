@@ -22,6 +22,47 @@ const groupSocket = async (io, socket, userId, getReceiverSocketId) => {
     console.log("Group room join error:", error);
   }
 
+
+  // Newly created group ka room join karna
+  socket.on("joinGroup", async ({ groupId } = {}, callback) => {
+    try {
+      if (!groupId || !userId) {
+        return callback?.({
+          success: false,
+          message: "Group ID or User ID missing",
+        });
+      }
+
+      // Check karo ki user is group ka member hai
+      const group = await Group.findOne({
+        _id: groupId,
+        members: userId,
+      });
+
+      if (!group) {
+        return callback?.({
+          success: false,
+          message: "You are not a member of this group",
+        });
+      }
+
+      // Group room join karna
+      await socket.join(group._id.toString());
+
+      console.log("User joined new group room:", group.groupName);
+
+      callback?.({ success: true });
+    } catch (error) {
+      console.log("New group room join error:", error);
+
+      callback?.({
+        success: false,
+        message: "Unable to join group room",
+      });
+    }
+  });
+
+
   // Group message ka overall status update karna
   const updateGroupMessageStatus = async (message) => {
     const group = await Group.findById(message.groupId);
