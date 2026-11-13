@@ -340,3 +340,73 @@ export const deleteGroup = async (req, res) => {
   }
 };
 
+
+
+// Leave Group Controller (Only Normal Members)
+export const leaveGroup = async (req, res) => {
+  try {
+    const { id: groupId } = req.params;
+    const userId = req.user._id;
+
+    // Find group
+    const group = await Group.findById(groupId);
+
+    if (!group) {
+      return res.status(404).json({
+        message: "Group not found",
+      });
+    }
+
+    // Admin cannot leave the group
+    if (String(group.admin) === String(userId)) {
+      return res.status(403).json({
+        message: "Group admin cannot leave the group",
+      });
+    }
+
+    // Check membership
+    const isMember = group.members.some(
+      (member) => String(member) === String(userId)
+    );
+
+    if (!isMember) {
+      return res.status(404).json({
+        message: "You are not a member of this group",
+      });
+    }
+
+    // Remove normal member
+    group.members.pull(userId);
+    await group.save();
+
+    // Get updated group
+    const updatedGroup = await Group.findById(groupId)
+      .populate("members", "fullname email")
+      .populate("admin", "fullname email");
+
+    // Remove all user's sockets from group room
+    await io.in(userId.toString()).socketsLeave(groupId.toString());
+
+    // Notify leaving member
+    io.to(userId.toString()).emit("groupRemoved", {
+      groupId: groupId.toString(),
+    });
+
+    // Notify remaining members
+    io.to(groupId.toString()).emit(
+      "groupMembersUpdated",
+      updatedGroup
+    );
+
+    return res.status(200).json({
+      message: "You left the group successfully",
+      group: updatedGroup,
+    });
+  } catch (error) {
+    console.log("Leave Group Error:", error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};

@@ -4,6 +4,7 @@ import AddMember from "./AddMember.jsx";
 import RemoveMember from "./RemoveMember.jsx";
 import Members from "./Members.jsx";
 import DeleteGroup from "./DeleteGroup.jsx";
+import LeaveGroup from "./LeaveGroup.jsx";
 
 function GroupInfo({ onClose }) {
   const { selectedGroup } = useConversation();
@@ -42,6 +43,7 @@ function GroupInfo({ onClose }) {
           {activeSection === "remove" && "Remove Member"}
           {activeSection === "members" && "Members"}
           {activeSection === "delete" && "Delete Group"}
+          {activeSection === "leave" && "Leave Group"}
         </h2>
 
         {onClose && (
@@ -73,6 +75,7 @@ function GroupInfo({ onClose }) {
 
           <div className="px-4 space-y-2">
 
+            {/* Admin Options */}
             {isAdmin && (
               <>
                 <button
@@ -91,7 +94,6 @@ function GroupInfo({ onClose }) {
                   <span>Remove Member</span>
                 </button>
 
-                {/* Delete Group Button */}
                 <button
                   onClick={() => setActiveSection("delete")}
                   className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-red-900/30 text-left"
@@ -102,6 +104,7 @@ function GroupInfo({ onClose }) {
               </>
             )}
 
+            {/* Members - Everyone */}
             <button
               onClick={() => setActiveSection("members")}
               className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-slate-800 text-left"
@@ -109,6 +112,17 @@ function GroupInfo({ onClose }) {
               <span className="text-xl">👥</span>
               <span>Members</span>
             </button>
+
+            {/* Leave Group - Only Normal Members */}
+            {!isAdmin && (
+              <button
+                onClick={() => setActiveSection("leave")}
+                className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-red-900/30 text-left"
+              >
+                <span className="text-red-500 text-xl">🚪</span>
+                <span className="text-red-400">Leave Group</span>
+              </button>
+            )}
 
           </div>
         </>
@@ -139,6 +153,13 @@ function GroupInfo({ onClose }) {
           <DeleteGroup
             group={selectedGroup}
             onBack={handleBack}
+          />
+        )}
+
+        {activeSection === "leave" && !isAdmin && (
+          <LeaveGroup
+            group={selectedGroup}
+            onLeaveSuccess={() => onClose?.()}
           />
         )}
 

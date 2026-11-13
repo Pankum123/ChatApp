@@ -124,5 +124,14 @@ export const deleteGroupAPI = async (groupId) => {
   return response;
 };
 
+// Leave Group API
+export const leaveGroupAPI = async (groupId) => {
+  if (!groupId) throw new Error("Group ID is required");
+
+  const response = await api.post(`/group/leave/${groupId}`);
+
+  return response;
+};
+
 // Export axios instance if needed elsewhere
 export default api;
