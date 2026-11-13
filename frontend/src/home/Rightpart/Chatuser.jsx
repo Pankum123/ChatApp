@@ -10,6 +10,9 @@ function Chatuser() {
     return onlineUsers.includes(userId) ? "Online" : "Offline";
   };
 
+  // Selected user backend profile photo
+  const profilePic = selectedConversation?.profilePic?.url;
+
   // console.log(selectedConversation.fullname);
   return (
     <div className="relative flex items-center h-[8%] justify-center gap-4 bg-slate-800 hover:bg-slate-700 duration-300 rounded-md">
@@ -22,7 +25,11 @@ function Chatuser() {
       <div className="flex space-x-3 items-center justify-center h-[8vh] bg-gray-800 hover:bg-gray-700 duration-300">
         <div className="avatar online">
           <div className="w-16 rounded-full">
-            <img src={profile} />
+            <img
+              src={profilePic || profile}
+              alt="Profile"
+              className="object-cover"
+            />
           </div>
         </div>
         <div>

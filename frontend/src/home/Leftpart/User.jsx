@@ -17,7 +17,11 @@ function User({ user }) {
       <div className="flex space-x-4 px-8 py-3 hover:bg-slate-700 duration-300 cursor-pointer">
         <div className={`avatar ${isOnline ? "online" : ""}`}>
           <div className="w-12 rounded-full">
-            <img src={profile} />
+            <img
+              src={user?.profilePic?.url || profile}
+              alt="Profile"
+              className="object-cover"
+            />
           </div>
         </div>
         <div>
