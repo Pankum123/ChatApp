@@ -9,6 +9,9 @@ import { app, server } from "./sockets/server.js"; // use this app
 import userRoute from "./modules/user/user.route.js";
 import messageRoute from "./modules/message/message.route.js";
 import groupRoute  from "./modules/group/group.route.js"
+
+import cloudinary from "./config/cloudinary.js";
+
 dotenv.config();
 
 if (process.env.NODE_ENV !== "production") {
@@ -47,6 +50,15 @@ const URI = process.env.MONGODB_URI;
 mongoose.connect(URI)
   .then(() => console.log("Connected to MongoDB"))
   .catch(err => console.log("MongoDB connection error:", err));
+
+// Cloudinary connection test
+cloudinary.api.ping()
+  .then(() => {
+    console.log("Cloudinary connected successfully!");
+  })
+  .catch(error => {
+    console.log("Cloudinary connection failed:", error.message);
+  });
 
 // Routes
 app.use("/api/user", userRoute);
