@@ -28,9 +28,17 @@ function GroupChatuser() {
           type="button"
           onClick={() => setShowGroupInfo(true)}
           title="Open Group Info"
-          className="relative z-10 w-14 h-14 rounded-full bg-green-600 flex items-center justify-center text-white font-semibold text-2xl hover:bg-green-700 transition cursor-pointer"
+          className="relative z-10 w-14 h-14 rounded-full bg-green-600 flex items-center justify-center text-white font-semibold text-2xl overflow-hidden hover:bg-green-700 transition cursor-pointer"
         >
-          {selectedGroup.groupName?.charAt(0)?.toUpperCase() || "G"}
+          {selectedGroup.groupImage?.url ? (
+            <img
+              src={selectedGroup.groupImage.url}
+              alt="Group"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            selectedGroup.groupName?.charAt(0)?.toUpperCase() || "G"
+          )}
         </button>
 
         {/* Group Details */}
