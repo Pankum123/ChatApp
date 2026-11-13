@@ -1,9 +1,8 @@
-
 import React, { useState } from "react";
 import { editGroupAPI } from "../../../../api.js";
 import useConversation from "../../../../zustand/useConversation.js";
 
-function EditGroup({ group, isAdmin }) {
+function EditGroup({ group }) {
   const [isEditing, setIsEditing] = useState(false);
   const [groupName, setGroupName] = useState(group.groupName || "");
   const [saving, setSaving] = useState(false);
@@ -62,19 +61,12 @@ function EditGroup({ group, isAdmin }) {
       {!isEditing ? (
         <button
           type="button"
-          disabled={!isAdmin}
           onClick={() => setIsEditing(true)}
-          className={`text-xl font-semibold ${
-            isAdmin
-              ? "cursor-pointer hover:text-green-400"
-              : "cursor-default"
-          }`}
-          title={isAdmin ? "Click to edit group name" : group.groupName}
+          className="text-xl font-semibold cursor-pointer hover:text-green-400"
+          title="Click to edit group name"
         >
           {group.groupName}
-          {isAdmin && (
-            <span className="text-sm text-gray-400 ml-2">✏️</span>
-          )}
+          <span className="text-sm text-gray-400 ml-2">✏️</span>
         </button>
       ) : (
         <div className="flex flex-col gap-3">

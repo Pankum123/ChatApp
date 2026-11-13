@@ -145,7 +145,6 @@ function GroupInfo({ onClose }) {
             {/* Editable Group Name */}
             <EditGroup
               group={selectedGroup}
-              isAdmin={isAdmin}
             />
 
             {/* Member Count */}

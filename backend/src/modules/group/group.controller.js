@@ -414,12 +414,13 @@ export const leaveGroup = async (req, res) => {
 
 
 
- // Edit Group Name Controller (Only Admin)
+
+// Edit Group Name Controller (All Group Members)
 export const editGroup = async (req, res) => {
   try {
     const { id: groupId } = req.params;
     const { groupName } = req.body;
-    const adminId = req.user._id;
+    const userId = req.user._id;
 
     // Validate group name
     if (!groupName || !groupName.trim()) {
@@ -434,19 +435,15 @@ export const editGroup = async (req, res) => {
       });
     }
 
-    // Find group
-    const group = await Group.findById(groupId);
+    // Find group and check membership
+    const group = await Group.findOne({
+      _id: groupId,
+      members: userId,
+    });
 
     if (!group) {
       return res.status(404).json({
-        message: "Group not found",
-      });
-    }
-
-    // Only admin can edit group
-    if (String(group.admin) !== String(adminId)) {
-      return res.status(403).json({
-        message: "Only group admin can edit group",
+        message: "Group not found or you are not a member",
       });
     }
 
@@ -454,12 +451,12 @@ export const editGroup = async (req, res) => {
     group.groupName = groupName.trim();
     await group.save();
 
-    // Get updated group with populated members and admin
+    // Get updated group
     const updatedGroup = await Group.findById(groupId)
       .populate("members", "fullname email")
       .populate("admin", "fullname email");
 
-    // Notify all group members in real time
+    // Notify all group members
     io.to(groupId.toString()).emit("groupUpdated", updatedGroup);
 
     return res.status(200).json({
@@ -475,6 +472,7 @@ export const editGroup = async (req, res) => {
     });
   }
 };
+
 
 
 // Update Group Profile Photo (All Group Members)
