@@ -291,3 +291,52 @@ export const removeGroupMember = async (req, res) => {
   }
 };
 
+// Delete Group Controller - Only Admin Can Delete Group
+export const deleteGroup = async (req, res) => {
+  try {
+    const { id: groupId } = req.params;
+    const adminId = req.user._id;
+
+    // Group find karo
+    const group = await Group.findById(groupId);
+
+    if (!group) {
+      return res.status(404).json({
+        message: "Group not found",
+      });
+    }
+
+    // Sirf admin group delete kar sakta hai
+    if (String(group.admin) !== String(adminId)) {
+      return res.status(403).json({
+        message: "Only group admin can delete this group",
+      });
+    }
+
+    // Group ke saare messages delete karo
+    await GroupMessage.deleteMany({ groupId });
+
+    // Group delete karo
+    await Group.findByIdAndDelete(groupId);
+
+    // Sabhi online group members ko notify karo
+    io.to(groupId.toString()).emit("groupDeleted", {
+      groupId: groupId.toString(),
+    });
+
+    // Sabhi connected members ko group room se remove karo
+    await io.in(groupId.toString()).socketsLeave(groupId.toString());
+
+    return res.status(200).json({
+      message: "Group deleted successfully",
+      groupId,
+    });
+  } catch (error) {
+    console.log("Delete Group Error:", error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+

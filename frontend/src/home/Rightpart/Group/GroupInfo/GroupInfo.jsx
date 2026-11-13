@@ -1,9 +1,9 @@
-
 import React, { useState } from "react";
 import useConversation from "../../../../zustand/useConversation.js";
 import AddMember from "./AddMember.jsx";
 import RemoveMember from "./RemoveMember.jsx";
 import Members from "./Members.jsx";
+import DeleteGroup from "./DeleteGroup.jsx";
 
 function GroupInfo({ onClose }) {
   const { selectedGroup } = useConversation();
@@ -41,6 +41,7 @@ function GroupInfo({ onClose }) {
           {activeSection === "add" && "Add Member"}
           {activeSection === "remove" && "Remove Member"}
           {activeSection === "members" && "Members"}
+          {activeSection === "delete" && "Delete Group"}
         </h2>
 
         {onClose && (
@@ -89,6 +90,15 @@ function GroupInfo({ onClose }) {
                   <span className="text-red-400 text-xl">－</span>
                   <span>Remove Member</span>
                 </button>
+
+                {/* Delete Group Button */}
+                <button
+                  onClick={() => setActiveSection("delete")}
+                  className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-red-900/30 text-left"
+                >
+                  <span className="text-red-500 text-xl">🗑</span>
+                  <span className="text-red-400">Delete Group</span>
+                </button>
               </>
             )}
 
@@ -106,6 +116,7 @@ function GroupInfo({ onClose }) {
 
       {/* Selected Section */}
       <div className="flex-1 overflow-y-auto">
+
         {activeSection === "add" && isAdmin && (
           <AddMember
             group={selectedGroup}
@@ -123,6 +134,14 @@ function GroupInfo({ onClose }) {
         {activeSection === "members" && (
           <Members group={selectedGroup} />
         )}
+
+        {activeSection === "delete" && isAdmin && (
+          <DeleteGroup
+            group={selectedGroup}
+            onBack={handleBack}
+          />
+        )}
+
       </div>
     </div>
   );

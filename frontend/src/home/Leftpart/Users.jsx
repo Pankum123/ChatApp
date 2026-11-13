@@ -78,14 +78,33 @@ function Users() {
       }
     };
 
+    // Deleted group ko sabhi members ki list se remove karna
+    const handleGroupDeleted = (data) => {
+      const groupId = data?.groupId || data?._id || data;
+
+      if (!groupId) return;
+
+      setGroups((prevGroups) =>
+        prevGroups.filter(
+          (group) => String(group._id) !== String(groupId)
+        )
+      );
+
+      if (String(selectedGroup?._id) === String(groupId)) {
+        setSelectedGroup(null);
+      }
+    };
+
     socket.on("newGroupCreated", handleNewGroupCreated);
     socket.on("groupMembersUpdated", handleGroupMembersUpdated);
     socket.on("groupRemoved", handleGroupRemoved);
+    socket.on("groupDeleted", handleGroupDeleted);
 
     return () => {
       socket.off("newGroupCreated", handleNewGroupCreated);
       socket.off("groupMembersUpdated", handleGroupMembersUpdated);
       socket.off("groupRemoved", handleGroupRemoved);
+      socket.off("groupDeleted", handleGroupDeleted);
     };
   }, [socket, setGroups, selectedGroup, setSelectedGroup]);
 

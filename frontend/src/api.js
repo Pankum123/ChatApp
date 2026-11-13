@@ -115,5 +115,14 @@ export const removeGroupMemberAPI = async (groupId, memberId) => {
   return response;
 };
 
+//======== Delete Group Route ================
+export const deleteGroupAPI = async (groupId) => {
+  if (!groupId) throw new Error("Group ID is required");
+
+  const response = await api.delete(`/group/delete/${groupId}`);
+
+  return response;
+};
+
 // Export axios instance if needed elsewhere
 export default api;
