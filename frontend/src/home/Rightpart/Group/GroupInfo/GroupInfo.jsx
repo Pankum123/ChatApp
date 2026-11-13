@@ -1,0 +1,131 @@
+
+import React, { useState } from "react";
+import useConversation from "../../../../zustand/useConversation.js";
+import AddMember from "./AddMember.jsx";
+import RemoveMember from "./RemoveMember.jsx";
+import Members from "./Members.jsx";
+
+function GroupInfo({ onClose }) {
+  const { selectedGroup } = useConversation();
+  const [activeSection, setActiveSection] = useState("menu");
+
+  if (!selectedGroup) return null;
+
+  const authUser = JSON.parse(localStorage.getItem("ChatApp"));
+  const currentUserId = authUser?.user?._id;
+
+  const adminId =
+    selectedGroup.admin?._id || selectedGroup.admin;
+
+  const isAdmin =
+    String(adminId) === String(currentUserId);
+
+  const handleBack = () => setActiveSection("menu");
+
+  return (
+    <div className="w-full h-full bg-slate-900 text-white flex flex-col">
+
+      {/* Header */}
+      <div className="flex items-center gap-3 p-4 bg-slate-800">
+        {activeSection !== "menu" && (
+          <button
+            onClick={handleBack}
+            className="text-xl hover:text-green-400"
+          >
+            ←
+          </button>
+        )}
+
+        <h2 className="text-lg font-semibold flex-1">
+          {activeSection === "menu" && "Group Info"}
+          {activeSection === "add" && "Add Member"}
+          {activeSection === "remove" && "Remove Member"}
+          {activeSection === "members" && "Members"}
+        </h2>
+
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="text-xl hover:text-red-400"
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
+      {/* Group Details */}
+      {activeSection === "menu" && (
+        <>
+          <div className="flex flex-col items-center py-7">
+            <div className="w-20 h-20 rounded-full bg-green-600 flex items-center justify-center text-3xl font-bold">
+              {selectedGroup.groupName?.charAt(0)?.toUpperCase() || "G"}
+            </div>
+
+            <h2 className="text-xl font-semibold mt-3">
+              {selectedGroup.groupName}
+            </h2>
+
+            <p className="text-sm text-gray-400">
+              {selectedGroup.members?.length || 0} Members
+            </p>
+          </div>
+
+          <div className="px-4 space-y-2">
+
+            {isAdmin && (
+              <>
+                <button
+                  onClick={() => setActiveSection("add")}
+                  className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-slate-800 text-left"
+                >
+                  <span className="text-green-400 text-xl">＋</span>
+                  <span>Add Member</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveSection("remove")}
+                  className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-slate-800 text-left"
+                >
+                  <span className="text-red-400 text-xl">－</span>
+                  <span>Remove Member</span>
+                </button>
+              </>
+            )}
+
+            <button
+              onClick={() => setActiveSection("members")}
+              className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-slate-800 text-left"
+            >
+              <span className="text-xl">👥</span>
+              <span>Members</span>
+            </button>
+
+          </div>
+        </>
+      )}
+
+      {/* Selected Section */}
+      <div className="flex-1 overflow-y-auto">
+        {activeSection === "add" && isAdmin && (
+          <AddMember
+            group={selectedGroup}
+            onBack={handleBack}
+          />
+        )}
+
+        {activeSection === "remove" && isAdmin && (
+          <RemoveMember
+            group={selectedGroup}
+            onBack={handleBack}
+          />
+        )}
+
+        {activeSection === "members" && (
+          <Members group={selectedGroup} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default GroupInfo;

@@ -91,5 +91,29 @@ export const sendGroupMessageAPI = async (groupId, message) => {
   return response;
 };
 
+// ====== Add Member to Group API ======
+export const addGroupMemberAPI = async (groupId, memberId) => {
+  if (!groupId) throw new Error("Group ID is required");
+  if (!memberId) throw new Error("Member ID is required");
+
+  const response = await api.post(`/group/add-member/${groupId}`, {
+    memberId,
+  });
+
+  return response;
+};
+
+// ====== Remove Member from Group API ======
+export const removeGroupMemberAPI = async (groupId, memberId) => {
+  if (!groupId) throw new Error("Group ID is required");
+  if (!memberId) throw new Error("Member ID is required");
+
+  const response = await api.post(`/group/remove-member/${groupId}`, {
+    memberId,
+  });
+
+  return response;
+};
+
 // Export axios instance if needed elsewhere
 export default api;

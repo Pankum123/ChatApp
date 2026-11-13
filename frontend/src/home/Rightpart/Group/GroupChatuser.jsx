@@ -1,40 +1,64 @@
-import React from "react";
+import React, { useState } from "react";
 import useConversation from "../../../zustand/useConversation.js";
 import { CiMenuFries } from "react-icons/ci";
+import GroupInfo from "./GroupInfo/GroupInfo.jsx";
 
 function GroupChatuser() {
   const { selectedGroup } = useConversation();
+  const [showGroupInfo, setShowGroupInfo] = useState(false);
+
+  if (!selectedGroup) return null;
 
   return (
-    <div className="relative flex items-center h-[8%] justify-center gap-4 bg-slate-800 hover:bg-slate-700 duration-300 rounded-md">
+    <div className="relative z-40 flex items-center h-[8vh] justify-center gap-4 bg-slate-800 rounded-md">
 
       {/* Mobile Menu */}
       <label
         htmlFor="my-drawer-2"
-        className="btn btn-ghost drawer-button lg:hidden absolute left-5"
+        className="btn btn-ghost drawer-button lg:hidden absolute left-5 z-10"
       >
         <CiMenuFries className="text-white text-xl" />
       </label>
 
-      <div className="flex space-x-3 items-center justify-center h-[8vh] bg-gray-800 hover:bg-gray-700 duration-300">
+      {/* Group Profile */}
+      <div className="flex items-center gap-3">
 
         {/* Group Avatar */}
-        <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center text-white font-semibold text-2xl">
-          {selectedGroup?.groupName?.charAt(0)?.toUpperCase() || "G"}
-        </div>
+        <button
+          type="button"
+          onClick={() => setShowGroupInfo(true)}
+          title="Open Group Info"
+          className="relative z-10 w-14 h-14 rounded-full bg-green-600 flex items-center justify-center text-white font-semibold text-2xl hover:bg-green-700 transition cursor-pointer"
+        >
+          {selectedGroup.groupName?.charAt(0)?.toUpperCase() || "G"}
+        </button>
 
         {/* Group Details */}
-        <div>
-          <h1 className="text-xl">
-            {selectedGroup?.groupName}
+        <button
+          type="button"
+          onClick={() => setShowGroupInfo(true)}
+          className="relative z-10 text-left cursor-pointer hover:opacity-80"
+        >
+          <h1 className="text-xl font-semibold">
+            {selectedGroup.groupName}
           </h1>
 
-          <span className="text-sm">
-            {selectedGroup?.members?.length || 0} Members
+          <span className="text-sm text-gray-400">
+            {selectedGroup.members?.length || 0} Members
           </span>
-        </div>
+        </button>
 
       </div>
+
+      {/* Group Info Panel */}
+      {showGroupInfo && (
+        <div className="absolute top-full right-0 z-[100] w-full sm:w-[380px] h-[75vh] shadow-2xl border border-slate-700 rounded-lg overflow-hidden">
+          <GroupInfo
+            onClose={() => setShowGroupInfo(false)}
+          />
+        </div>
+      )}
+
     </div>
   );
 }
