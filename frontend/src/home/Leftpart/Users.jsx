@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import User from "./User";
 import useGetAllUsers from "../../context/useGetAllUsers";
@@ -7,6 +6,7 @@ import { createGroupAPI } from "../../api";
 import useGetGroups from "../../context/Group/useGetGroups";
 import GroupItem from "./Group/GroupItem";
 import { useSocketContext } from "../../context/SocketContext.jsx";
+import useConversation from "../../zustand/useConversation.js";
 
 function Users() {
   const [allUsers, loading] = useGetAllUsers();
@@ -16,13 +16,13 @@ function Users() {
   const [creatingGroup, setCreatingGroup] = useState(false);
 
   const { socket } = useSocketContext();
+  const { selectedGroup, setSelectedGroup } = useConversation();
 
-  // Real-time mein naye group receive karna
   useEffect(() => {
     if (!socket) return;
 
+    // New member ko group receive karwana
     const handleNewGroupCreated = (newGroup) => {
-      // Naye group ke room mein automatically join karo
       if (newGroup?._id) {
         socket.emit("joinGroup", { groupId: newGroup._id }, (response) => {
           if (!response?.success) {
@@ -30,10 +30,10 @@ function Users() {
           }
         });
       }
-      
+
       setGroups((prevGroups) => {
         const alreadyExists = prevGroups.some(
-          (group) => group._id === newGroup._id
+          (group) => String(group._id) === String(newGroup._id)
         );
 
         if (alreadyExists) return prevGroups;
@@ -42,12 +42,52 @@ function Users() {
       });
     };
 
+    // Add / Remove ke baad existing members ka group update karna
+    const handleGroupMembersUpdated = (data) => {
+      const updatedGroup = data?.group || data;
+
+      if (!updatedGroup?._id) return;
+
+      setGroups((prevGroups) =>
+        prevGroups.map((group) =>
+          String(group._id) === String(updatedGroup._id)
+            ? updatedGroup
+            : group
+        )
+      );
+
+      if (String(selectedGroup?._id) === String(updatedGroup._id)) {
+        setSelectedGroup(updatedGroup);
+      }
+    };
+
+    // Removed member ke frontend se group remove karna
+    const handleGroupRemoved = (data) => {
+      const groupId = data?.groupId || data?._id || data;
+
+      if (!groupId) return;
+
+      setGroups((prevGroups) =>
+        prevGroups.filter(
+          (group) => String(group._id) !== String(groupId)
+        )
+      );
+
+      if (String(selectedGroup?._id) === String(groupId)) {
+        setSelectedGroup(null);
+      }
+    };
+
     socket.on("newGroupCreated", handleNewGroupCreated);
+    socket.on("groupMembersUpdated", handleGroupMembersUpdated);
+    socket.on("groupRemoved", handleGroupRemoved);
 
     return () => {
       socket.off("newGroupCreated", handleNewGroupCreated);
+      socket.off("groupMembersUpdated", handleGroupMembersUpdated);
+      socket.off("groupRemoved", handleGroupRemoved);
     };
-  }, [socket, setGroups]);
+  }, [socket, setGroups, selectedGroup, setSelectedGroup]);
 
   // Group create karna
   const handleCreateGroup = async (groupData) => {
@@ -60,7 +100,7 @@ function Users() {
 
       setGroups((prevGroups) => {
         const alreadyExists = prevGroups.some(
-          (group) => group._id === response.data._id
+          (group) => String(group._id) === String(response.data._id)
         );
 
         if (alreadyExists) return prevGroups;
