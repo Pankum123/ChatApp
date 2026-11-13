@@ -61,6 +61,25 @@ function Users() {
       }
     };
 
+    // Group name update hone par sabhi members ko update karna
+    const handleGroupUpdated = (data) => {
+      const updatedGroup = data?.group || data;
+
+      if (!updatedGroup?._id) return;
+
+      setGroups((prevGroups) =>
+        prevGroups.map((group) =>
+          String(group._id) === String(updatedGroup._id)
+            ? updatedGroup
+            : group
+        )
+      );
+
+      if (String(selectedGroup?._id) === String(updatedGroup._id)) {
+        setSelectedGroup(updatedGroup);
+      }
+    };
+
     // Removed member ke frontend se group remove karna
     const handleGroupRemoved = (data) => {
       const groupId = data?.groupId || data?._id || data;
@@ -95,14 +114,18 @@ function Users() {
       }
     };
 
+    // Socket listeners
     socket.on("newGroupCreated", handleNewGroupCreated);
     socket.on("groupMembersUpdated", handleGroupMembersUpdated);
+    socket.on("groupUpdated", handleGroupUpdated);
     socket.on("groupRemoved", handleGroupRemoved);
     socket.on("groupDeleted", handleGroupDeleted);
 
+    // Cleanup
     return () => {
       socket.off("newGroupCreated", handleNewGroupCreated);
       socket.off("groupMembersUpdated", handleGroupMembersUpdated);
+      socket.off("groupUpdated", handleGroupUpdated);
       socket.off("groupRemoved", handleGroupRemoved);
       socket.off("groupDeleted", handleGroupDeleted);
     };

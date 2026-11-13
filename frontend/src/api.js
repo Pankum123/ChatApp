@@ -133,5 +133,16 @@ export const leaveGroupAPI = async (groupId) => {
   return response;
 };
 
+// Edit Group Name API
+export const editGroupAPI = async (groupId, groupName) => {
+  if (!groupId) throw new Error("Group ID is required");
+
+  const response = await api.put(`/group/edit/${groupId}`, {
+    groupName,
+  });
+
+  return response;
+};
+
 // Export axios instance if needed elsewhere
 export default api;

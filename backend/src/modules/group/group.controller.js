@@ -410,3 +410,67 @@ export const leaveGroup = async (req, res) => {
     });
   }
 };
+
+
+
+ // Edit Group Name Controller (Only Admin)
+export const editGroup = async (req, res) => {
+  try {
+    const { id: groupId } = req.params;
+    const { groupName } = req.body;
+    const adminId = req.user._id;
+
+    // Validate group name
+    if (!groupName || !groupName.trim()) {
+      return res.status(400).json({
+        message: "Group name is required",
+      });
+    }
+
+    if (groupName.trim().length > 50) {
+      return res.status(400).json({
+        message: "Group name cannot exceed 50 characters",
+      });
+    }
+
+    // Find group
+    const group = await Group.findById(groupId);
+
+    if (!group) {
+      return res.status(404).json({
+        message: "Group not found",
+      });
+    }
+
+    // Only admin can edit group
+    if (String(group.admin) !== String(adminId)) {
+      return res.status(403).json({
+        message: "Only group admin can edit group",
+      });
+    }
+
+    // Update group name
+    group.groupName = groupName.trim();
+    await group.save();
+
+    // Get updated group with populated members and admin
+    const updatedGroup = await Group.findById(groupId)
+      .populate("members", "fullname email")
+      .populate("admin", "fullname email");
+
+    // Notify all group members in real time
+    io.to(groupId.toString()).emit("groupUpdated", updatedGroup);
+
+    return res.status(200).json({
+      message: "Group name updated successfully",
+      group: updatedGroup,
+    });
+
+  } catch (error) {
+    console.log("Edit Group Error:", error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};

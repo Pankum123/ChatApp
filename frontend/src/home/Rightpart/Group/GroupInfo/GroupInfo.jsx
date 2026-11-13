@@ -5,6 +5,7 @@ import RemoveMember from "./RemoveMember.jsx";
 import Members from "./Members.jsx";
 import DeleteGroup from "./DeleteGroup.jsx";
 import LeaveGroup from "./LeaveGroup.jsx";
+import EditGroup from "./EditGroup.jsx";
 
 function GroupInfo({ onClose }) {
   const { selectedGroup } = useConversation();
@@ -60,17 +61,23 @@ function GroupInfo({ onClose }) {
       {activeSection === "menu" && (
         <>
           <div className="flex flex-col items-center py-7">
+
+            {/* Group Profile */}
             <div className="w-20 h-20 rounded-full bg-green-600 flex items-center justify-center text-3xl font-bold">
               {selectedGroup.groupName?.charAt(0)?.toUpperCase() || "G"}
             </div>
 
-            <h2 className="text-xl font-semibold mt-3">
-              {selectedGroup.groupName}
-            </h2>
+            {/* Editable Group Name */}
+            <EditGroup
+              group={selectedGroup}
+              isAdmin={isAdmin}
+            />
 
-            <p className="text-sm text-gray-400">
+            {/* Member Count */}
+            <p className="text-sm text-gray-400 mt-2">
               {selectedGroup.members?.length || 0} Members
             </p>
+
           </div>
 
           <div className="px-4 space-y-2">
@@ -78,6 +85,7 @@ function GroupInfo({ onClose }) {
             {/* Admin Options */}
             {isAdmin && (
               <>
+                {/* Add Member */}
                 <button
                   onClick={() => setActiveSection("add")}
                   className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-slate-800 text-left"
@@ -86,6 +94,7 @@ function GroupInfo({ onClose }) {
                   <span>Add Member</span>
                 </button>
 
+                {/* Remove Member */}
                 <button
                   onClick={() => setActiveSection("remove")}
                   className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-slate-800 text-left"
@@ -94,6 +103,7 @@ function GroupInfo({ onClose }) {
                   <span>Remove Member</span>
                 </button>
 
+                {/* Delete Group */}
                 <button
                   onClick={() => setActiveSection("delete")}
                   className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-red-900/30 text-left"
