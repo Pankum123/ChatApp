@@ -10,7 +10,8 @@ import userRoute from "./modules/user/user.route.js";
 import messageRoute from "./modules/message/message.route.js";
 import groupRoute  from "./modules/group/group.route.js"
 
-import cloudinary from "./config/cloudinary.js";
+import { v2 as cloudinary } from "cloudinary";
+import fileUpload from "express-fileupload";
 
 dotenv.config();
 
@@ -43,6 +44,13 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
+  })
+);
+
 // MongoDB connection
 const PORT = process.env.PORT || 4001;
 const URI = process.env.MONGODB_URI;
@@ -51,19 +59,17 @@ mongoose.connect(URI)
   .then(() => console.log("Connected to MongoDB"))
   .catch(err => console.log("MongoDB connection error:", err));
 
-// Cloudinary connection test
-cloudinary.api.ping()
-  .then(() => {
-    console.log("Cloudinary connected successfully!");
-  })
-  .catch(error => {
-    console.log("Cloudinary connection failed:", error.message);
-  });
-
 // Routes
 app.use("/api/user", userRoute);
 app.use("/api/message", messageRoute);
 app.use("/api/group", groupRoute);
+
+// Cloudinary configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Start server
 server.listen(PORT, () => {

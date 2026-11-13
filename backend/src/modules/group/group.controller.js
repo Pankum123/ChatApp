@@ -3,6 +3,7 @@ import GroupMessage from "./groupMessage.model.js";
 import { io } from "../../sockets/server.js";
 import mongoose from "mongoose";
 import User from "../user/user.model.js";
+import { v2 as cloudinary } from "cloudinary";
 
 
 export const createGroup = async (req, res) => {
@@ -471,6 +472,94 @@ export const editGroup = async (req, res) => {
 
     return res.status(500).json({
       message: "Internal server error",
+    });
+  }
+};
+
+
+// Update Group Profile Photo (All Group Members)
+export const updateGroupImage = async (req, res) => {
+  const userId = req.user._id;
+  const { id: groupId } = req.params;
+
+  try {
+    if (!req.files || !req.files.image) {
+      return res.status(400).json({
+        errors: "No file uploaded",
+      });
+    }
+
+    const { image } = req.files;
+
+    const allowedFormat = ["image/png", "image/jpeg"];
+
+    if (!allowedFormat.includes(image.mimetype)) {
+      return res.status(400).json({
+        errors: "Invalid file format. Only PNG and JPG are allowed",
+      });
+    }
+
+    // Check group membership
+    const group = await Group.findOne({
+      _id: groupId,
+      members: userId,
+    });
+
+    if (!group) {
+      return res.status(404).json({
+        errors: "Group not found or you are not a member",
+      });
+    }
+
+    // Cloudinary upload
+    const cloud_response = await cloudinary.uploader.upload(
+      image.tempFilePath
+    );
+
+    if (!cloud_response || cloud_response.error) {
+      return res.status(400).json({
+        errors: "Error uploading file to cloudinary",
+      });
+    }
+
+    // Save old image public ID
+    const oldPublicId = group.groupImage?.publicId;
+
+    // Update group image
+    group.groupImage = {
+      publicId: cloud_response.public_id,
+      url: cloud_response.url,
+    };
+
+    await group.save();
+
+    // Delete old image
+    if (oldPublicId) {
+      try {
+        await cloudinary.uploader.destroy(oldPublicId);
+      } catch (error) {
+        console.log("Old image delete error:", error);
+      }
+    }
+
+    // Get updated group
+    const updatedGroup = await Group.findById(groupId)
+      .populate("members", "fullname email")
+      .populate("admin", "fullname email");
+
+    // Notify group members
+    io.to(groupId.toString()).emit("groupUpdated", updatedGroup);
+
+    return res.status(200).json({
+      message: "Group image updated successfully",
+      group: updatedGroup,
+    });
+
+  } catch (error) {
+    console.log("Error updating group image:", error);
+
+    return res.status(500).json({
+      errors: "Error updating group image",
     });
   }
 };

@@ -144,5 +144,26 @@ export const editGroupAPI = async (groupId, groupName) => {
   return response;
 };
 
+// ====== Update Group Image API ======
+export const updateGroupImageAPI = async (groupId, image) => {
+  if (!groupId) throw new Error("Group ID is required");
+  if (!image) throw new Error("Group image is required");
+
+  const formData = new FormData();
+  formData.append("image", image);
+
+  const response = await api.put(
+    `/group/update-image/${groupId}`,
+    formData,
+    {
+      headers: {
+        "Content-Type": undefined,
+      },
+    }
+  );
+
+  return response;
+};
+
 // Export axios instance if needed elsewhere
 export default api;

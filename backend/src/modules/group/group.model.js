@@ -8,6 +8,16 @@ const groupSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    groupImage: {
+      url: {
+        type: String,
+        default: "",
+      },
+      publicId: {
+        type: String,
+        default: "",
+      },
+    },
     members: [
       {
         type: mongoose.Schema.Types.ObjectId,
