@@ -17,6 +17,24 @@ const userSchema = mongoose.Schema({
     confirmPassword: {
         type: String,
     },
+    // User Profile Photo
+    profilePic: {
+      url: {
+        type: String,
+        default: "",
+      },
+      publicId: {
+        type: String,
+        default: "",
+      },
+    },
+
+    // User About / Message
+    about: {
+      type: String,
+      default: "Hey there! I am using ChatApp.",
+      maxlength: 100,
+    },
 }, { timestamps: true }); // createdAt & updatedAt
 
 const User = mongoose.model("User", userSchema);

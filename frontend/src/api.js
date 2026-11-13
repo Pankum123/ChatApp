@@ -165,5 +165,44 @@ export const updateGroupImageAPI = async (groupId, image) => {
   return response;
 };
 
+// ====== User Profile APIs ======
+
+// Update Profile Photo API
+// ====== Update User Profile Photo API ======
+export const updateProfilePicAPI = async (image) => {
+  if (!image) throw new Error("Profile image is required");
+
+  const formData = new FormData();
+  formData.append("image", image);
+
+  const response = await api.put(
+    "/user/update-profile-pic",
+    formData,
+    {
+      headers: {
+        "Content-Type": undefined,
+      },
+    }
+  );
+
+  return response;
+};
+
+// Update Full Name API
+export const updateFullnameAPI = async (fullname) => {
+  const response = await api.put("/user/update-fullname", {
+    fullname,
+  });
+  return response;
+};
+
+// Update About API
+export const updateAboutAPI = async (about) => {
+  const response = await api.put("/user/update-about", {
+    about,
+  });
+  return response;
+};
+
 // Export axios instance if needed elsewhere
 export default api;

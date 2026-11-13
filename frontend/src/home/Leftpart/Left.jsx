@@ -1,7 +1,7 @@
 import React from "react";
 import Search from "./Search";
 import Users from "./Users";
-import Logout from "./Logout";
+import Profile from "./Profile";
 
 function Left() {
   return (
@@ -13,7 +13,8 @@ function Left() {
       >
         <Users />
       </div>
-      <Logout />
+      {/* <Logout /> */}
+      <Profile/>
     </div>
   );
 }

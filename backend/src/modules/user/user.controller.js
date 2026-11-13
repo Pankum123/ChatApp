@@ -1,6 +1,8 @@
 import User from "./user.model.js";
 import bcrypt from "bcryptjs";
 import createTokenAndSaveCookie from "../../jwt/generateToken.js";
+import { v2 as cloudinary } from "cloudinary";
+
 export const signup = async (req, res) => {
   const { fullname, email, password, confirmPassword } = req.body;
   try {
@@ -76,5 +78,165 @@ export const allUsers = async (req, res) => {
     res.status(201).json(filteredUsers);
   } catch (error) {
     console.log("Error in allUsers Controller: " + error);
+  }
+};
+
+
+// ===== Update User Profile Photo =====
+export const updateProfilePic = async (req, res) => {
+  const userId = req.user._id;
+
+  try {
+    if (!req.files || !req.files.image) {
+      return res.status(400).json({
+        errors: "No file uploaded",
+      });
+    }
+
+    const { image } = req.files;
+
+    const allowedFormat = ["image/png", "image/jpeg"];
+
+    if (!allowedFormat.includes(image.mimetype)) {
+      return res.status(400).json({
+        errors: "Invalid file format. Only PNG and JPG are allowed",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        errors: "User not found",
+      });
+    }
+
+    // Cloudinary upload
+    const cloud_response = await cloudinary.uploader.upload(
+      image.tempFilePath
+    );
+
+    if (!cloud_response || !cloud_response.public_id) {
+      return res.status(400).json({
+        errors: "Error uploading file to cloudinary",
+      });
+    }
+
+    const oldPublicId = user.profilePic?.publicId;
+
+    user.profilePic = {
+      publicId: cloud_response.public_id,
+      url: cloud_response.url,
+    };
+
+    await user.save();
+
+    // Delete old profile photo
+    if (oldPublicId) {
+      try {
+        await cloudinary.uploader.destroy(oldPublicId);
+      } catch (error) {
+        console.log("Old profile image delete error:", error);
+      }
+    }
+
+    const updatedUser = await User.findById(userId).select("-password");
+
+    return res.status(200).json({
+      message: "Profile photo updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.log("Profile Photo Update Error:", error);
+
+    return res.status(500).json({
+      errors: "Error updating profile photo",
+    });
+  }
+};
+
+// ===== Update User Full Name =====
+export const updateFullname = async (req, res) => {
+  const userId = req.user._id;
+  const { fullname } = req.body;
+
+  try {
+    if (!fullname || !fullname.trim()) {
+      return res.status(400).json({
+        errors: "Name is required",
+      });
+    }
+
+    if (fullname.trim().length > 50) {
+      return res.status(400).json({
+        errors: "Name cannot exceed 50 characters",
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { fullname: fullname.trim() },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        errors: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Name updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.log("Name Update Error:", error);
+
+    return res.status(500).json({
+      errors: "Error updating name",
+    });
+  }
+};
+
+// ===== Update User About =====
+export const updateAbout = async (req, res) => {
+  const userId = req.user._id;
+  const { about } = req.body;
+
+  try {
+    if (typeof about !== "string") {
+      return res.status(400).json({
+        errors: "About must be text",
+      });
+    }
+
+    if (about.trim().length > 100) {
+      return res.status(400).json({
+        errors: "About cannot exceed 100 characters",
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { about: about.trim() },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        errors: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "About updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.log("About Update Error:", error);
+
+    return res.status(500).json({
+      errors: "Error updating about",
+    });
   }
 };
