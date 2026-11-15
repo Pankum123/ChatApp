@@ -70,8 +70,12 @@ function AddMember({ group, onBack }) {
               className="flex items-center justify-between gap-3 bg-slate-800 p-3 rounded-lg"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 shrink-0 rounded-full bg-green-600 flex items-center justify-center font-semibold">
-                  {user.fullname?.charAt(0)?.toUpperCase() || "U"}
+                <div className="w-10 h-10 shrink-0 rounded-full overflow-hidden">
+                  <img
+                    src={user?.profilePic?.url || "/user.jpg"}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
 
                 <span className="truncate">

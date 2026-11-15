@@ -2,13 +2,23 @@
 import React, { useState } from "react";
 import useConversation from "../../../../zustand/useConversation.js";
 import { removeGroupMemberAPI } from "../../../../api.js";
+import useGetAllUsers from "../../../../context/useGetAllUsers.jsx";
 
 function RemoveMember({ group, onBack }) {
   const { setSelectedGroup } = useConversation();
+  const [allUsers] = useGetAllUsers();
 
   const [removingId, setRemovingId] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const authUser = JSON.parse(localStorage.getItem("ChatApp"));
+  const currentUser = authUser?.user;
+
+  const memberUsers = [
+    ...allUsers,
+    ...(currentUser ? [currentUser] : []),
+  ];
 
   const adminId = group.admin?._id || group.admin;
 
@@ -70,6 +80,9 @@ function RemoveMember({ group, onBack }) {
         <div className="space-y-3">
           {removableMembers.map((member) => {
             const memberId = member._id || member;
+            const matchedUser = memberUsers.find(
+              (user) => String(user._id) === String(memberId)
+            );
 
             return (
               <div
@@ -77,8 +90,16 @@ function RemoveMember({ group, onBack }) {
                 className="flex items-center justify-between gap-3 bg-slate-800 p-3 rounded-lg"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 shrink-0 rounded-full bg-green-600 flex items-center justify-center font-semibold">
-                    {member.fullname?.charAt(0)?.toUpperCase() || "U"}
+                  <div className="w-10 h-10 shrink-0 rounded-full overflow-hidden">
+                    <img
+                      src={
+                        member?.profilePic?.url ||
+                        matchedUser?.profilePic?.url ||
+                        "/user.jpg"
+                      }
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
 
                   <span className="truncate">
