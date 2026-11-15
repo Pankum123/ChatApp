@@ -1,10 +1,14 @@
-
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthProvider";
 import profile from "../../../public/user.jpg";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
-import { logoutUser, updateProfilePicAPI, updateFullnameAPI, updateAboutAPI } from "../../api";
+import {
+  logoutUser,
+  updateProfilePicAPI,
+  updateFullnameAPI,
+  updateAboutAPI,
+} from "../../api";
 import { FaPencilAlt } from "react-icons/fa";
 
 function Profile() {
@@ -13,8 +17,12 @@ function Profile() {
   const [loading, setLoading] = useState(false);
 
   const [editing, setEditing] = useState("");
-  const [fullname, setFullname] = useState(authUser?.user?.fullname || "");
-  const [about, setAbout] = useState(authUser?.user?.about || "");
+  const [fullname, setFullname] = useState(
+    authUser?.user?.fullname || ""
+  );
+  const [about, setAbout] = useState(
+    authUser?.user?.about || ""
+  );
 
   const user = authUser?.user;
   const profilePic = user?.profilePic?.url;
@@ -45,7 +53,9 @@ function Profile() {
       updateLocalUser(response.data.user);
       toast.success("Profile photo updated successfully");
     } catch (error) {
-      toast.error(error.response?.data?.errors || "Photo update failed");
+      toast.error(
+        error.response?.data?.errors || "Photo update failed"
+      );
     } finally {
       setLoading(false);
       e.target.value = "";
@@ -66,7 +76,9 @@ function Profile() {
       setEditing("");
       toast.success("Name updated successfully");
     } catch (error) {
-      toast.error(error.response?.data?.errors || "Name update failed");
+      toast.error(
+        error.response?.data?.errors || "Name update failed"
+      );
     } finally {
       setLoading(false);
     }
@@ -82,7 +94,9 @@ function Profile() {
       setEditing("");
       toast.success("About updated successfully");
     } catch (error) {
-      toast.error(error.response?.data?.errors || "About update failed");
+      toast.error(
+        error.response?.data?.errors || "About update failed"
+      );
     } finally {
       setLoading(false);
     }
@@ -124,7 +138,9 @@ function Profile() {
       {showMenu && (
         <div className="absolute bottom-16 left-2 z-50 w-72 bg-gray-800 text-white rounded-xl shadow-xl p-4">
 
-          <h2 className="text-lg font-semibold mb-4">Profile</h2>
+          <h2 className="text-lg font-semibold mb-4">
+            Profile
+          </h2>
 
           {/* Profile Photo */}
           <div className="flex justify-center items-center gap-3 mb-4">
@@ -148,9 +164,14 @@ function Profile() {
           {/* Name */}
           <div className="mb-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-green-400">Name</span>
+              <span className="text-sm text-green-400">
+                Name
+              </span>
+
               <button
-                onClick={() => setEditing(editing === "name" ? "" : "name")}
+                onClick={() =>
+                  setEditing(editing === "name" ? "" : "name")
+                }
                 className="p-2 hover:bg-gray-700 rounded-full"
               >
                 <FaPencilAlt size={13} />
@@ -165,25 +186,33 @@ function Profile() {
                   maxLength={50}
                   className="w-full bg-gray-700 p-2 rounded mt-1 outline-none"
                 />
+
                 <button
                   onClick={handleNameUpdate}
                   disabled={loading}
                   className="mt-2 bg-green-600 px-3 py-1 rounded"
                 >
-                  Save
+                  {loading ? "Saving..." : "Save"}
                 </button>
               </div>
             ) : (
-              <p className="text-white">{user?.fullname}</p>
+              <p className="text-white">
+                {user?.fullname}
+              </p>
             )}
           </div>
 
           {/* About */}
           <div className="mb-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-green-400">About</span>
+              <span className="text-sm text-green-400">
+                About
+              </span>
+
               <button
-                onClick={() => setEditing(editing === "about" ? "" : "about")}
+                onClick={() =>
+                  setEditing(editing === "about" ? "" : "about")
+                }
                 className="p-2 hover:bg-gray-700 rounded-full"
               >
                 <FaPencilAlt size={13} />
@@ -199,12 +228,13 @@ function Profile() {
                   className="w-full bg-gray-700 p-2 rounded mt-1 outline-none resize-none"
                   rows={3}
                 />
+
                 <button
                   onClick={handleAboutUpdate}
                   disabled={loading}
                   className="mt-2 bg-green-600 px-3 py-1 rounded"
                 >
-                  Save
+                  {loading ? "Saving..." : "Save"}
                 </button>
               </div>
             ) : (
@@ -212,6 +242,17 @@ function Profile() {
                 {user?.about || "Hey there! I am using ChatApp."}
               </p>
             )}
+          </div>
+
+          {/* Email - Read Only */}
+          <div className="mt-4 mb-4 border-t border-gray-600 pt-3">
+            <span className="text-sm text-gray-400">
+              Email
+            </span>
+
+            <p className="text-white break-all mt-1">
+              {user?.email || "Email not available"}
+            </p>
           </div>
 
           <hr className="border-gray-600 my-3" />
