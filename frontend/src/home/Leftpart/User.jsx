@@ -8,8 +8,10 @@ function User({ user }) {
 
   const isSelected = selectedConversation?._id === user._id;
 
-  const { onlineUsers } = useSocketContext();
+  const { onlineUsers, typingUsers } = useSocketContext();
+
   const isOnline = onlineUsers.includes(user._id);
+  const isTyping = typingUsers.includes(user._id);
 
   return (
     <div
@@ -44,8 +46,12 @@ function User({ user }) {
             {user.fullname}
           </h1>
 
-          <span className="text-xs text-gray-400">
-            {isOnline ? "Online" : "Offline"}
+          <span
+            className={`text-xs ${
+              isTyping ? "text-green-400 font-medium" : "text-gray-400"
+            }`}
+          >
+            {isTyping ? "Typing..." : isOnline ? "Online" : "Offline"}
           </span>
         </div>
 
@@ -55,4 +61,3 @@ function User({ user }) {
 }
 
 export default User;
-
