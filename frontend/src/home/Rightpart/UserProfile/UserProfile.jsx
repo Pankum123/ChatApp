@@ -40,19 +40,12 @@ function UserProfile({ user, onClose }) {
 
         {/* User Details */}
         <div className="space-y-5 p-5">
+          {/* About */}
           <div>
-            <p className="mb-1 text-sm font-medium text-green-400">
-              Email
-            </p>
-            <p className="break-all text-gray-200">
-              {user.email || "Not available"}
-            </p>
-          </div>
-
-          <div className="border-t border-slate-600 pt-4">
             <p className="mb-1 text-sm font-medium text-green-400">
               About
             </p>
+
             <p className="break-words text-gray-200">
               {user.about || "Hey there! I am using ChatApp."}
             </p>
