@@ -1,20 +1,38 @@
-
 import React from "react";
 
-function Members({ group }) {
+function Members({ group, allUsers = [] }) {
   const adminId = group.admin?._id || group.admin;
 
   return (
     <div className="p-4">
-
       <h3 className="text-gray-300 font-semibold mb-4">
         Group Members ({group.members?.length || 0})
       </h3>
 
       <div className="space-y-3">
         {group.members?.map((member) => {
-          const memberId = member._id || member;
+          const memberId = member?._id || member;
+
           const isAdmin = String(memberId) === String(adminId);
+
+          // Match member with existing users data
+          const matchedUser = allUsers.find(
+            (user) => String(user._id) === String(memberId)
+          );
+
+          const profilePic =
+            member?.profilePic?.url ||
+            matchedUser?.profilePic?.url ||
+            "/user.jpg";
+
+          const fullname =
+            member?.fullname ||
+            matchedUser?.fullname ||
+            "Group Member";
+
+          const email =
+            member?.email ||
+            matchedUser?.email;
 
           return (
             <div
@@ -22,18 +40,24 @@ function Members({ group }) {
               className="flex items-center justify-between gap-3 bg-slate-800 p-3 rounded-lg"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 shrink-0 rounded-full bg-green-600 flex items-center justify-center font-semibold">
-                  {member.fullname?.charAt(0)?.toUpperCase() || "U"}
+                {/* Member Profile Photo */}
+                <div className="w-10 h-10 shrink-0 rounded-full overflow-hidden">
+                  <img
+                    src={profilePic}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
 
+                {/* Member Details */}
                 <div className="min-w-0">
                   <p className="font-medium truncate">
-                    {member.fullname || "Group Member"}
+                    {fullname}
                   </p>
 
-                  {member.email && (
+                  {email && (
                     <p className="text-xs text-gray-400 truncate">
-                      {member.email}
+                      {email}
                     </p>
                   )}
                 </div>

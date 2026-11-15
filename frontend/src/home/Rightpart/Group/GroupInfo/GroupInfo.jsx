@@ -8,9 +8,11 @@ import Members from "./Members.jsx";
 import DeleteGroup from "./DeleteGroup.jsx";
 import LeaveGroup from "./LeaveGroup.jsx";
 import EditGroup from "./EditGroup.jsx";
+import useGetAllUsers from "../../../../context/useGetAllUsers.jsx";
 
 function GroupInfo({ onClose }) {
   const { selectedGroup, setSelectedGroup } = useConversation();
+  const [allUsers] = useGetAllUsers();
 
   const [activeSection, setActiveSection] = useState("menu");
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -22,6 +24,12 @@ function GroupInfo({ onClose }) {
 
   const authUser = JSON.parse(localStorage.getItem("ChatApp"));
   const currentUserId = authUser?.user?._id;
+  const currentUser = authUser?.user;
+
+  const memberUsers = [
+    ...allUsers,
+    ...(currentUser ? [currentUser] : []),
+  ];
 
   const adminId =
     selectedGroup.admin?._id || selectedGroup.admin;
@@ -227,7 +235,11 @@ function GroupInfo({ onClose }) {
         )}
 
         {activeSection === "members" && (
-          <Members group={selectedGroup} />
+          // <Members group={selectedGroup} />
+          <Members
+            group={selectedGroup}
+            allUsers={memberUsers}
+          />
         )}
 
         {activeSection === "delete" && isAdmin && (
