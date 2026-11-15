@@ -59,17 +59,30 @@ function EditGroup({ group }) {
     <div className="w-full max-w-xs text-center mt-3">
 
       {!isEditing ? (
-        <button
-          type="button"
-          onClick={() => setIsEditing(true)}
-          className="text-xl font-semibold cursor-pointer hover:text-green-400"
-          title="Click to edit group name"
-        >
-          {group.groupName}
-          <span className="text-sm text-gray-400 ml-2">✏️</span>
-        </button>
+        <div className="flex items-center justify-center gap-2">
+
+          {/* Group Name - Not Clickable */}
+          <h2 className="text-xl font-semibold">
+            {group.groupName}
+          </h2>
+
+          {/* Edit Icon - Only Clickable */}
+          <button
+            type="button"
+            onClick={() => {
+              setGroupName(group.groupName || "");
+              setIsEditing(true);
+            }}
+            className="text-sm text-green-400 hover:text-green-300"
+            title="Edit Group Name"
+          >
+            ✏️
+          </button>
+
+        </div>
       ) : (
         <div className="flex flex-col gap-3">
+
           <input
             type="text"
             value={groupName}
@@ -81,6 +94,7 @@ function EditGroup({ group }) {
           />
 
           <div className="flex gap-2 justify-center">
+
             <button
               type="button"
               onClick={handleSave}
@@ -98,10 +112,10 @@ function EditGroup({ group }) {
             >
               Cancel
             </button>
+
           </div>
         </div>
       )}
-
     </div>
   );
 }
