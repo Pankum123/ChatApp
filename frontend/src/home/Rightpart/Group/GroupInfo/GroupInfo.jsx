@@ -114,19 +114,34 @@ function GroupInfo({ onClose }) {
           <div className="flex flex-col items-center py-7">
 
             {/* Group Profile */}
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-green-600 flex items-center justify-center text-3xl font-bold">
-              {selectedGroup.groupImage?.url ? (
-                <img
-                  src={selectedGroup.groupImage.url}
-                  alt="Group"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                selectedGroup.groupName?.charAt(0)?.toUpperCase() || "G"
-              )}
+            <div className="relative flex items-center justify-center">
+
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-green-600 flex items-center justify-center text-3xl font-bold">
+                {selectedGroup.groupImage?.url ? (
+                  <img
+                    src={selectedGroup.groupImage.url}
+                    alt="Group"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  selectedGroup.groupName?.charAt(0)?.toUpperCase() || "G"
+                )}
+              </div>
+
+              {/* Edit Photo Icon */}
+              <button
+                type="button"
+                disabled={uploadingImage}
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute right-[-12px] bottom-1 bg-green-600 hover:bg-green-700 p-2 rounded-full text-white disabled:opacity-50"
+                title="Change Group Photo"
+              >
+                {uploadingImage ? "..." : "✏️"}
+              </button>
+
             </div>
 
-            {/* Change Group Photo */}
+            {/* Hidden Image Input */}
             <input
               type="file"
               accept="image/png,image/jpeg"
@@ -134,15 +149,6 @@ function GroupInfo({ onClose }) {
               onChange={handleImageChange}
               className="hidden"
             />
-
-            <button
-              type="button"
-              disabled={uploadingImage}
-              onClick={() => fileInputRef.current?.click()}
-              className="mt-3 px-4 py-2 rounded-md bg-green-600 hover:bg-green-700 disabled:opacity-50 text-sm"
-            >
-              {uploadingImage ? "Uploading..." : "Change Group Photo"}
-            </button>
 
             {imageError && (
               <p className="text-red-400 text-sm mt-2">
