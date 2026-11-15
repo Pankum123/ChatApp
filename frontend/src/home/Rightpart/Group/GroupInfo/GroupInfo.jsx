@@ -58,7 +58,6 @@ function GroupInfo({ onClose }) {
       const updatedGroup = response.data.group;
 
       setSelectedGroup(updatedGroup);
-
       setImageError("");
     } catch (error) {
       console.log(
@@ -110,7 +109,8 @@ function GroupInfo({ onClose }) {
 
       {/* Group Details */}
       {activeSection === "menu" && (
-        <>
+        <div className="flex-1 overflow-y-auto">
+
           <div className="flex flex-col items-center py-7">
 
             {/* Group Profile */}
@@ -126,7 +126,7 @@ function GroupInfo({ onClose }) {
               )}
             </div>
 
-            {/* Change Group Photo - All Members */}
+            {/* Change Group Photo */}
             <input
               type="file"
               accept="image/png,image/jpeg"
@@ -151,9 +151,7 @@ function GroupInfo({ onClose }) {
             )}
 
             {/* Editable Group Name */}
-            <EditGroup
-              group={selectedGroup}
-            />
+            <EditGroup group={selectedGroup} />
 
             {/* Member Count */}
             <p className="text-sm text-gray-400 mt-2">
@@ -162,35 +160,28 @@ function GroupInfo({ onClose }) {
 
           </div>
 
-          <div className="px-4 space-y-2">
+          <div className="px-4 space-y-2 pb-4">
 
-            {/* Admin Options */}
+            {/* Add Member */}
             {isAdmin && (
-              <>
-                <button
-                  onClick={() => setActiveSection("add")}
-                  className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-slate-800 text-left"
-                >
-                  <span className="text-green-400 text-xl">＋</span>
-                  <span>Add Member</span>
-                </button>
+              <button
+                onClick={() => setActiveSection("add")}
+                className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-slate-800 text-left"
+              >
+                <span className="text-green-400 text-xl">＋</span>
+                <span>Add Member</span>
+              </button>
+            )}
 
-                <button
-                  onClick={() => setActiveSection("remove")}
-                  className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-slate-800 text-left"
-                >
-                  <span className="text-red-400 text-xl">－</span>
-                  <span>Remove Member</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveSection("delete")}
-                  className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-red-900/30 text-left"
-                >
-                  <span className="text-red-500 text-xl">🗑</span>
-                  <span className="text-red-400">Delete Group</span>
-                </button>
-              </>
+            {/* Remove Member */}
+            {isAdmin && (
+              <button
+                onClick={() => setActiveSection("remove")}
+                className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-slate-800 text-left"
+              >
+                <span className="text-red-400 text-xl">－</span>
+                <span>Remove Member</span>
+              </button>
             )}
 
             {/* Members - Everyone */}
@@ -202,7 +193,18 @@ function GroupInfo({ onClose }) {
               <span>Members</span>
             </button>
 
-            {/* Leave Group - Only Normal Members */}
+            {/* Delete Group - Admin Only */}
+            {isAdmin && (
+              <button
+                onClick={() => setActiveSection("delete")}
+                className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-red-900/30 text-left"
+              >
+                <span className="text-red-500 text-xl">🗑</span>
+                <span className="text-red-400">Delete Group</span>
+              </button>
+            )}
+
+            {/* Leave Group - Normal Members */}
             {!isAdmin && (
               <button
                 onClick={() => setActiveSection("leave")}
@@ -214,49 +216,50 @@ function GroupInfo({ onClose }) {
             )}
 
           </div>
-        </>
+        </div>
       )}
 
       {/* Selected Section */}
-      <div className="flex-1 overflow-y-auto">
+      {activeSection !== "menu" && (
+        <div className="flex-1 overflow-y-auto">
 
-        {activeSection === "add" && isAdmin && (
-          <AddMember
-            group={selectedGroup}
-            onBack={handleBack}
-          />
-        )}
+          {activeSection === "add" && isAdmin && (
+            <AddMember
+              group={selectedGroup}
+              onBack={handleBack}
+            />
+          )}
 
-        {activeSection === "remove" && isAdmin && (
-          <RemoveMember
-            group={selectedGroup}
-            onBack={handleBack}
-          />
-        )}
+          {activeSection === "remove" && isAdmin && (
+            <RemoveMember
+              group={selectedGroup}
+              onBack={handleBack}
+            />
+          )}
 
-        {activeSection === "members" && (
-          // <Members group={selectedGroup} />
-          <Members
-            group={selectedGroup}
-            allUsers={memberUsers}
-          />
-        )}
+          {activeSection === "members" && (
+            <Members
+              group={selectedGroup}
+              allUsers={memberUsers}
+            />
+          )}
 
-        {activeSection === "delete" && isAdmin && (
-          <DeleteGroup
-            group={selectedGroup}
-            onBack={handleBack}
-          />
-        )}
+          {activeSection === "delete" && isAdmin && (
+            <DeleteGroup
+              group={selectedGroup}
+              onBack={handleBack}
+            />
+          )}
 
-        {activeSection === "leave" && !isAdmin && (
-          <LeaveGroup
-            group={selectedGroup}
-            onLeaveSuccess={() => onClose?.()}
-          />
-        )}
+          {activeSection === "leave" && !isAdmin && (
+            <LeaveGroup
+              group={selectedGroup}
+              onLeaveSuccess={() => onClose?.()}
+            />
+          )}
 
-      </div>
+        </div>
+      )}
     </div>
   );
 }
