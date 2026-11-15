@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthProvider";
 import profile from "../../../public/user.jpg";
 import Cookies from "js-cookie";
@@ -24,8 +24,28 @@ function Profile() {
     authUser?.user?.about || ""
   );
 
+  const profileRef = useRef(null);
+
   const user = authUser?.user;
   const profilePic = user?.profilePic?.url;
+
+  // Close popup on outside click
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target)
+      ) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
 
   // Update auth user and localStorage
   const updateLocalUser = (updatedUser) => {
@@ -121,7 +141,7 @@ function Profile() {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={profileRef}>
       {/* Profile Button */}
       <button
         onClick={() => setShowMenu(!showMenu)}
