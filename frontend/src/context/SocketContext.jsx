@@ -12,6 +12,8 @@ export const useSocketContext = () => {
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [typingUsers, setTypingUsers] = useState([]);
+
   const [authUser] = useAuth();
   useGetGroupSocketMessage(socket);
 
@@ -34,16 +36,31 @@ export const SocketProvider = ({ children }) => {
           messageId: newMessage._id,
         });
       });
+
+      // Receive private chat typing event
+      socket.on("userTyping", ({ senderId }) => {
+        setTypingUsers((prev) =>
+          prev.includes(senderId) ? prev : [...prev, senderId]
+        );
+      });
+
+      // Receive private chat stop typing event
+      socket.on("userStopTyping", ({ senderId }) => {
+        setTypingUsers((prev) =>
+          prev.filter((id) => id !== senderId)
+        );
+      });
       return () => socket.close();
     } else {
       if (socket) {
         socket.close();
         setSocket(null);
       }
+      setTypingUsers([]);
     }
   }, [authUser]);
   return (
-    <socketContext.Provider value={{ socket, onlineUsers }}>
+    <socketContext.Provider value={{ socket, onlineUsers, typingUsers }}>
       {children}
     </socketContext.Provider>
   );

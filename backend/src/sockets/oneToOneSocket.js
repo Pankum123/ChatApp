@@ -110,6 +110,38 @@ const oneToOneSocket = async (io, socket, userId, getReceiverSocketId) => {
       console.log("Messages read error:", error);
     }
   });
+
+  // Private chat typing event
+  socket.on("typing", ({ receiverId } = {}) => {
+    if (
+      !userId ||
+      !receiverId ||
+      typeof receiverId !== "string" ||
+      receiverId === userId.toString()
+    ) {
+      return;
+    }
+
+    io.to(receiverId).emit("userTyping", {
+      senderId: userId.toString(),
+    });
+  });
+
+  // Private chat stop typing event
+  socket.on("stopTyping", ({ receiverId } = {}) => {
+    if (
+      !userId ||
+      !receiverId ||
+      typeof receiverId !== "string" ||
+      receiverId === userId.toString()
+    ) {
+      return;
+    }
+
+    io.to(receiverId).emit("userStopTyping", {
+      senderId: userId.toString(),
+    });
+  });
 };
 
 export default oneToOneSocket;
