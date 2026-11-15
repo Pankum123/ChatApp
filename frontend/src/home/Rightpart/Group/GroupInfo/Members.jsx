@@ -30,10 +30,6 @@ function Members({ group, allUsers = [] }) {
             matchedUser?.fullname ||
             "Group Member";
 
-          const email =
-            member?.email ||
-            matchedUser?.email;
-
           return (
             <div
               key={memberId}
@@ -55,11 +51,6 @@ function Members({ group, allUsers = [] }) {
                     {fullname}
                   </p>
 
-                  {email && (
-                    <p className="text-xs text-gray-400 truncate">
-                      {email}
-                    </p>
-                  )}
                 </div>
               </div>
 
