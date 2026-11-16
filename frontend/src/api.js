@@ -204,5 +204,31 @@ export const updateAboutAPI = async (about) => {
   return response;
 };
 
+
+// ===== Delete Private Message APIs =====
+
+// Delete message for me
+export const deleteMessageForMeAPI = async (messageId) => {
+  if (!messageId) throw new Error("Message ID is required");
+
+  const response = await api.delete(
+    `/message/delete-for-me/${messageId}`
+  );
+
+  return response;
+};
+
+// Delete message for everyone
+export const deleteMessageForEveryoneAPI = async (messageId) => {
+  if (!messageId) throw new Error("Message ID is required");
+
+  const response = await api.delete(
+    `/message/delete-for-everyone/${messageId}`
+  );
+
+  return response;
+};
+
+
 // Export axios instance if needed elsewhere
 export default api;

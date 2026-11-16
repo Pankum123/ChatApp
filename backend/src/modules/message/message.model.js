@@ -35,6 +35,26 @@ const messageSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+
+    // Message sabke liye delete hua ya nahi
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+
+    // Jin users ke liye message hide hua
+    deletedFor: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    // Message delete hone ka time
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );

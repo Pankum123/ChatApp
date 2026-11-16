@@ -53,12 +53,33 @@ const useGetSocketMessage = () => {
       setMessage(updatedMessages);
     };
 
+    // Delete for everyone realtime update
+    const handleMessageDeleted = (deletedMessage) => {
+      const currentMessages = useConversation.getState().messages;
+
+      const updatedMessages = currentMessages.map((message) => {
+        if (message._id === deletedMessage.messageId) {
+          return {
+            ...message,
+            message: deletedMessage.message,
+            isDeleted: true,
+            deletedAt: deletedMessage.deletedAt,
+          };
+        }
+        return message;
+      });
+
+      setMessage(updatedMessages);
+    };
+
     socket.on("newMessage", handleNewMessage);
     socket.on("messageStatusUpdated", handleMessageStatusUpdated);
+    socket.on("messageDeletedForEveryone", handleMessageDeleted);
 
     return () => {
       socket.off("newMessage", handleNewMessage);
       socket.off("messageStatusUpdated", handleMessageStatusUpdated);
+      socket.off("messageDeletedForEveryone", handleMessageDeleted);
     };
 
   }, [socket, setMessage]);
