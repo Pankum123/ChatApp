@@ -1,6 +1,9 @@
-import React, { useState } from "react";
-import { MdDone, MdDoneAll } from "react-icons/md";
-import { BsThreeDotsVertical } from "react-icons/bs";
+import React, { useState, useRef, useEffect } from "react";
+import {
+  MdDone,
+  MdDoneAll,
+  MdKeyboardArrowDown,
+} from "react-icons/md";
 import useConversation from "../../zustand/useConversation.js";
 import {
   deleteMessageForMeAPI,
@@ -10,6 +13,8 @@ import {
 function Message({ message }) {
   const [showMenu, setShowMenu] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const menuRef = useRef(null);
 
   const authUser = JSON.parse(localStorage.getItem("ChatApp"));
   const userId = authUser?.user?._id;
@@ -27,6 +32,26 @@ function Message({ message }) {
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  // Close menu on outside click
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target)
+      ) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+    };
+  }, []);
 
   // Delete for me
   const handleDeleteForMe = async () => {
@@ -53,7 +78,6 @@ function Message({ message }) {
       setLoading(true);
 
       const response = await deleteMessageForEveryoneAPI(message._id);
-
       const deletedMessage = response.data.deletedMessage;
 
       setMessage(
@@ -76,29 +100,41 @@ function Message({ message }) {
     <div>
       <div className="p-4">
         <div className={`chat ${chatName}`}>
-          <div className="relative group">
+          <div
+            className="relative group inline-block w-fit min-w-[65px] max-w-[85vw]"
+            ref={menuRef}
+          >
             <div
-              className={`chat-bubble text-white ${chatColor} ${
+              className={`chat-bubble !w-fit !min-w-[65px] !max-w-[85vw] relative inline-block text-white pr-8 break-words ${chatColor} ${
                 message.isDeleted ? "italic text-gray-300" : ""
               }`}
             >
-              {message.message}
-            </div>
+              <span className="whitespace-pre-wrap [overflow-wrap:anywhere]">
+                {message.message}
+              </span>
 
-            {!loading && (
-              <button
-                type="button"
-                onClick={() => setShowMenu((prev) => !prev)}
-                className="absolute top-1 right-1 p-1 rounded-full bg-black/20 hover:bg-black/40"
-                title="Message options"
-              >
-                <BsThreeDotsVertical className="text-white" />
-              </button>
-            )}
+              {!loading && (
+                <button
+                  type="button"
+                  onClick={() => setShowMenu((prev) => !prev)}
+                  title="Message options"
+                  className="
+                    absolute top-1 right-1 p-0.5 rounded-full
+                    text-white bg-black/20 hover:bg-black/40
+                    opacity-100 sm:opacity-0
+                    sm:group-hover:opacity-100
+                    sm:group-focus-within:opacity-100
+                    transition-opacity duration-150
+                  "
+                >
+                  <MdKeyboardArrowDown size={21} />
+                </button>
+              )}
+            </div>
 
             {showMenu && (
               <div
-                className={`absolute top-8 z-50 w-48 rounded-md bg-slate-800 shadow-xl border border-slate-600 ${
+                className={`absolute top-full mt-1 z-50 w-48 rounded-md bg-slate-800 shadow-xl border border-slate-600 ${
                   itsMe ? "right-0" : "left-0"
                 }`}
               >
