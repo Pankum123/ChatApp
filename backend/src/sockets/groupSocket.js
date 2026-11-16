@@ -227,6 +227,54 @@ const groupSocket = async (io, socket, userId, getReceiverSocketId) => {
       console.log("Group messages read error:", error);
     }
   });
+
+
+  // Group typing event
+  socket.on("groupTyping", async ({ groupId } = {}) => {
+    try {
+      if (!groupId || !userId) return;
+
+      // Check karo ki user group ka member hai
+      const group = await Group.findOne({
+        _id: groupId,
+        members: userId,
+      });
+
+      if (!group) return;
+
+      // Group ke baaki members ko typing status bhejna
+      socket.to(groupId.toString()).emit("groupUserTyping", {
+        groupId: groupId.toString(),
+        senderId: userId.toString(),
+      });
+    } catch (error) {
+      console.log("Group typing error:", error);
+    }
+  });
+
+  // Group stop typing event
+  socket.on("groupStopTyping", async ({ groupId } = {}) => {
+    try {
+      if (!groupId || !userId) return;
+
+      // Check karo ki user group ka member hai
+      const group = await Group.findOne({
+        _id: groupId,
+        members: userId,
+      });
+
+      if (!group) return;
+
+      // Group ke baaki members ko typing stop status bhejna
+      socket.to(groupId.toString()).emit("groupUserStopTyping", {
+        groupId: groupId.toString(),
+        senderId: userId.toString(),
+      });
+    } catch (error) {
+      console.log("Group stop typing error:", error);
+    }
+  });
+
 };
 
 export default groupSocket;

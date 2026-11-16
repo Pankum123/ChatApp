@@ -1,13 +1,33 @@
 import React, { useState } from "react";
 import useConversation from "../../../zustand/useConversation.js";
+import { useSocketContext } from "../../../context/SocketContext.jsx";
 import { CiMenuFries } from "react-icons/ci";
 import GroupInfo from "./GroupInfo/GroupInfo.jsx";
 
 function GroupChatuser() {
   const { selectedGroup } = useConversation();
+  const { groupTypingUsers } = useSocketContext();
   const [showGroupInfo, setShowGroupInfo] = useState(false);
 
   if (!selectedGroup) return null;
+
+  const typingMembers = groupTypingUsers
+    .filter((item) => item.groupId === selectedGroup._id)
+    .map((item) => {
+      const member = selectedGroup.members?.find(
+        (member) => (member._id || member).toString() === item.senderId
+      );
+
+      return member?.fullname;
+    })
+    .filter(Boolean);
+
+  const typingText =
+    typingMembers.length === 1
+      ? `${typingMembers[0]} is typing...`
+      : typingMembers.length > 1
+      ? `${typingMembers.join(", ")} are typing...`
+      : "";
 
   return (
     <div className="relative z-40 flex items-center h-[8vh] justify-center gap-4 bg-slate-800 rounded-md">
@@ -51,9 +71,15 @@ function GroupChatuser() {
             {selectedGroup.groupName}
           </h1>
 
-          <span className="text-sm text-gray-400">
-            {selectedGroup.members?.length || 0} Members
-          </span>
+          {typingText ? (
+            <span className="text-sm text-green-400">
+              {typingText}
+            </span>
+          ) : (
+            <span className="text-sm text-gray-400">
+              {selectedGroup.members?.length || 0} Members
+            </span>
+          )}
         </button>
 
       </div>
@@ -72,3 +98,4 @@ function GroupChatuser() {
 }
 
 export default GroupChatuser;
+

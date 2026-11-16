@@ -13,6 +13,7 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [typingUsers, setTypingUsers] = useState([]);
+  const [groupTypingUsers, setGroupTypingUsers] = useState([]);
 
   const [authUser] = useAuth();
   useGetGroupSocketMessage(socket);
@@ -50,6 +51,33 @@ export const SocketProvider = ({ children }) => {
           prev.filter((id) => id !== senderId)
         );
       });
+
+      // Receive group chat typing event
+      socket.on("groupUserTyping", ({ groupId, senderId }) => {
+        setGroupTypingUsers((prev) => {
+          const alreadyTyping = prev.some(
+            (item) =>
+              item.groupId === groupId &&
+              item.senderId === senderId
+          );
+
+          if (alreadyTyping) return prev;
+
+          return [...prev, { groupId, senderId }];
+        });
+      });
+
+      // Receive group chat stop typing event
+      socket.on("groupUserStopTyping", ({ groupId, senderId }) => {
+        setGroupTypingUsers((prev) =>
+          prev.filter(
+            (item) =>
+              item.groupId !== groupId ||
+              item.senderId !== senderId
+          )
+        );
+      });
+
       return () => socket.close();
     } else {
       if (socket) {
@@ -57,10 +85,11 @@ export const SocketProvider = ({ children }) => {
         setSocket(null);
       }
       setTypingUsers([]);
+      setGroupTypingUsers([]);
     }
   }, [authUser]);
   return (
-    <socketContext.Provider value={{ socket, onlineUsers, typingUsers }}>
+    <socketContext.Provider value={{ socket, onlineUsers, typingUsers, groupTypingUsers }}>
       {children}
     </socketContext.Provider>
   );

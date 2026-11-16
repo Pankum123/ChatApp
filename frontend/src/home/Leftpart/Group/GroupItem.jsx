@@ -1,10 +1,30 @@
 import React from "react";
 import useConversation from "../../../zustand/useConversation.js";
+import { useSocketContext } from "../../../context/SocketContext.jsx";
 
 function GroupItem({ group }) {
   const { selectedGroup, setSelectedGroup } = useConversation();
+  const { groupTypingUsers } = useSocketContext();
 
   const isSelected = selectedGroup?._id === group._id;
+
+  const typingMembers = groupTypingUsers
+    .filter((item) => item.groupId === group._id)
+    .map((item) => {
+      const member = group.members?.find(
+        (member) => (member._id || member).toString() === item.senderId
+      );
+
+      return member?.fullname;
+    })
+    .filter(Boolean);
+
+  const typingText =
+    typingMembers.length === 1
+      ? `${typingMembers[0]} is typing...`
+      : typingMembers.length > 1
+      ? `${typingMembers.join(", ")} are typing...`
+      : "";
 
   return (
     <div
@@ -29,14 +49,20 @@ function GroupItem({ group }) {
         </div>
 
         {/* Group Details */}
-        <div>
+        <div className="min-w-0">
           <h1 className="font-bold text-white">
             {group.groupName}
           </h1>
 
-          <span className="text-gray-400">
-            {group.members?.length || 0} members
-          </span>
+          {typingText ? (
+            <span className="text-xs text-green-400">
+              {typingText}
+            </span>
+          ) : (
+            <span className="text-xs text-gray-400">
+              {group.members?.length || 0} members
+            </span>
+          )}
         </div>
 
       </div>
