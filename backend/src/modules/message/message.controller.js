@@ -166,3 +166,74 @@ export const deleteMessageForEveryone = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+// Edit message
+export const editMessage = async (req, res) => {
+  try {
+    const { id: messageId } = req.params;
+    const { message: newMessage } = req.body;
+    const userId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(messageId)) {
+      return res.status(400).json({ error: "Invalid message ID" });
+    }
+
+    if (!newMessage || !newMessage.trim()) {
+      return res.status(400).json({ error: "Message cannot be empty" });
+    }
+
+    const message = await Message.findOne({
+      _id: messageId,
+      senderId: userId,
+    });
+
+    if (!message) {
+      return res.status(404).json({
+        error: "Message not found or you cannot edit this message",
+      });
+    }
+
+    if (message.isDeleted) {
+      return res.status(400).json({
+        error: "Deleted message cannot be edited",
+      });
+    }
+
+    message.message = newMessage.trim();
+    message.isEdited = true;
+    message.editedAt = new Date();
+
+    await message.save();
+
+    const editData = {
+      messageId: message._id.toString(),
+      message: message.message,
+      isEdited: message.isEdited,
+      editedAt: message.editedAt,
+    };
+
+    const receiverSocketId = getReceiverSocketId(
+      message.receiverId.toString()
+    );
+
+    const senderSocketId = getReceiverSocketId(
+      message.senderId.toString()
+    );
+
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messageEdited", editData);
+    }
+
+    if (senderSocketId) {
+      io.to(senderSocketId).emit("messageEdited", editData);
+    }
+
+    res.status(200).json({
+      message: "Message updated successfully",
+      editedMessage: editData,
+    });
+  } catch (error) {
+    console.log("Edit message error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

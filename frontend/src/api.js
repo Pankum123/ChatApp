@@ -230,5 +230,20 @@ export const deleteMessageForEveryoneAPI = async (messageId) => {
 };
 
 
+// Edit message API
+export const editMessageAPI = async (messageId, message) => {
+  if (!messageId) throw new Error("Message ID is required");
+
+  if (!message || !message.trim()) {
+    throw new Error("Message cannot be empty");
+  }
+
+  const response = await api.put(`/message/edit/${messageId}`, {
+    message: message.trim(),
+  });
+
+  return response;
+};
+
 // Export axios instance if needed elsewhere
 export default api;

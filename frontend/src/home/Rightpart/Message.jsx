@@ -29,7 +29,11 @@ function Message({ message }) {
   const authUser = JSON.parse(localStorage.getItem("ChatApp"));
   const userId = authUser?.user?._id;
 
-  const { messages, setMessage } = useConversation();
+  const {
+    messages,
+    setMessage,
+    setEditingMessage,
+  } = useConversation();
 
   const senderId = message.senderId?._id || message.senderId;
   const itsMe = String(senderId) === String(userId);
@@ -129,6 +133,13 @@ function Message({ message }) {
     }
   };
 
+  // Edit message in Typesend input
+  const handleEdit = () => {
+    setEditingMessage(message);
+    setShowMenu(false);
+    setShowDeleteMenu(false);
+  };
+
   return (
     <div>
       <div className="p-4">
@@ -145,6 +156,12 @@ function Message({ message }) {
             >
               <span className="whitespace-pre-wrap [overflow-wrap:anywhere]">
                 {message.message}
+
+                {message.isEdited && !message.isDeleted && (
+                  <span className="ml-2 text-xs text-gray-200 italic">
+                    edited
+                  </span>
+                )}
               </span>
 
               {/* Dropdown arrow */}
@@ -207,6 +224,7 @@ function Message({ message }) {
                     {itsMe && !message.isDeleted && (
                       <button
                         type="button"
+                        onClick={handleEdit}
                         className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
                       >
                         <MdEdit size={21} />

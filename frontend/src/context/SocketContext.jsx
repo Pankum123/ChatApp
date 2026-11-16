@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthProvider";
 import io from "socket.io-client";
 import useGetGroupSocketMessage from "./Group/useGetGroupSocketMessage.js";
+import useConversation from "../zustand/useConversation.js";
+
 const socketContext = createContext();
 
 // it is a hook.
@@ -28,15 +30,32 @@ export const SocketProvider = ({ children }) => {
           userId: authUser.user._id,
         },
       });
+
       setSocket(socket);
+
       socket.on("getOnlineUsers", (users) => {
         setOnlineUsers(users);
       });
+
       socket.on("newMessage", (newMessage) => {
         socket.emit("messageDelivered", {
           messageId: newMessage._id,
         });
       });
+
+      // Receive edited private message
+      socket.on("messageEdited", (editedData) => {
+        const { messages, setMessage } = useConversation.getState();
+
+        setMessage(
+          messages.map((item) =>
+            String(item._id) === String(editedData.messageId)
+              ? { ...item, ...editedData }
+              : item
+          )
+        );
+      });
+
 
       // Receive private chat typing event
       socket.on("userTyping", ({ senderId }) => {
