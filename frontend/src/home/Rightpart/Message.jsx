@@ -3,8 +3,16 @@ import {
   MdDone,
   MdDoneAll,
   MdKeyboardArrowDown,
+  MdReply,
+  MdContentCopy,
+  MdForward,
+  MdEdit,
+  MdDeleteOutline,
+  MdArrowBack,
 } from "react-icons/md";
+
 import useConversation from "../../zustand/useConversation.js";
+
 import {
   deleteMessageForMeAPI,
   deleteMessageForEveryoneAPI,
@@ -12,7 +20,9 @@ import {
 
 function Message({ message }) {
   const [showMenu, setShowMenu] = useState(false);
+  const [showDeleteMenu, setShowDeleteMenu] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [menuPosition, setMenuPosition] = useState("bottom");
 
   const menuRef = useRef(null);
 
@@ -28,6 +38,7 @@ function Message({ message }) {
   const chatColor = itsMe ? "bg-blue-500" : "";
 
   const createdAt = new Date(message.createdAt);
+
   const formattedTime = createdAt.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
@@ -41,6 +52,7 @@ function Message({ message }) {
         !menuRef.current.contains(event.target)
       ) {
         setShowMenu(false);
+        setShowDeleteMenu(false);
       }
     };
 
@@ -52,6 +64,25 @@ function Message({ message }) {
       document.removeEventListener("touchstart", handleOutsideClick);
     };
   }, []);
+
+  // Open menu in available direction
+  const handleMenuToggle = () => {
+    if (!showMenu && menuRef.current) {
+      const rect = menuRef.current.getBoundingClientRect();
+      const menuHeight = 300;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+
+      if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
+        setMenuPosition("top");
+      } else {
+        setMenuPosition("bottom");
+      }
+    }
+
+    setShowMenu((prev) => !prev);
+    setShowDeleteMenu(false);
+  };
 
   // Delete for me
   const handleDeleteForMe = async () => {
@@ -65,6 +96,7 @@ function Message({ message }) {
       );
 
       setShowMenu(false);
+      setShowDeleteMenu(false);
     } catch (error) {
       console.log("Delete for me error:", error);
     } finally {
@@ -89,6 +121,7 @@ function Message({ message }) {
       );
 
       setShowMenu(false);
+      setShowDeleteMenu(false);
     } catch (error) {
       console.log("Delete for everyone error:", error);
     } finally {
@@ -104,6 +137,7 @@ function Message({ message }) {
             className="relative group inline-block w-fit min-w-[65px] max-w-[85vw]"
             ref={menuRef}
           >
+            {/* Message bubble */}
             <div
               className={`chat-bubble !w-fit !min-w-[65px] !max-w-[85vw] relative inline-block text-white pr-8 break-words ${chatColor} ${
                 message.isDeleted ? "italic text-gray-300" : ""
@@ -113,10 +147,11 @@ function Message({ message }) {
                 {message.message}
               </span>
 
+              {/* Dropdown arrow */}
               {!loading && (
                 <button
                   type="button"
-                  onClick={() => setShowMenu((prev) => !prev)}
+                  onClick={handleMenuToggle}
                   title="Message options"
                   className="
                     absolute top-1 right-1 p-0.5 rounded-full
@@ -132,49 +167,123 @@ function Message({ message }) {
               )}
             </div>
 
+            {/* Main options menu */}
             {showMenu && (
               <div
-                className={`absolute top-full mt-1 z-50 w-48 rounded-md bg-slate-800 shadow-xl border border-slate-600 ${
+                className={`absolute ${
+                  menuPosition === "top"
+                    ? "bottom-full mb-1"
+                    : "top-full mt-1"
+                } z-50 w-52 rounded-md bg-[#202c33] shadow-xl border border-gray-700 py-1 ${
                   itsMe ? "right-0" : "left-0"
                 }`}
               >
-                <button
-                  type="button"
-                  onClick={handleDeleteForMe}
-                  disabled={loading}
-                  className="block w-full text-left px-4 py-3 text-white hover:bg-slate-700"
-                >
-                  Delete for me
-                </button>
+                {!showDeleteMenu ? (
+                  <>
+                    <button
+                      type="button"
+                      className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                    >
+                      <MdReply size={21} />
+                      Reply
+                    </button>
 
-                {itsMe && !message.isDeleted && (
-                  <button
-                    type="button"
-                    onClick={handleDeleteForEveryone}
-                    disabled={loading}
-                    className="block w-full text-left px-4 py-3 text-white hover:bg-slate-700"
-                  >
-                    Delete for everyone
-                  </button>
+                    <button
+                      type="button"
+                      className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                    >
+                      <MdContentCopy size={21} />
+                      Copy
+                    </button>
+
+                    <button
+                      type="button"
+                      className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                    >
+                      <MdForward size={21} />
+                      Forward
+                    </button>
+
+                    {itsMe && !message.isDeleted && (
+                      <button
+                        type="button"
+                        className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                      >
+                        <MdEdit size={21} />
+                        Edit
+                      </button>
+                    )}
+
+                    <div className="border-t border-gray-700 my-1" />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteMenu(true)}
+                      className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                    >
+                      <MdDeleteOutline size={21} />
+                      Delete
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteMenu(false)}
+                      className="flex items-center gap-3 w-full px-4 py-3 text-gray-300 hover:bg-[#2a3942]"
+                    >
+                      <MdArrowBack size={20} />
+                      Back
+                    </button>
+
+                    <div className="border-t border-gray-700 my-1" />
+
+                    <button
+                      type="button"
+                      onClick={handleDeleteForMe}
+                      disabled={loading}
+                      className="block w-full text-left px-4 py-3 text-white hover:bg-[#2a3942]"
+                    >
+                      Delete for me
+                    </button>
+
+                    {itsMe && !message.isDeleted && (
+                      <button
+                        type="button"
+                        onClick={handleDeleteForEveryone}
+                        disabled={loading}
+                        className="block w-full text-left px-4 py-3 text-white hover:bg-[#2a3942]"
+                      >
+                        Delete for everyone
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             )}
           </div>
 
+          {/* Message time and ticks */}
           <div className="chat-footer">
             {formattedTime}
 
-            {!message.isDeleted && itsMe && message.status === "sent" && (
-              <MdDone className="text-gray-400 text-base" />
-            )}
+            {!message.isDeleted &&
+              itsMe &&
+              message.status === "sent" && (
+                <MdDone className="text-gray-400 text-base" />
+              )}
 
-            {!message.isDeleted && itsMe && message.status === "delivered" && (
-              <MdDoneAll className="text-gray-400 text-base" />
-            )}
+            {!message.isDeleted &&
+              itsMe &&
+              message.status === "delivered" && (
+                <MdDoneAll className="text-gray-400 text-base" />
+              )}
 
-            {!message.isDeleted && itsMe && message.status === "read" && (
-              <MdDoneAll className="text-blue-400 text-base" />
-            )}
+            {!message.isDeleted &&
+              itsMe &&
+              message.status === "read" && (
+                <MdDoneAll className="text-blue-400 text-base" />
+              )}
           </div>
         </div>
       </div>
