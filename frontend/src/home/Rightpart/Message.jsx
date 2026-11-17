@@ -23,6 +23,7 @@ function Message({ message }) {
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
   const [loading, setLoading] = useState(false);
   const [menuPosition, setMenuPosition] = useState("bottom");
+  const [copied, setCopied] = useState(false);
 
   const menuRef = useRef(null);
 
@@ -140,6 +141,23 @@ function Message({ message }) {
     setShowDeleteMenu(false);
   };
 
+  // Copy private message
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(message.message);
+
+      setCopied(true);
+
+      setTimeout(() => {
+        setCopied(false);
+        setShowMenu(false);
+        setShowDeleteMenu(false);
+      }, 1000);
+    } catch (error) {
+      console.log("Copy message error:", error);
+    }
+  };
+
   return (
     <div>
       <div className="p-4">
@@ -207,10 +225,17 @@ function Message({ message }) {
 
                     <button
                       type="button"
-                      className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                      onClick={handleCopy}
+                      className="flex items-center justify-between w-full px-4 py-3 text-white hover:bg-[#2a3942]"
                     >
-                      <MdContentCopy size={21} />
-                      Copy
+                      <span className="flex items-center gap-3">
+                        <MdContentCopy size={21} />
+                        Copy
+                      </span>
+
+                      {copied && (
+                        <MdDone className="text-green-400" size={21} />
+                      )}
                     </button>
 
                     <button

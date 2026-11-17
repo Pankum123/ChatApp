@@ -28,6 +28,7 @@ function GroupMessages() {
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
   const [loadingMessageId, setLoadingMessageId] = useState(null);
   const [menuPosition, setMenuPosition] = useState("bottom");
+  const [copiedMessageId, setCopiedMessageId] = useState(null);
 
   const {
     selectedGroup,
@@ -118,6 +119,23 @@ function GroupMessages() {
     setEditingMessage(message);
     setActiveMenu(null);
     setShowDeleteMenu(false);
+  };
+
+  // Copy group message
+  const handleCopy = async (messageId, messageText) => {
+    try {
+      await navigator.clipboard.writeText(messageText);
+
+      setCopiedMessageId(messageId);
+
+      setTimeout(() => {
+        setCopiedMessageId(null);
+        setActiveMenu(null);
+        setShowDeleteMenu(false);
+      }, 1000);
+    } catch (error) {
+      console.log("Copy message error:", error);
+    }
   };
 
   // Delete group message for me
@@ -274,10 +292,17 @@ function GroupMessages() {
 
                             <button
                               type="button"
-                              className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                              onClick={() => handleCopy(message._id, message.message)}
+                              className="flex items-center justify-between w-full px-4 py-3 text-white hover:bg-[#2a3942]"
                             >
-                              <MdContentCopy size={21} />
-                              Copy
+                              <span className="flex items-center gap-3">
+                                <MdContentCopy size={21} />
+                                Copy
+                              </span>
+
+                              {copiedMessageId === message._id && (
+                                <MdDone className="text-green-400" size={21} />
+                              )}
                             </button>
 
                             <button
