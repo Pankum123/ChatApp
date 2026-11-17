@@ -5,11 +5,11 @@ import {
   MdKeyboardArrowDown,
   MdReply,
   MdContentCopy,
-  MdForward,
   MdEdit,
   MdDeleteOutline,
   MdArrowBack,
 } from "react-icons/md";
+import { IoArrowRedo } from "react-icons/io5";
 
 import useConversation from "../../zustand/useConversation.js";
 
@@ -217,7 +217,7 @@ function Message({ message }) {
                       type="button"
                       className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
                     >
-                      <MdForward size={21} />
+                      <IoArrowRedo size={21} />
                       Forward
                     </button>
 
