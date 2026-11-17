@@ -3,64 +3,120 @@ import Conversation from "../conversation/conversation.model.js";
 import Message from "./message.model.js";
 import mongoose from "mongoose";
 
+
 export const sendMessage = async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, replyTo } = req.body;
     const { id: receiverId } = req.params;
-    const senderId = req.user._id; // current logged in user
+    const senderId = req.user._id;
+
+    if (!message || !message.trim()) {
+      return res.status(400).json({
+        error: "Message cannot be empty",
+      });
+    }
+
     let conversation = await Conversation.findOne({
       members: { $all: [senderId, receiverId] },
     });
+
     if (!conversation) {
       conversation = await Conversation.create({
         members: [senderId, receiverId],
       });
     }
+
+    let replyMessage = null;
+
+    if (replyTo) {
+      if (!mongoose.Types.ObjectId.isValid(replyTo)) {
+        return res.status(400).json({
+          error: "Invalid reply message ID",
+        });
+      }
+
+      replyMessage = await Message.findOne({
+        _id: replyTo,
+        $or: [
+          { senderId, receiverId },
+          { senderId: receiverId, receiverId: senderId },
+        ],
+      });
+
+      if (!replyMessage) {
+        return res.status(404).json({
+          error: "Reply message not found",
+        });
+      }
+    }
+
     const newMessage = new Message({
       senderId,
       receiverId,
-      message,
+      message: message.trim(),
+      replyTo: replyMessage ? replyMessage._id : null,
     });
-    if (newMessage) {
-      conversation.messages.push(newMessage._id);
-    }
-    // await conversation.save()
-    // await newMessage.save();
-    await Promise.all([conversation.save(), newMessage.save()]); // run parallel
+
+    conversation.messages.push(newMessage._id);
+
+    await Promise.all([
+      conversation.save(),
+      newMessage.save(),
+    ]);
+
+    await newMessage.populate({
+      path: "replyTo",
+      select: "message senderId isDeleted",
+    });
+
     const receiverSocketId = getReceiverSocketId(receiverId);
+
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", newMessage);
     }
+
     res.status(201).json(newMessage);
   } catch (error) {
     console.log("Error in sendMessage", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
 
 export const getMessage = async (req, res) => {
   try {
     const { id: chatUser } = req.params;
-    const senderId = req.user._id; // current logged in user
+    const senderId = req.user._id;
+
     let conversation = await Conversation.findOne({
       members: { $all: [senderId, chatUser] },
-    }).populate("messages");
+    }).populate({
+      path: "messages",
+      populate: {
+        path: "replyTo",
+        select: "message senderId isDeleted",
+      },
+    });
+
     if (!conversation) {
       return res.status(201).json([]);
     }
-    // const messages = conversation.messages;
+
     const messages = conversation.messages.filter((message) => {
       return !message.deletedFor.some(
         (id) => id.toString() === senderId.toString()
       );
     });
+
     res.status(201).json(messages);
   } catch (error) {
     console.log("Error in getMessage", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
-
 
 // Delete message for me
 export const deleteMessageForMe = async (req, res) => {

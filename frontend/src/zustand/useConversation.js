@@ -1,15 +1,3 @@
-// import { create } from "zustand";
-
-// const useConversation = create((set) => ({
-//   selectedConversation: null,
-//   setSelectedConversation: (selectedConversation) =>
-//     set({ selectedConversation }),
-//   messages: [],
-//   setMessage: (messages) => set({ messages }),
-// }));
-// export default useConversation;
-
-
 import { create } from "zustand";
 
 const useConversation = create((set) => ({
@@ -20,6 +8,7 @@ const useConversation = create((set) => ({
       selectedConversation,
       selectedGroup: null,
       editingMessage: null,
+      replyingMessage: null,
     }),
 
   // Group Chat
@@ -29,6 +18,7 @@ const useConversation = create((set) => ({
       selectedGroup,
       selectedConversation: null,
       editingMessage: null,
+      replyingMessage: null,
     }),
 
   // Messages
@@ -37,6 +27,10 @@ const useConversation = create((set) => ({
 
   editingMessage: null,
   setEditingMessage: (editingMessage) => set({ editingMessage }),
+
+  // Reply Message
+  replyingMessage: null,
+  setReplyingMessage: (replyingMessage) => set({ replyingMessage }),
 
   // Group Messages
   groupMessages: [],

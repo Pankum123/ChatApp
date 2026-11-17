@@ -34,6 +34,7 @@ function Message({ message }) {
     messages,
     setMessage,
     setEditingMessage,
+    setReplyingMessage,
   } = useConversation();
 
   const senderId = message.senderId?._id || message.senderId;
@@ -168,12 +169,56 @@ function Message({ message }) {
           >
             {/* Message bubble */}
             <div
+              id={`message-${message._id}`}
               className={`chat-bubble !w-fit !min-w-[65px] !max-w-[85vw] relative inline-block text-white pr-8 break-words ${chatColor} ${
                 message.isDeleted ? "italic text-gray-300" : ""
               }`}
             >
-              <span className="whitespace-pre-wrap [overflow-wrap:anywhere]">
-                {message.message}
+              {/* Replied Message Preview */}
+                {message.replyTo && (
+                  <div
+                    onClick={() => {
+                      const originalMessage = document.getElementById(
+                        `message-${message.replyTo._id}`
+                      );
+
+                      if (originalMessage) {
+                        originalMessage.scrollIntoView({
+                          behavior: "smooth",
+                          block: "center",
+                        });
+
+                        originalMessage.classList.add("ring-2", "ring-green-400");
+
+                        setTimeout(() => {
+                          originalMessage.classList.remove(
+                            "ring-2",
+                            "ring-green-400"
+                          );
+                        }, 1500);
+                      }
+                    }}
+                    className="bg-black/20 border-l-4 border-green-400 rounded-md px-3 py-2 mb-2 cursor-pointer hover:bg-black/30"
+                  >
+                    <p className="text-green-300 text-xs font-semibold mb-1">
+                      {String(
+                        message.replyTo.senderId?._id ||
+                        message.replyTo.senderId
+                      ) === String(userId)
+                        ? "You"
+                        : "Replied message"}
+                    </p>
+
+                    <p className="text-gray-200 text-sm break-words">
+                      {message.replyTo.isDeleted
+                        ? "This message was deleted"
+                        : message.replyTo.message}
+                    </p>
+                  </div>
+                )}
+
+                <span className="whitespace-pre-wrap [overflow-wrap:anywhere]">
+                  {message.message}
 
                 {message.isEdited && !message.isDeleted && (
                   <span className="ml-2 text-xs text-gray-200 italic">
@@ -216,12 +261,18 @@ function Message({ message }) {
                 {!showDeleteMenu ? (
                   <>
                     <button
-                      type="button"
-                      className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
-                    >
-                      <MdReply size={21} />
-                      Reply
-                    </button>
+                    type="button"
+                    onClick={() => {
+                      setReplyingMessage(message);
+                      setEditingMessage(null);
+                      setShowMenu(false);
+                      setShowDeleteMenu(false);
+                    }}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                  >
+                    <MdReply size={21} />
+                    Reply
+                  </button>
 
                     <button
                       type="button"

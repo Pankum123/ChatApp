@@ -53,9 +53,9 @@ export const getMessagesByConversation = async (conversationId) => {
 };
 
 // ====== Messages API ======
-export const sendMessageToConversation = async (conversationId, message) => {
+export const sendMessageToConversation = async (conversationId, message, replyTo = null) => {
   if (!conversationId) throw new Error("Conversation ID is required");
-  const res = await api.post(`/message/send/${conversationId}`, { message });
+  const res = await api.post(`/message/send/${conversationId}`, { message, replyTo });
   return res;
 };
 

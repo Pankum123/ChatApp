@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { IoSend } from "react-icons/io5";
+import { MdClose, MdReply } from "react-icons/md";
 import useSendMessage from "../../context/useSendMessage.js";
 import { useSocketContext } from "../../context/SocketContext.jsx";
 import useConversation from "../../zustand/useConversation.js";
@@ -10,7 +11,6 @@ function Typesend() {
   const [editLoading, setEditLoading] = useState(false);
 
   const { loading, sendMessages } = useSendMessage();
-
   const { socket } = useSocketContext();
 
   const {
@@ -19,6 +19,8 @@ function Typesend() {
     setMessage: setMessages,
     editingMessage,
     setEditingMessage,
+    replyingMessage,
+    setReplyingMessage,
   } = useConversation();
 
   const typingTimeout = useRef(null);
@@ -31,9 +33,22 @@ function Typesend() {
   useEffect(() => {
     if (editingMessage) {
       setMessage(editingMessage.message);
+      setReplyingMessage(null);
       inputRef.current?.focus();
     }
   }, [editingMessage]);
+
+  // Auto scroll and focus when replying
+  useEffect(() => {
+    if (replyingMessage) {
+      inputRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+
+      inputRef.current?.focus();
+    }
+  }, [replyingMessage]);
 
   // Stop typing event
   const stopTyping = () => {
@@ -113,9 +128,11 @@ function Typesend() {
       return;
     }
 
-    // Send new message
+    // Send new message with reply
     stopTyping();
-    await sendMessages(message);
+
+    await sendMessages(message, replyingMessage?._id || null);
+
     setMessage("");
   };
 
@@ -123,6 +140,11 @@ function Typesend() {
   const handleCancelEdit = () => {
     setMessage("");
     setEditingMessage(null);
+  };
+
+  // Cancel reply
+  const handleCancelReply = () => {
+    setReplyingMessage(null);
   };
 
   // Cleanup on unmount
@@ -140,6 +162,35 @@ function Typesend() {
 
   return (
     <form onSubmit={handleSubmit}>
+      {/* Reply Preview */}
+      {replyingMessage && !editingMessage && (
+        <div className="flex items-center justify-between bg-[#202c33] border-l-4 border-green-500 px-4 py-2 mx-2 rounded-t-lg">
+          <div className="flex items-center gap-2 overflow-hidden">
+            <MdReply className="text-green-400 text-xl shrink-0" />
+
+            <div className="overflow-hidden">
+              <p className="text-green-400 text-sm font-semibold">
+                Replying to message
+              </p>
+
+              <p className="text-gray-300 text-sm truncate">
+                {replyingMessage.isDeleted
+                  ? "This message was deleted"
+                  : replyingMessage.message}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleCancelReply}
+            className="text-gray-400 hover:text-white p-1"
+          >
+            <MdClose size={22} />
+          </button>
+        </div>
+      )}
+
       <div className="flex space-x-1 h-[8vh] bg-gray-800">
         <div className="w-[70%] mx-4">
           <input
@@ -181,4 +232,3 @@ function Typesend() {
 }
 
 export default Typesend;
-
