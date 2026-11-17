@@ -87,6 +87,11 @@ const groupMessageSchema = new mongoose.Schema(
       default: null,
     },
 
+    isForwarded: {
+      type: Boolean,
+      default: false,
+    },
+
   },
   { timestamps: true }
 );

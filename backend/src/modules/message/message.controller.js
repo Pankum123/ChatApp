@@ -2,6 +2,9 @@ import { getReceiverSocketId, io } from "../../sockets/server.js";
 import Conversation from "../conversation/conversation.model.js";
 import Message from "./message.model.js";
 import mongoose from "mongoose";
+import User from "../user/user.model.js";
+import Group from "../group/group.model.js";
+import GroupMessage from "../group/groupMessage.model.js";
 
 
 export const sendMessage = async (req, res) => {
@@ -293,3 +296,126 @@ export const editMessage = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+// Forward message to Private Chat
+export const forwardMessage = async (req, res) => {
+  try {
+    const { id: receiverId } = req.params;
+    const { messageId, sourceType = "private" } = req.body;
+    const senderId = req.user._id;
+
+    // Validate IDs
+    if (
+      !mongoose.Types.ObjectId.isValid(receiverId) ||
+      !mongoose.Types.ObjectId.isValid(messageId)
+    ) {
+      return res.status(400).json({
+        error: "Invalid receiver or message ID",
+      });
+    }
+
+    if (!["private", "group"].includes(sourceType)) {
+      return res.status(400).json({
+        error: "Invalid source type",
+      });
+    }
+
+    // Check receiver
+    const receiver = await User.findById(receiverId);
+
+    if (!receiver) {
+      return res.status(404).json({
+        error: "Receiver not found",
+      });
+    }
+
+    let originalMessage = null;
+
+    // Get original private message
+    if (sourceType === "private") {
+      originalMessage = await Message.findOne({
+        _id: messageId,
+        $or: [
+          { senderId },
+          { receiverId: senderId },
+        ],
+        deletedFor: { $ne: senderId },
+        isDeleted: false,
+      });
+    }
+
+    // Get original group message
+    if (sourceType === "group") {
+      originalMessage = await GroupMessage.findOne({
+        _id: messageId,
+        deletedFor: { $ne: senderId },
+        isDeleted: false,
+      });
+
+      if (originalMessage) {
+        const sourceGroup = await Group.findOne({
+          _id: originalMessage.groupId,
+          members: senderId,
+        });
+
+        if (!sourceGroup) {
+          originalMessage = null;
+        }
+      }
+    }
+
+    if (!originalMessage) {
+      return res.status(404).json({
+        error: "Original message not found or unavailable",
+      });
+    }
+
+    // Find or create private conversation
+    let conversation = await Conversation.findOne({
+      members: { $all: [senderId, receiverId] },
+    });
+
+    if (!conversation) {
+      conversation = await Conversation.create({
+        members: [senderId, receiverId],
+      });
+    }
+
+    // Create forwarded message
+    const forwardedMessage = new Message({
+      senderId,
+      receiverId,
+      message: originalMessage.message,
+      isForwarded: true,
+    });
+
+    conversation.messages.push(forwardedMessage._id);
+
+    await Promise.all([
+      conversation.save(),
+      forwardedMessage.save(),
+    ]);
+
+    // Send realtime message to receiver
+    const receiverSocketId = getReceiverSocketId(receiverId);
+
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit(
+        "newMessage",
+        forwardedMessage
+      );
+    }
+
+    return res.status(201).json({
+      message: "Message forwarded successfully",
+      forwardedMessage,
+    });
+  } catch (error) {
+    console.log("Forward private message error:", error);
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+};
+

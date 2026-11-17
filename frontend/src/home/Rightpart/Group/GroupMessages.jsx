@@ -14,6 +14,7 @@ import { IoArrowRedo } from "react-icons/io5";
 import useConversation from "../../../zustand/useConversation.js";
 import useGetGroupMessages from "../../../context/Group/useGetGroupMessages.js";
 import Loading from "../../../components/Loading.jsx";
+import ForwardModal from "../ForwardModal.jsx";
 
 import {
   deleteGroupMessageForMeAPI,
@@ -29,6 +30,7 @@ function GroupMessages() {
   const [loadingMessageId, setLoadingMessageId] = useState(null);
   const [menuPosition, setMenuPosition] = useState("bottom");
   const [copiedMessageId, setCopiedMessageId] = useState(null);
+  const [forwardMessage, setForwardMessage] = useState(null);
 
   const {
     selectedGroup,
@@ -85,6 +87,13 @@ function GroupMessages() {
     );
 
     return member?.fullname || "Group Member";
+  };
+
+  // Open forward modal for a group message
+  const handleForward = (message) => {
+    setForwardMessage(message);
+    setActiveMenu(null);
+    setShowDeleteMenu(false);
   };
 
   // Reply to group message
@@ -297,6 +306,14 @@ function GroupMessages() {
                         </div>
                       )}
 
+                      {/* Forwarded label */}
+                      {message.isForwarded && !message.isDeleted && (
+                        <div className="flex items-center gap-1 text-xs text-gray-200 italic mb-1">
+                          <IoArrowRedo size={14} />
+                          Forwarded
+                        </div>
+                      )}
+
                       <span className="whitespace-pre-wrap [overflow-wrap:anywhere]">
                         {message.message}
 
@@ -373,7 +390,9 @@ function GroupMessages() {
 
                             <button
                               type="button"
-                              className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                              onClick={() => handleForward(message)}
+                              disabled={message.isDeleted}
+                              className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942] disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <IoArrowRedo size={21} />
                               Forward
@@ -479,6 +498,15 @@ function GroupMessages() {
       )}
 
       <div ref={bottomRef} />
+
+      {/* Forward Modal */}
+      {forwardMessage && (
+        <ForwardModal
+          message={forwardMessage}
+          sourceType="group"
+          onClose={() => setForwardMessage(null)}
+        />
+      )}
     </div>
   );
 }

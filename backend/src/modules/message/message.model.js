@@ -69,6 +69,11 @@ const messageSchema = new mongoose.Schema(
       ref: "message",
       default: null,
     },
+
+    isForwarded: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

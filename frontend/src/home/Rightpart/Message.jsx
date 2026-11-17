@@ -12,6 +12,7 @@ import {
 import { IoArrowRedo } from "react-icons/io5";
 
 import useConversation from "../../zustand/useConversation.js";
+import ForwardModal from "./ForwardModal.jsx";
 
 import {
   deleteMessageForMeAPI,
@@ -21,6 +22,7 @@ import {
 function Message({ message }) {
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
+  const [showForwardModal, setShowForwardModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [menuPosition, setMenuPosition] = useState("bottom");
   const [copied, setCopied] = useState(false);
@@ -159,6 +161,13 @@ function Message({ message }) {
     }
   };
 
+  // Forward private message
+  const handleForward = () => {
+    setShowMenu(false);
+    setShowDeleteMenu(false);
+    setShowForwardModal(true);
+  };
+
   return (
     <div>
       <div className="p-4">
@@ -175,50 +184,61 @@ function Message({ message }) {
               }`}
             >
               {/* Replied Message Preview */}
-                {message.replyTo && (
-                  <div
-                    onClick={() => {
-                      const originalMessage = document.getElementById(
-                        `message-${message.replyTo._id}`
+              {message.replyTo && (
+                <div
+                  onClick={() => {
+                    const originalMessage = document.getElementById(
+                      `message-${message.replyTo._id}`
+                    );
+
+                    if (originalMessage) {
+                      originalMessage.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                      });
+
+                      originalMessage.classList.add(
+                        "ring-2",
+                        "ring-green-400"
                       );
 
-                      if (originalMessage) {
-                        originalMessage.scrollIntoView({
-                          behavior: "smooth",
-                          block: "center",
-                        });
+                      setTimeout(() => {
+                        originalMessage.classList.remove(
+                          "ring-2",
+                          "ring-green-400"
+                        );
+                      }, 1500);
+                    }
+                  }}
+                  className="bg-black/20 border-l-4 border-green-400 rounded-md px-3 py-2 mb-2 cursor-pointer hover:bg-black/30"
+                >
+                  <p className="text-green-300 text-xs font-semibold mb-1">
+                    {String(
+                      message.replyTo.senderId?._id ||
+                      message.replyTo.senderId
+                    ) === String(userId)
+                      ? "You"
+                      : "Replied message"}
+                  </p>
 
-                        originalMessage.classList.add("ring-2", "ring-green-400");
+                  <p className="text-gray-200 text-sm break-words">
+                    {message.replyTo.isDeleted
+                      ? "This message was deleted"
+                      : message.replyTo.message}
+                  </p>
+                </div>
+              )}
 
-                        setTimeout(() => {
-                          originalMessage.classList.remove(
-                            "ring-2",
-                            "ring-green-400"
-                          );
-                        }, 1500);
-                      }
-                    }}
-                    className="bg-black/20 border-l-4 border-green-400 rounded-md px-3 py-2 mb-2 cursor-pointer hover:bg-black/30"
-                  >
-                    <p className="text-green-300 text-xs font-semibold mb-1">
-                      {String(
-                        message.replyTo.senderId?._id ||
-                        message.replyTo.senderId
-                      ) === String(userId)
-                        ? "You"
-                        : "Replied message"}
-                    </p>
+              {/* Forwarded label */}
+              {message.isForwarded && !message.isDeleted && (
+                <div className="flex items-center gap-1 text-xs text-gray-200 italic mb-1">
+                  <IoArrowRedo size={14} />
+                  Forwarded
+                </div>
+              )}
 
-                    <p className="text-gray-200 text-sm break-words">
-                      {message.replyTo.isDeleted
-                        ? "This message was deleted"
-                        : message.replyTo.message}
-                    </p>
-                  </div>
-                )}
-
-                <span className="whitespace-pre-wrap [overflow-wrap:anywhere]">
-                  {message.message}
+              <span className="whitespace-pre-wrap [overflow-wrap:anywhere]">
+                {message.message}
 
                 {message.isEdited && !message.isDeleted && (
                   <span className="ml-2 text-xs text-gray-200 italic">
@@ -261,18 +281,18 @@ function Message({ message }) {
                 {!showDeleteMenu ? (
                   <>
                     <button
-                    type="button"
-                    onClick={() => {
-                      setReplyingMessage(message);
-                      setEditingMessage(null);
-                      setShowMenu(false);
-                      setShowDeleteMenu(false);
-                    }}
-                    className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
-                  >
-                    <MdReply size={21} />
-                    Reply
-                  </button>
+                      type="button"
+                      onClick={() => {
+                        setReplyingMessage(message);
+                        setEditingMessage(null);
+                        setShowMenu(false);
+                        setShowDeleteMenu(false);
+                      }}
+                      className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                    >
+                      <MdReply size={21} />
+                      Reply
+                    </button>
 
                     <button
                       type="button"
@@ -291,7 +311,9 @@ function Message({ message }) {
 
                     <button
                       type="button"
-                      className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                      onClick={handleForward}
+                      disabled={message.isDeleted}
+                      className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <IoArrowRedo size={21} />
                       Forward
@@ -381,8 +403,18 @@ function Message({ message }) {
           </div>
         </div>
       </div>
+
+      {/* Forward Modal */}
+      {showForwardModal && (
+        <ForwardModal
+          message={message}
+          sourceType="private"
+          onClose={() => setShowForwardModal(false)}
+        />
+      )}
     </div>
   );
 }
 
 export default Message;
+

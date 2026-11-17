@@ -4,6 +4,7 @@ import { io } from "../../sockets/server.js";
 import mongoose from "mongoose";
 import User from "../user/user.model.js";
 import { v2 as cloudinary } from "cloudinary";
+import Message from "../message/message.model.js";
 
 
 export const createGroup = async (req, res) => {
@@ -849,3 +850,113 @@ export const editGroupMessage = async (req, res) => {
     });
   }
 };
+
+
+// Forward message to Group Chat
+export const forwardGroupMessage = async (req, res) => {
+  try {
+    const { id: groupId } = req.params;
+    const { messageId, sourceType = "private" } = req.body;
+    const senderId = req.user._id;
+
+    // Validate IDs
+    if (
+      !mongoose.Types.ObjectId.isValid(groupId) ||
+      !mongoose.Types.ObjectId.isValid(messageId)
+    ) {
+      return res.status(400).json({
+        error: "Invalid group or message ID",
+      });
+    }
+
+    if (!["private", "group"].includes(sourceType)) {
+      return res.status(400).json({
+        error: "Invalid source type",
+      });
+    }
+
+    // Check destination group membership
+    const destinationGroup = await Group.findOne({
+      _id: groupId,
+      members: senderId,
+    });
+
+    if (!destinationGroup) {
+      return res.status(404).json({
+        error: "Group not found or you are not a member",
+      });
+    }
+
+    let originalMessage = null;
+
+    // Find original private message
+    if (sourceType === "private") {
+      originalMessage = await Message.findOne({
+        _id: messageId,
+        $or: [
+          { senderId },
+          { receiverId: senderId },
+        ],
+        deletedFor: { $ne: senderId },
+        isDeleted: false,
+      });
+    }
+
+    // Find original group message
+    if (sourceType === "group") {
+      originalMessage = await GroupMessage.findOne({
+        _id: messageId,
+        deletedFor: { $ne: senderId },
+        isDeleted: false,
+      });
+
+      if (originalMessage) {
+        const sourceGroup = await Group.findOne({
+          _id: originalMessage.groupId,
+          members: senderId,
+        });
+
+        if (!sourceGroup) {
+          originalMessage = null;
+        }
+      }
+    }
+
+    if (!originalMessage) {
+      return res.status(404).json({
+        error: "Original message not found or unavailable",
+      });
+    }
+
+    // Create forwarded group message
+    const forwardedMessage = await GroupMessage.create({
+      groupId,
+      senderId,
+      message: originalMessage.message,
+      isForwarded: true,
+    });
+
+    // Populate sender details
+    const populatedMessage = await GroupMessage.findById(
+      forwardedMessage._id
+    ).populate("senderId", "fullname email");
+
+    // Send realtime message to group members
+    io.to(groupId.toString()).emit(
+      "newGroupMessage",
+      populatedMessage
+    );
+
+    return res.status(201).json({
+      message: "Message forwarded successfully",
+      forwardedMessage: populatedMessage,
+    });
+  } catch (error) {
+    console.log("Forward group message error:", error);
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+};
+

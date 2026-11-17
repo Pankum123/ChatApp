@@ -285,5 +285,37 @@ export const editGroupMessageAPI = async (groupId, messageId, message) => {
   return response;
 };
 
+// Forward message to Private Chat
+export const forwardMessageAPI = async (
+  receiverId,
+  messageId,
+  sourceType = "private"
+) => {
+  if (!receiverId || !messageId) {
+    throw new Error("Receiver ID and Message ID are required");
+  }
+
+  return await api.post(`/message/forward/${receiverId}`, {
+    messageId,
+    sourceType,
+  });
+};
+
+// Forward message to Group Chat
+export const forwardGroupMessageAPI = async (
+  groupId,
+  messageId,
+  sourceType = "private"
+) => {
+  if (!groupId || !messageId) {
+    throw new Error("Group ID and Message ID are required");
+  }
+
+  return await api.post(`/group/forward/${groupId}`, {
+    messageId,
+    sourceType,
+  });
+};
+
 // Export axios instance if needed elsewhere
 export default api;
