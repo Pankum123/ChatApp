@@ -245,5 +245,31 @@ export const editMessageAPI = async (messageId, message) => {
   return response;
 };
 
+// ====== Delete Group Message APIs ======
+
+// Delete group message for me
+export const deleteGroupMessageForMeAPI = async (groupId, messageId) => {
+  if (!groupId) throw new Error("Group ID is required");
+  if (!messageId) throw new Error("Message ID is required");
+
+  const response = await api.delete(
+    `/group/delete-message-for-me/${groupId}/${messageId}`
+  );
+
+  return response;
+};
+
+// Delete group message for everyone
+export const deleteGroupMessageForEveryoneAPI = async (groupId, messageId) => {
+  if (!groupId) throw new Error("Group ID is required");
+  if (!messageId) throw new Error("Message ID is required");
+
+  const response = await api.delete(
+    `/group/delete-message-for-everyone/${groupId}/${messageId}`
+  );
+
+  return response;
+};
+
 // Export axios instance if needed elsewhere
 export default api;

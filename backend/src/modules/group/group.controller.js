@@ -93,6 +93,7 @@ export const sendGroupMessage = async (req, res) => {
 };
 
 // Get Group Messages
+
 export const getGroupMessages = async (req, res) => {
   try {
     const { id: groupId } = req.params;
@@ -111,15 +112,17 @@ export const getGroupMessages = async (req, res) => {
 
     const messages = await GroupMessage.find({
       groupId,
+      deletedFor: { $ne: userId },
     }).populate("senderId", "fullname email");
 
     res.status(200).json(messages);
   } catch (error) {
     console.log("Error in getGroupMessages", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
-
 
 
 // Add Member to Group (Only Admin)
@@ -558,6 +561,149 @@ export const updateGroupImage = async (req, res) => {
 
     return res.status(500).json({
       errors: "Error updating group image",
+    });
+  }
+};
+
+
+// Delete Group Message for Me
+export const deleteGroupMessageForMe = async (req, res) => {
+  try {
+    const { id: groupId, messageId } = req.params;
+    const userId = req.user._id;
+
+    // Validate IDs
+    if (
+      !mongoose.Types.ObjectId.isValid(groupId) ||
+      !mongoose.Types.ObjectId.isValid(messageId)
+    ) {
+      return res.status(400).json({
+        error: "Invalid group or message ID",
+      });
+    }
+
+    // Check group membership
+    const group = await Group.findOne({
+      _id: groupId,
+      members: userId,
+    });
+
+    if (!group) {
+      return res.status(404).json({
+        error: "Group not found or you are not a member",
+      });
+    }
+
+    // Find message in this group
+    const groupMessage = await GroupMessage.findOne({
+      _id: messageId,
+      groupId,
+    });
+
+    if (!groupMessage) {
+      return res.status(404).json({
+        error: "Group message not found",
+      });
+    }
+
+    // Hide message only for current user
+    await GroupMessage.updateOne(
+      { _id: messageId, groupId },
+      {
+        $addToSet: {
+          deletedFor: userId,
+        },
+      }
+    );
+
+    return res.status(200).json({
+      message: "Group message deleted for you",
+      messageId,
+    });
+  } catch (error) {
+    console.log("Delete group message for me error:", error);
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+};
+
+
+// Delete Group Message for Everyone
+export const deleteGroupMessageForEveryone = async (req, res) => {
+  try {
+    const { id: groupId, messageId } = req.params;
+    const userId = req.user._id;
+
+    if (
+      !mongoose.Types.ObjectId.isValid(groupId) ||
+      !mongoose.Types.ObjectId.isValid(messageId)
+    ) {
+      return res.status(400).json({
+        error: "Invalid group or message ID",
+      });
+    }
+
+    const group = await Group.findOne({
+      _id: groupId,
+      members: userId,
+    });
+
+    if (!group) {
+      return res.status(404).json({
+        error: "Group not found or you are not a member",
+      });
+    }
+
+    const groupMessage = await GroupMessage.findOne({
+      _id: messageId,
+      groupId,
+    });
+
+    if (!groupMessage) {
+      return res.status(404).json({
+        error: "Group message not found",
+      });
+    }
+
+    // Only message sender can delete for everyone
+    if (String(groupMessage.senderId) !== String(userId)) {
+      return res.status(403).json({
+        error: "Only sender can delete this message for everyone",
+      });
+    }
+
+    if (groupMessage.isDeleted) {
+      return res.status(400).json({
+        error: "Message is already deleted",
+      });
+    }
+
+    groupMessage.message = "This message was deleted";
+    groupMessage.isDeleted = true;
+    groupMessage.deletedAt = new Date();
+
+    await groupMessage.save();
+
+    // Notify all group members
+    io.to(groupId.toString()).emit("groupMessageDeletedForEveryone", {
+      groupId: groupId.toString(),
+      messageId: messageId.toString(),
+      message: groupMessage.message,
+      isDeleted: true,
+      deletedAt: groupMessage.deletedAt,
+    });
+
+    return res.status(200).json({
+      message: "Group message deleted for everyone",
+      messageId,
+    });
+  } catch (error) {
+    console.log("Delete group message for everyone error:", error);
+
+    return res.status(500).json({
+      error: "Internal server error",
     });
   }
 };

@@ -65,12 +65,37 @@ const useGetGroupSocketMessage = (socket) => {
       );
     };
 
+    // Receive deleted group message
+    const handleGroupMessageDeleted = (deletedData) => {
+      if (
+        String(deletedData.groupId) !==
+        String(selectedGroup?._id)
+      ) {
+        return;
+      }
+
+      setGroupMessages((prevMessages) =>
+        prevMessages.map((message) =>
+          String(message._id) === String(deletedData.messageId)
+            ? {
+                ...message,
+                message: deletedData.message,
+                isDeleted: deletedData.isDeleted,
+                deletedAt: deletedData.deletedAt,
+              }
+            : message
+        )
+      );
+    };
+
     socket.on("newGroupMessage", handleNewGroupMessage);
     socket.on("groupMessageStatusUpdated", handleGroupMessageStatus);
+    socket.on("groupMessageDeletedForEveryone",handleGroupMessageDeleted);
 
     return () => {
       socket.off("newGroupMessage", handleNewGroupMessage);
       socket.off("groupMessageStatusUpdated", handleGroupMessageStatus);
+      socket.off("groupMessageDeletedForEveryone",handleGroupMessageDeleted);
     };
   }, [socket, selectedGroup?._id, setGroupMessages]);
 };
