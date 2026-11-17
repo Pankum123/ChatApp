@@ -81,11 +81,12 @@ export const getGroupMessagesAPI = async (groupId) => {
   return response;
 };
 
-export const sendGroupMessageAPI = async (groupId, message) => {
+export const sendGroupMessageAPI = async (groupId, message, replyTo = null) => {
   if (!groupId) throw new Error("Group ID is required");
 
   const response = await api.post(`/group/send/${groupId}`, {
     message,
+    replyTo,
   });
 
   return response;

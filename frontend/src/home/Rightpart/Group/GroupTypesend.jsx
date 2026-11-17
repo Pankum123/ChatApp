@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { IoSend } from "react-icons/io5";
+import { MdClose, MdReply } from "react-icons/md";
 
 import useSendGroupMessage from "../../../context/Group/useSendGroupMessage.js";
 import { useSocketContext } from "../../../context/SocketContext.jsx";
@@ -19,6 +20,8 @@ function GroupTypesend() {
     editingMessage,
     setEditingMessage,
     setGroupMessages,
+    groupReplyingMessage,
+    setGroupReplyingMessage,
   } = useConversation();
 
   const typingTimeout = useRef(null);
@@ -31,9 +34,22 @@ function GroupTypesend() {
   useEffect(() => {
     if (editingMessage) {
       setMessage(editingMessage.message);
+      setGroupReplyingMessage(null);
       inputRef.current?.focus();
     }
   }, [editingMessage]);
+
+  // Auto scroll and focus when replying
+  useEffect(() => {
+    if (groupReplyingMessage) {
+      inputRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+
+      inputRef.current?.focus();
+    }
+  }, [groupReplyingMessage]);
 
   // Stop group typing event
   const stopTyping = () => {
@@ -114,10 +130,13 @@ function GroupTypesend() {
       return;
     }
 
-    // Send new group message
+    // Send new group message with reply
     stopTyping();
 
-    await sendGroupMessage(message.trim());
+    await sendGroupMessage(
+      message.trim(),
+      groupReplyingMessage?._id || null
+    );
 
     setMessage("");
   };
@@ -126,6 +145,11 @@ function GroupTypesend() {
   const handleCancelEdit = () => {
     setMessage("");
     setEditingMessage(null);
+  };
+
+  // Cancel reply
+  const handleCancelReply = () => {
+    setGroupReplyingMessage(null);
   };
 
   // Cleanup on unmount or group change
@@ -144,6 +168,35 @@ function GroupTypesend() {
 
   return (
     <form onSubmit={handleSubmit}>
+      {/* Group Reply Preview */}
+      {groupReplyingMessage && !editingMessage && (
+        <div className="flex items-center justify-between bg-[#202c33] border-l-4 border-green-500 px-4 py-2 mx-2 rounded-t-lg">
+          <div className="flex items-center gap-2 overflow-hidden">
+            <MdReply className="text-green-400 text-xl shrink-0" />
+
+            <div className="overflow-hidden">
+              <p className="text-green-400 text-sm font-semibold">
+                Replying to {groupReplyingMessage.senderId?.fullname || "message"}
+              </p>
+
+              <p className="text-gray-300 text-sm truncate">
+                {groupReplyingMessage.isDeleted
+                  ? "This message was deleted"
+                  : groupReplyingMessage.message}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleCancelReply}
+            className="text-gray-400 hover:text-white p-1"
+          >
+            <MdClose size={22} />
+          </button>
+        </div>
+      )}
+
       <div className="flex space-x-1 h-[8vh] bg-gray-800">
         <div className="w-[70%] mx-4">
           <input

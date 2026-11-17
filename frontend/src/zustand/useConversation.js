@@ -9,6 +9,7 @@ const useConversation = create((set) => ({
       selectedGroup: null,
       editingMessage: null,
       replyingMessage: null,
+      groupReplyingMessage: null,
     }),
 
   // Group Chat
@@ -19,6 +20,7 @@ const useConversation = create((set) => ({
       selectedConversation: null,
       editingMessage: null,
       replyingMessage: null,
+      groupReplyingMessage: null,
     }),
 
   // Messages
@@ -31,6 +33,10 @@ const useConversation = create((set) => ({
   // Reply Message
   replyingMessage: null,
   setReplyingMessage: (replyingMessage) => set({ replyingMessage }),
+
+  // Group Reply Message
+  groupReplyingMessage: null,
+  setGroupReplyingMessage: (groupReplyingMessage) => set({ groupReplyingMessage }),
 
   // Group Messages
   groupMessages: [],

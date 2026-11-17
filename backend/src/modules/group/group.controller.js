@@ -37,9 +37,6 @@ export const createGroup = async (req, res) => {
   }
 };
 
-
-
-
 export const getGroups = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -61,9 +58,15 @@ export const getGroups = async (req, res) => {
 // Send Group Message
 export const sendGroupMessage = async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, replyTo } = req.body;
     const { id: groupId } = req.params;
     const senderId = req.user._id;
+
+    if (!message || !message.trim()) {
+      return res.status(400).json({
+        error: "Message cannot be empty",
+      });
+    }
 
     const group = await Group.findOne({
       _id: groupId,
@@ -76,24 +79,63 @@ export const sendGroupMessage = async (req, res) => {
       });
     }
 
+    // Validate replied message
+    if (replyTo) {
+      if (!mongoose.Types.ObjectId.isValid(replyTo)) {
+        return res.status(400).json({
+          error: "Invalid reply message ID",
+        });
+      }
+
+      const originalMessage = await GroupMessage.findOne({
+        _id: replyTo,
+        groupId,
+      });
+
+      if (!originalMessage) {
+        return res.status(404).json({
+          error: "Replied message not found in this group",
+        });
+      }
+    }
+
     const newGroupMessage = await GroupMessage.create({
       groupId,
       senderId,
-      message,
+      message: message.trim(),
+      replyTo: replyTo || null,
     });
 
-    // Group ke sabhi connected members ko message bhejna
-    io.to(groupId).emit("newGroupMessage", newGroupMessage);
+    // Populate sender and replied message
+    const populatedMessage = await GroupMessage.findById(
+      newGroupMessage._id
+    )
+      .populate("senderId", "fullname email")
+      .populate({
+        path: "replyTo",
+        populate: {
+          path: "senderId",
+          select: "fullname email",
+        },
+      });
 
-    res.status(201).json(newGroupMessage);
+    // Send populated message to all connected group members
+    io.to(groupId).emit(
+      "newGroupMessage",
+      populatedMessage
+    );
+
+    res.status(201).json(populatedMessage);
   } catch (error) {
     console.log("Error in sendGroupMessage", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
 
-// Get Group Messages
 
+// Get Group Messages
 export const getGroupMessages = async (req, res) => {
   try {
     const { id: groupId } = req.params;
@@ -113,11 +155,20 @@ export const getGroupMessages = async (req, res) => {
     const messages = await GroupMessage.find({
       groupId,
       deletedFor: { $ne: userId },
-    }).populate("senderId", "fullname email");
+    })
+      .populate("senderId", "fullname email")
+      .populate({
+        path: "replyTo",
+        populate: {
+          path: "senderId",
+          select: "fullname email",
+        },
+      });
 
     res.status(200).json(messages);
   } catch (error) {
     console.log("Error in getGroupMessages", error);
+
     res.status(500).json({
       error: "Internal server error",
     });

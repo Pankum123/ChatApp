@@ -10,9 +10,10 @@ const useSendGroupMessage = () => {
     selectedGroup,
     groupMessages,
     setGroupMessages,
+    setGroupReplyingMessage,
   } = useConversation();
 
-  const sendGroupMessage = async (message) => {
+  const sendGroupMessage = async (message, replyTo = null) => {
     if (!message.trim() || !selectedGroup?._id) return;
 
     setLoading(true);
@@ -20,7 +21,8 @@ const useSendGroupMessage = () => {
     try {
       const res = await sendGroupMessageAPI(
         selectedGroup._id,
-        message
+        message,
+        replyTo
       );
 
       const newMessage = res.data;
@@ -35,6 +37,7 @@ const useSendGroupMessage = () => {
 
         return [...prevMessages, newMessage];
       });
+      setGroupReplyingMessage(null);
     } catch (error) {
       console.log("Error in sending group message:", error);
     } finally {

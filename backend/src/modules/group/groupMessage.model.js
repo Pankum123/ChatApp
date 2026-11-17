@@ -81,6 +81,12 @@ const groupMessageSchema = new mongoose.Schema(
       default: null,
     },
 
+    replyTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "GroupMessage",
+      default: null,
+    },
+
   },
   { timestamps: true }
 );
