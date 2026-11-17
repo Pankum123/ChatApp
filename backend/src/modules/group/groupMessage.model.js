@@ -69,6 +69,18 @@ const groupMessageSchema = new mongoose.Schema(
       default: null,
     },
 
+     // Message edit hua ya nahi
+    isEdited: {
+      type: Boolean,
+      default: false,
+    },
+
+    // Message edit hone ka time
+    editedAt: {
+      type: Date,
+      default: null,
+    },
+
   },
   { timestamps: true }
 );

@@ -88,14 +88,41 @@ const useGetGroupSocketMessage = (socket) => {
       );
     };
 
+
+    // Receive edited group message
+    const handleGroupMessageEdited = (editedData) => {
+      if (
+        String(editedData.groupId) !==
+        String(selectedGroup?._id)
+      ) {
+        return;
+      }
+
+      setGroupMessages((prevMessages) =>
+        prevMessages.map((message) =>
+          String(message._id) === String(editedData.messageId)
+            ? {
+                ...message,
+                message: editedData.message,
+                isEdited: editedData.isEdited,
+                editedAt: editedData.editedAt,
+              }
+            : message
+        )
+      );
+    };
+
+
     socket.on("newGroupMessage", handleNewGroupMessage);
     socket.on("groupMessageStatusUpdated", handleGroupMessageStatus);
     socket.on("groupMessageDeletedForEveryone",handleGroupMessageDeleted);
+    socket.on("groupMessageEdited", handleGroupMessageEdited);
 
     return () => {
       socket.off("newGroupMessage", handleNewGroupMessage);
       socket.off("groupMessageStatusUpdated", handleGroupMessageStatus);
       socket.off("groupMessageDeletedForEveryone",handleGroupMessageDeleted);
+      socket.off("groupMessageEdited", handleGroupMessageEdited);
     };
   }, [socket, selectedGroup?._id, setGroupMessages]);
 };

@@ -1,6 +1,6 @@
 
 import express from "express";
-import { addGroupMember, createGroup, deleteGroup, deleteGroupMessageForEveryone, deleteGroupMessageForMe, editGroup, getGroupMessages, getGroups, leaveGroup, removeGroupMember, sendGroupMessage, updateGroupImage } from "./group.controller.js";
+import { addGroupMember, createGroup, deleteGroup, deleteGroupMessageForEveryone, deleteGroupMessageForMe, editGroup, editGroupMessage, getGroupMessages, getGroups, leaveGroup, removeGroupMember, sendGroupMessage, updateGroupImage } from "./group.controller.js";
 import secureRoute from "../../middleware/secureRoute.js";
 
 const router = express.Router();
@@ -17,5 +17,6 @@ router.put("/edit/:id", secureRoute, editGroup);
 router.put("/update-image/:id", secureRoute, updateGroupImage);
 router.delete("/delete-message-for-me/:id/:messageId", secureRoute, deleteGroupMessageForMe);
 router.delete("/delete-message-for-everyone/:id/:messageId", secureRoute, deleteGroupMessageForEveryone);
+router.put("/edit-message/:id/:messageId", secureRoute, editGroupMessage);
 
 export default router;

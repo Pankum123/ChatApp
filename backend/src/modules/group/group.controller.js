@@ -707,3 +707,94 @@ export const deleteGroupMessageForEveryone = async (req, res) => {
     });
   }
 };
+
+
+// Edit Group Message
+export const editGroupMessage = async (req, res) => {
+  try {
+    const { id: groupId, messageId } = req.params;
+    const { message: newMessage } = req.body;
+    const userId = req.user._id;
+
+    // Validate IDs
+    if (
+      !mongoose.Types.ObjectId.isValid(groupId) ||
+      !mongoose.Types.ObjectId.isValid(messageId)
+    ) {
+      return res.status(400).json({
+        error: "Invalid group or message ID",
+      });
+    }
+
+    // Validate message
+    if (!newMessage || !newMessage.trim()) {
+      return res.status(400).json({
+        error: "Message cannot be empty",
+      });
+    }
+
+    // Check group membership
+    const group = await Group.findOne({
+      _id: groupId,
+      members: userId,
+    });
+
+    if (!group) {
+      return res.status(404).json({
+        error: "Group not found or you are not a member",
+      });
+    }
+
+    // Find message sent by current user
+    const groupMessage = await GroupMessage.findOne({
+      _id: messageId,
+      groupId,
+      senderId: userId,
+    });
+
+    if (!groupMessage) {
+      return res.status(404).json({
+        error: "Message not found or you cannot edit this message",
+      });
+    }
+
+    // Deleted message cannot be edited
+    if (groupMessage.isDeleted) {
+      return res.status(400).json({
+        error: "Deleted message cannot be edited",
+      });
+    }
+
+    // Update message
+    groupMessage.message = newMessage.trim();
+    groupMessage.isEdited = true;
+    groupMessage.editedAt = new Date();
+
+    await groupMessage.save();
+
+    const editData = {
+      groupId: groupId.toString(),
+      messageId: groupMessage._id.toString(),
+      message: groupMessage.message,
+      isEdited: groupMessage.isEdited,
+      editedAt: groupMessage.editedAt,
+    };
+
+    // Notify all group members
+    io.to(groupId.toString()).emit(
+      "groupMessageEdited",
+      editData
+    );
+
+    return res.status(200).json({
+      message: "Group message updated successfully",
+      editedMessage: editData,
+    });
+  } catch (error) {
+    console.log("Edit group message error:", error);
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+};

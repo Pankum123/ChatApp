@@ -3,6 +3,10 @@ import {
   MdDone,
   MdDoneAll,
   MdKeyboardArrowDown,
+  MdReply,
+  MdContentCopy,
+  MdForward,
+  MdEdit,
   MdDeleteOutline,
   MdArrowBack,
 } from "react-icons/md";
@@ -18,12 +22,19 @@ import {
 
 function GroupMessages() {
   const bottomRef = useRef(null);
+  const menuRef = useRef(null);
+
   const [activeMenu, setActiveMenu] = useState(null);
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
   const [loadingMessageId, setLoadingMessageId] = useState(null);
+  const [menuPosition, setMenuPosition] = useState("bottom");
 
-  const { selectedGroup, groupMessages, setGroupMessages } =
-    useConversation();
+  const {
+    selectedGroup,
+    groupMessages,
+    setGroupMessages,
+    setEditingMessage,
+  } = useConversation();
 
   const { loading } = useGetGroupMessages();
 
@@ -35,6 +46,27 @@ function GroupMessages() {
       behavior: "smooth",
     });
   }, [groupMessages]);
+
+  // Close menu on outside click
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target)
+      ) {
+        setActiveMenu(null);
+        setShowDeleteMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+    };
+  }, []);
 
   const getSenderId = (sender) => {
     return sender?._id || sender;
@@ -52,14 +84,40 @@ function GroupMessages() {
     return member?.fullname || "Group Member";
   };
 
-  const handleMenuToggle = (messageId) => {
+  // Open menu in available direction
+  const handleMenuToggle = (messageId, event) => {
     if (activeMenu === messageId) {
       setActiveMenu(null);
       setShowDeleteMenu(false);
-    } else {
-      setActiveMenu(messageId);
-      setShowDeleteMenu(false);
+      return;
     }
+
+    const messageElement = event.currentTarget.closest(
+      ".group-message-menu"
+    );
+
+    if (messageElement) {
+      const rect = messageElement.getBoundingClientRect();
+      const menuHeight = 300;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+
+      if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
+        setMenuPosition("top");
+      } else {
+        setMenuPosition("bottom");
+      }
+    }
+
+    setActiveMenu(messageId);
+    setShowDeleteMenu(false);
+  };
+
+  // Edit group message
+  const handleEdit = (message) => {
+    setEditingMessage(message);
+    setActiveMenu(null);
+    setShowDeleteMenu(false);
   };
 
   // Delete group message for me
@@ -129,6 +187,9 @@ function GroupMessages() {
           const senderId = getSenderId(message.senderId);
           const itsMe = String(senderId) === String(currentUserId);
 
+          const chatName = itsMe ? "chat-end" : "chat-start";
+          const chatColor = itsMe ? "bg-blue-500" : "";
+
           const createdAt = new Date(message.createdAt);
 
           const formattedTime = createdAt.toLocaleTimeString([], {
@@ -137,115 +198,182 @@ function GroupMessages() {
           });
 
           return (
-            <div key={message._id} className="p-4">
-              <div className={`chat ${itsMe ? "chat-end" : "chat-start"}`}>
-                {!itsMe && (
-                  <div className="chat-header text-xs text-gray-400 mb-1">
-                    {getSenderName(message.senderId)}
-                  </div>
-                )}
+            <div key={message._id}>
+              <div className="p-4">
+                <div className={`chat ${chatName}`}>
+                  {!itsMe && (
+                    <div className="chat-header text-xs text-gray-400 mb-1">
+                      {getSenderName(message.senderId)}
+                    </div>
+                  )}
 
-                <div className="relative group inline-block w-fit min-w-[65px] max-w-[85vw]">
-                  {/* Message bubble */}
                   <div
-                    className={`chat-bubble !w-fit !min-w-[65px] !max-w-[85vw] relative inline-block text-white pr-8 break-words ${
-                      itsMe ? "bg-blue-500" : ""
-                    } ${message.isDeleted ? "italic text-gray-300" : ""}`}
+                    className="relative group inline-block w-fit min-w-[65px] max-w-[85vw] group-message-menu"
+                    ref={activeMenu === message._id ? menuRef : null}
                   >
-                    <span className="whitespace-pre-wrap [overflow-wrap:anywhere]">
-                      {message.message}
-                    </span>
-
-                    {/* Dropdown arrow */}
-                    {!loadingMessageId && (
-                      <button
-                        type="button"
-                        onClick={() => handleMenuToggle(message._id)}
-                        title="Message options"
-                        className="absolute top-1 right-1 p-0.5 rounded-full text-white bg-black/20 hover:bg-black/40 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity duration-150"
-                      >
-                        <MdKeyboardArrowDown size={21} />
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Delete menu */}
-                  {activeMenu === message._id && (
+                    {/* Message bubble */}
                     <div
-                      className={`absolute top-full mt-1 z-50 w-52 rounded-md bg-[#202c33] shadow-xl border border-gray-700 py-1 ${
-                        itsMe ? "right-0" : "left-0"
+                      className={`chat-bubble !w-fit !min-w-[65px] !max-w-[85vw] relative inline-block text-white pr-8 break-words ${chatColor} ${
+                        message.isDeleted
+                          ? "italic text-gray-300"
+                          : ""
                       }`}
                     >
-                      {!showDeleteMenu ? (
+                      <span className="whitespace-pre-wrap [overflow-wrap:anywhere]">
+                        {message.message}
+
+                        {message.isEdited && !message.isDeleted && (
+                          <span className="ml-2 text-xs text-gray-200 italic">
+                            edited
+                          </span>
+                        )}
+                      </span>
+
+                      {/* Dropdown arrow */}
+                      {!loadingMessageId && (
                         <button
                           type="button"
-                          onClick={() => setShowDeleteMenu(true)}
-                          className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                          onClick={(e) =>
+                            handleMenuToggle(message._id, e)
+                          }
+                          title="Message options"
+                          className="
+                            absolute top-1 right-1 p-0.5 rounded-full
+                            text-white bg-black/20 hover:bg-black/40
+                            opacity-100 sm:opacity-0
+                            sm:group-hover:opacity-100
+                            sm:group-focus-within:opacity-100
+                            transition-opacity duration-150
+                          "
                         >
-                          <MdDeleteOutline size={21} />
-                          Delete
+                          <MdKeyboardArrowDown size={21} />
                         </button>
-                      ) : (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => setShowDeleteMenu(false)}
-                            className="flex items-center gap-3 w-full px-4 py-3 text-gray-300 hover:bg-[#2a3942]"
-                          >
-                            <MdArrowBack size={20} />
-                            Back
-                          </button>
+                      )}
+                    </div>
 
-                          <div className="border-t border-gray-700 my-1" />
+                    {/* Main options menu */}
+                    {activeMenu === message._id && (
+                      <div
+                        className={`absolute ${
+                          menuPosition === "top"
+                            ? "bottom-full mb-1"
+                            : "top-full mt-1"
+                        } z-50 w-52 rounded-md bg-[#202c33] shadow-xl border border-gray-700 py-1 ${
+                          itsMe ? "right-0" : "left-0"
+                        }`}
+                      >
+                        {!showDeleteMenu ? (
+                          <>
+                            <button
+                              type="button"
+                              className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                            >
+                              <MdReply size={21} />
+                              Reply
+                            </button>
 
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteForMe(message._id)}
-                            disabled={loadingMessageId === message._id}
-                            className="block w-full text-left px-4 py-3 text-white hover:bg-[#2a3942]"
-                          >
-                            Delete for me
-                          </button>
+                            <button
+                              type="button"
+                              className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                            >
+                              <MdContentCopy size={21} />
+                              Copy
+                            </button>
 
-                          {itsMe && !message.isDeleted && (
+                            <button
+                              type="button"
+                              className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                            >
+                              <MdForward size={21} />
+                              Forward
+                            </button>
+
+                            {itsMe && !message.isDeleted && (
+                              <button
+                                type="button"
+                                onClick={() => handleEdit(message)}
+                                className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                              >
+                                <MdEdit size={21} />
+                                Edit
+                              </button>
+                            )}
+
+                            <div className="border-t border-gray-700 my-1" />
+
+                            <button
+                              type="button"
+                              onClick={() => setShowDeleteMenu(true)}
+                              className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                            >
+                              <MdDeleteOutline size={21} />
+                              Delete
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setShowDeleteMenu(false)}
+                              className="flex items-center gap-3 w-full px-4 py-3 text-gray-300 hover:bg-[#2a3942]"
+                            >
+                              <MdArrowBack size={20} />
+                              Back
+                            </button>
+
+                            <div className="border-t border-gray-700 my-1" />
+
                             <button
                               type="button"
                               onClick={() =>
-                                handleDeleteForEveryone(message._id)
+                                handleDeleteForMe(message._id)
                               }
                               disabled={loadingMessageId === message._id}
                               className="block w-full text-left px-4 py-3 text-white hover:bg-[#2a3942]"
                             >
-                              Delete for everyone
+                              Delete for me
                             </button>
-                          )}
-                        </>
+
+                            {itsMe && !message.isDeleted && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleDeleteForEveryone(message._id)
+                                }
+                                disabled={loadingMessageId === message._id}
+                                className="block w-full text-left px-4 py-3 text-white hover:bg-[#2a3942]"
+                              >
+                                Delete for everyone
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Message time and ticks */}
+                  <div className="chat-footer">
+                    {formattedTime}
+
+                    {!message.isDeleted &&
+                      itsMe &&
+                      message.status === "sent" && (
+                        <MdDone className="text-gray-400 text-base" />
                       )}
-                    </div>
-                  )}
-                </div>
 
-                {/* Message time and ticks */}
-                <div className="chat-footer">
-                  {formattedTime}
+                    {!message.isDeleted &&
+                      itsMe &&
+                      message.status === "delivered" && (
+                        <MdDoneAll className="text-gray-400 text-base" />
+                      )}
 
-                  {!message.isDeleted &&
-                    itsMe &&
-                    message.status === "sent" && (
-                      <MdDone className="text-gray-400 text-base" />
-                    )}
-
-                  {!message.isDeleted &&
-                    itsMe &&
-                    message.status === "delivered" && (
-                      <MdDoneAll className="text-gray-400 text-base" />
-                    )}
-
-                  {!message.isDeleted &&
-                    itsMe &&
-                    message.status === "read" && (
-                      <MdDoneAll className="text-blue-400 text-base" />
-                    )}
+                    {!message.isDeleted &&
+                      itsMe &&
+                      message.status === "read" && (
+                        <MdDoneAll className="text-blue-400 text-base" />
+                      )}
+                  </div>
                 </div>
               </div>
             </div>
