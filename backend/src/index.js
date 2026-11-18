@@ -9,6 +9,7 @@ import { app, server } from "./sockets/server.js"; // use this app
 import userRoute from "./modules/user/user.route.js";
 import messageRoute from "./modules/message/message.route.js";
 import groupRoute  from "./modules/group/group.route.js"
+import googleAuthRoute from "./modules/googleAuth/googleAuth.route.js";
 
 import { v2 as cloudinary } from "cloudinary";
 import fileUpload from "express-fileupload";
@@ -63,6 +64,7 @@ mongoose.connect(URI)
 app.use("/api/user", userRoute);
 app.use("/api/message", messageRoute);
 app.use("/api/group", groupRoute);
+app.use("/api/google-auth", googleAuthRoute);
 
 // Cloudinary configuration
 cloudinary.config({

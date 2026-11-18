@@ -1,10 +1,10 @@
-import axios from "axios";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../context/AuthProvider";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { loginUser } from "../api";
+import GoogleLogin from "./googleAuth/GoogleLogin";
 
 function Login() {
   const [authUser, setAuthUser] = useAuth();
@@ -137,6 +137,7 @@ const onSubmit = async (data) => {
               className="text-white bg-green-500 px-2 py-1 cursor-pointer rounded-lg"
             />
           </div>
+          <GoogleLogin />
         </form>
       </div>
     </>

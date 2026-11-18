@@ -32,6 +32,21 @@ export const logoutUser = async () => {
   return response;
 };
 
+
+// ===== Google Login API =====
+export const googleLoginAPI = async (idToken) => {
+  if (!idToken) {
+    throw new Error("Google ID token is required");
+  }
+
+  const response = await api.post("/google-auth/login", {
+    idToken,
+  });
+
+  return response;
+};
+
+
 // Get all users API
 export const getAllUsers = async () => {
   const token = Cookies.get("jwt"); // get token like in your hook
