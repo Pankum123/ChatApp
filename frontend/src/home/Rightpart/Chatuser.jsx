@@ -4,6 +4,7 @@ import { useSocketContext } from "../../context/SocketContext.jsx";
 import { CiMenuFries } from "react-icons/ci";
 import profile from "../../../public/user.jpg";
 import UserProfile from "./UserProfile/UserProfile.jsx";
+import CallButtons from "../../components/call/CallButtons.jsx";
 
 function Chatuser() {
   const { selectedConversation } = useConversation();
@@ -25,26 +26,24 @@ function Chatuser() {
 
   return (
     <>
-      <div className="relative flex items-center h-[8%] justify-center gap-4 bg-slate-800 hover:bg-slate-700 duration-300 rounded-md">
+      <div className="relative flex items-center h-[8%] justify-between px-4 bg-slate-800 hover:bg-slate-700 duration-300 rounded-md">
 
         {/* Mobile Menu Button */}
         <label
           htmlFor="my-drawer-2"
-          className="btn btn-ghost drawer-button lg:hidden absolute left-5"
+          className="btn btn-ghost drawer-button lg:hidden"
         >
           <CiMenuFries className="text-white text-xl" />
         </label>
 
-        <div className="flex space-x-3 items-center justify-center h-[8vh] bg-gray-800 hover:bg-gray-700 duration-300">
-
-          {/* Profile Image, Name and Status Click */}
+        {/* User Profile and Status */}
+        <div className="flex space-x-3 items-center">
           <button
             type="button"
             onClick={() => setShowProfile(true)}
             className="flex items-center gap-3 cursor-pointer text-left"
             title="View Profile"
           >
-            {/* Profile Image */}
             <div className="avatar">
               <div className="w-16 rounded-full">
                 <img
@@ -55,7 +54,6 @@ function Chatuser() {
               </div>
             </div>
 
-            {/* User Name and Status */}
             <div>
               <h1 className="text-xl">
                 {selectedConversation.fullname}
@@ -73,6 +71,10 @@ function Chatuser() {
             </div>
           </button>
         </div>
+
+        {/* Audio and Video Call Buttons */}
+        <CallButtons receiverId={selectedConversation._id} />
+
       </div>
 
       {/* User Profile Popup */}

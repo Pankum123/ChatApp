@@ -3,6 +3,7 @@ import http from "http";
 import express from "express";
 import oneToOneSocket from "./oneToOneSocket.js";
 import groupSocket from "./groupSocket.js";
+import callSocket from "./callSocket.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -65,6 +66,13 @@ io.on("connection", async (socket) => {
     socket,
     userId,
     getReceiverSocketId
+  );
+
+  // Calling Socket Events
+  callSocket(
+    io,
+    socket,
+    userId
   );
 
   // used to listen client side events emitted by server side

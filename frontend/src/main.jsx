@@ -5,11 +5,15 @@ import "./index.css";
 import { AuthProvider } from "./context/AuthProvider.jsx";
 import { BrowserRouter } from "react-router-dom";
 import { SocketProvider } from "./context/SocketContext.jsx";
+import { CallProvider } from "./context/call/CallContext.jsx";
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <AuthProvider>
       <SocketProvider>
-        <App />
+        <CallProvider>
+          <App />
+        </CallProvider>
       </SocketProvider>
     </AuthProvider>
   </BrowserRouter>
