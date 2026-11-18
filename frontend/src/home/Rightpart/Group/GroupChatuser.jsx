@@ -3,6 +3,7 @@ import useConversation from "../../../zustand/useConversation.js";
 import { useSocketContext } from "../../../context/SocketContext.jsx";
 import { CiMenuFries } from "react-icons/ci";
 import GroupInfo from "./GroupInfo/GroupInfo.jsx";
+import GroupCallButtons from "../../../components/groupCall/GroupCallButtons.jsx";
 
 function GroupChatuser() {
   const { selectedGroup } = useConversation();
@@ -17,7 +18,6 @@ function GroupChatuser() {
       const member = selectedGroup.members?.find(
         (member) => (member._id || member).toString() === item.senderId
       );
-
       return member?.fullname;
     })
     .filter(Boolean);
@@ -30,72 +30,57 @@ function GroupChatuser() {
       : "";
 
   return (
-    <div className="relative z-40 flex items-center h-[8vh] justify-center gap-4 bg-slate-800 rounded-md">
-
-      {/* Mobile Menu */}
+    <div className="relative z-40 flex h-[8vh] items-center justify-center gap-4 rounded-md bg-slate-800">
       <label
         htmlFor="my-drawer-2"
-        className="btn btn-ghost drawer-button lg:hidden absolute left-5 z-10"
+        className="btn btn-ghost drawer-button absolute left-5 z-10 lg:hidden"
       >
-        <CiMenuFries className="text-white text-xl" />
+        <CiMenuFries className="text-xl text-white" />
       </label>
 
-      {/* Group Profile */}
       <div className="flex items-center gap-3">
-
-        {/* Group Avatar */}
         <button
           type="button"
           onClick={() => setShowGroupInfo(true)}
           title="Open Group Info"
-          className="relative z-10 w-14 h-14 rounded-full bg-green-600 flex items-center justify-center text-white font-semibold text-2xl overflow-hidden hover:bg-green-700 transition cursor-pointer"
+          className="relative z-10 flex h-14 w-14 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-green-600 text-2xl font-semibold text-white transition hover:bg-green-700"
         >
           {selectedGroup.groupImage?.url ? (
             <img
               src={selectedGroup.groupImage.url}
               alt="Group"
-              className="w-full h-full object-cover"
+              className="h-full w-full object-cover"
             />
           ) : (
             selectedGroup.groupName?.charAt(0)?.toUpperCase() || "G"
           )}
         </button>
 
-        {/* Group Details */}
         <button
           type="button"
           onClick={() => setShowGroupInfo(true)}
-          className="relative z-10 text-left cursor-pointer hover:opacity-80"
+          className="relative z-10 cursor-pointer text-left hover:opacity-80"
         >
-          <h1 className="text-xl font-semibold">
-            {selectedGroup.groupName}
-          </h1>
-
+          <h1 className="text-xl font-semibold">{selectedGroup.groupName}</h1>
           {typingText ? (
-            <span className="text-sm text-green-400">
-              {typingText}
-            </span>
+            <span className="text-sm text-green-400">{typingText}</span>
           ) : (
             <span className="text-sm text-gray-400">
               {selectedGroup.members?.length || 0} Members
             </span>
           )}
         </button>
-
       </div>
 
-      {/* Group Info Panel */}
+      <GroupCallButtons groupId={selectedGroup._id} />
+
       {showGroupInfo && (
-        <div className="absolute top-full right-0 z-[100] w-full sm:w-[380px] h-[75vh] shadow-2xl border border-slate-700 rounded-lg overflow-hidden">
-          <GroupInfo
-            onClose={() => setShowGroupInfo(false)}
-          />
+        <div className="absolute right-0 top-full z-[100] h-[75vh] w-full overflow-hidden rounded-lg border border-slate-700 shadow-2xl sm:w-[380px]">
+          <GroupInfo onClose={() => setShowGroupInfo(false)} />
         </div>
       )}
-
     </div>
   );
 }
 
 export default GroupChatuser;
-

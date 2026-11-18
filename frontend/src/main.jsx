@@ -6,13 +6,16 @@ import { AuthProvider } from "./context/AuthProvider.jsx";
 import { BrowserRouter } from "react-router-dom";
 import { SocketProvider } from "./context/SocketContext.jsx";
 import { CallProvider } from "./context/call/CallContext.jsx";
+import { GroupCallProvider } from "./context/call/group/GroupCallContext.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <AuthProvider>
       <SocketProvider>
         <CallProvider>
-          <App />
+          <GroupCallProvider>
+            <App />
+          </GroupCallProvider>
         </CallProvider>
       </SocketProvider>
     </AuthProvider>

@@ -8,6 +8,8 @@ import { Toaster } from "react-hot-toast";
 
 import { Navigate, Route, Routes } from "react-router-dom";
 import CallWindow from "./components/call/CallWindow";
+import GroupCallWindow from "./components/groupCall/GroupCallWindow";
+
 function App() {
   const [authUser, setAuthUser] = useAuth();
   console.log(authUser);
@@ -57,7 +59,12 @@ function App() {
         />
       </Routes>
       {/* Global Calling Window */}
-      {authUser && <CallWindow />}
+      {authUser && (
+        <>
+          <CallWindow />
+          <GroupCallWindow />
+        </>
+      )}
       <Toaster />
     </>
   );

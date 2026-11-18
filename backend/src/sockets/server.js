@@ -4,6 +4,7 @@ import express from "express";
 import oneToOneSocket from "./oneToOneSocket.js";
 import groupSocket from "./groupSocket.js";
 import callSocket from "./callSocket.js";
+import groupCallSocket from "./groupCallSocket.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -74,6 +75,9 @@ io.on("connection", async (socket) => {
     socket,
     userId
   );
+
+  // New group audio/video calling signaling.
+  groupCallSocket(io, socket, userId);
 
   // used to listen client side events emitted by server side
   socket.on("disconnect", () => {
