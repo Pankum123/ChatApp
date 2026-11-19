@@ -3,26 +3,37 @@ import { useAuth } from "../../context/AuthProvider";
 import profile from "../../../public/user.jpg";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
+
 import {
   logoutUser,
   updateProfilePicAPI,
   updateFullnameAPI,
   updateAboutAPI,
+  setPasswordAPI,
 } from "../../api";
+
 import { FaPencilAlt } from "react-icons/fa";
 
 function Profile() {
   const [authUser, setAuthUser] = useAuth();
+
   const [showMenu, setShowMenu] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [editing, setEditing] = useState("");
+
   const [fullname, setFullname] = useState(
     authUser?.user?.fullname || ""
   );
+
   const [about, setAbout] = useState(
     authUser?.user?.about || ""
   );
+
+  // Set Password States
+  const [showSetPassword, setShowSetPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const profileRef = useRef(null);
 
@@ -68,9 +79,11 @@ function Profile() {
 
     try {
       setLoading(true);
+
       const response = await updateProfilePicAPI(image);
 
       updateLocalUser(response.data.user);
+
       toast.success("Profile photo updated successfully");
     } catch (error) {
       toast.error(
@@ -90,9 +103,11 @@ function Profile() {
 
     try {
       setLoading(true);
+
       const response = await updateFullnameAPI(fullname);
 
       updateLocalUser(response.data.user);
+
       setEditing("");
       toast.success("Name updated successfully");
     } catch (error) {
@@ -108,9 +123,11 @@ function Profile() {
   const handleAboutUpdate = async () => {
     try {
       setLoading(true);
+
       const response = await updateAboutAPI(about);
 
       updateLocalUser(response.data.user);
+
       setEditing("");
       toast.success("About updated successfully");
     } catch (error) {
@@ -122,16 +139,56 @@ function Profile() {
     }
   };
 
+  // Set Password
+  const handleSetPassword = async () => {
+    if (!password || !confirmPassword) {
+      return toast.error("Please fill both password fields");
+    }
+
+    if (password !== confirmPassword) {
+      return toast.error("Passwords do not match");
+    }
+
+    if (password.length < 8) {
+      return toast.error("Password must be at least 8 characters");
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await setPasswordAPI(
+        password,
+        confirmPassword
+      );
+
+      updateLocalUser(response.data.user);
+
+      setPassword("");
+      setConfirmPassword("");
+      setShowSetPassword(false);
+
+      toast.success("Password set successfully");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.error || "Unable to set password"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Logout
   const handleLogout = async () => {
     try {
       setLoading(true);
+
       await logoutUser();
 
       localStorage.removeItem("ChatApp");
       Cookies.remove("jwt");
 
       toast.success("Logged out successfully");
+
       window.location.reload();
     } catch (error) {
       console.log("Error in Logout:", error);
@@ -142,6 +199,7 @@ function Profile() {
 
   return (
     <div className="relative" ref={profileRef}>
+
       {/* Profile Button */}
       <button
         onClick={() => setShowMenu(!showMenu)}
@@ -172,6 +230,7 @@ function Profile() {
 
             <label className="cursor-pointer p-2 rounded-full hover:bg-gray-700">
               <FaPencilAlt />
+
               <input
                 type="file"
                 accept="image/png,image/jpeg"
@@ -275,6 +334,68 @@ function Profile() {
             </p>
           </div>
 
+          {/* Set Password */}
+          {user?.passwordLoginEnabled === false && (
+            <div className="mb-4 border-t border-gray-600 pt-3">
+
+              {!showSetPassword ? (
+                <button
+                  onClick={() => setShowSetPassword(true)}
+                  className="w-full text-left p-2 text-green-400 hover:bg-gray-700 rounded"
+                >
+                  Set Password
+                </button>
+              ) : (
+                <div className="space-y-3">
+
+                  <h3 className="text-green-400 font-semibold">
+                    Set Your Password
+                  </h3>
+
+                  <input
+                    type="password"
+                    placeholder="Enter new password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-gray-700 p-2 rounded outline-none"
+                  />
+
+                  <input
+                    type="password"
+                    placeholder="Confirm new password"
+                    value={confirmPassword}
+                    onChange={(e) =>
+                      setConfirmPassword(e.target.value)
+                    }
+                    className="w-full bg-gray-700 p-2 rounded outline-none"
+                  />
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSetPassword}
+                      disabled={loading}
+                      className="bg-green-600 px-3 py-2 rounded"
+                    >
+                      {loading ? "Saving..." : "Save Password"}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setShowSetPassword(false);
+                        setPassword("");
+                        setConfirmPassword("");
+                      }}
+                      className="bg-gray-600 px-3 py-2 rounded"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+
+                </div>
+              )}
+            </div>
+          )}
+
           <hr className="border-gray-600 my-3" />
 
           {/* Logout */}
@@ -285,6 +406,7 @@ function Profile() {
           >
             {loading ? "Please wait..." : "Logout"}
           </button>
+
         </div>
       )}
     </div>

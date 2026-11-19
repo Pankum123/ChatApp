@@ -46,6 +46,15 @@ export const googleLoginAPI = async (idToken) => {
   return response;
 };
 
+// Set Password API
+export const setPasswordAPI = async (password, confirmPassword) => {
+  const response = await api.put("/user/set-password", {
+    password,
+    confirmPassword,
+  });
+  return response;
+};
+
 
 // Get all users API
 export const getAllUsers = async () => {

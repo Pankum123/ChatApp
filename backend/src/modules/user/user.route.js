@@ -3,6 +3,7 @@ import {
   allUsers,
   login,
   logout,
+  setPassword,
   signup,
   updateAbout,
   updateFullname,
@@ -18,5 +19,6 @@ router.get("/allusers", secureRoute, allUsers);
 router.put("/update-profile-pic", secureRoute, updateProfilePic);
 router.put("/update-fullname", secureRoute, updateFullname);
 router.put("/update-about", secureRoute, updateAbout);
+router.put("/set-password", secureRoute, setPassword);
 
 export default router;

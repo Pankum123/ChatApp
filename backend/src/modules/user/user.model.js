@@ -1,22 +1,33 @@
+
 import mongoose from "mongoose";
 
-const userSchema = mongoose.Schema({
+const userSchema = new mongoose.Schema(
+  {
     fullname: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
+      trim: true,
     },
+
     email: {
-        type: String,
-        required: true,
-        unique: true,
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
     },
+
     password: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
-    confirmPassword: {
-        type: String,
+
+    // Email and password login enabled or disabled
+    passwordLoginEnabled: {
+      type: Boolean,
+      default: true,
     },
+
     // User Profile Photo
     profilePic: {
       url: {
@@ -35,7 +46,12 @@ const userSchema = mongoose.Schema({
       default: "Hey there! I am using ChatApp.",
       maxlength: 100,
     },
-}, { timestamps: true }); // createdAt & updatedAt
+  },
+  {
+    timestamps: true,
+  }
+);
 
 const User = mongoose.model("User", userSchema);
+
 export default User;

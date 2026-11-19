@@ -3,78 +3,210 @@ import bcrypt from "bcryptjs";
 import createTokenAndSaveCookie from "../../jwt/generateToken.js";
 import { v2 as cloudinary } from "cloudinary";
 
+// Normalize email
+const normalizeEmail = (email = "") => {
+  return email.trim().toLowerCase();
+};
+
+// Public user data
+const publicUser = (user) => ({
+  _id: user._id,
+  fullname: user.fullname,
+  email: user.email,
+  profilePic: user.profilePic,
+  about: user.about,
+  passwordLoginEnabled: user.passwordLoginEnabled,
+});
+
+// ================= SIGNUP =================
+
 export const signup = async (req, res) => {
   const { fullname, email, password, confirmPassword } = req.body;
+
   try {
-    if (password !== confirmPassword) {
-      return res.status(400).json({ error: "Passwords do not match" });
-    }
-    const user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({ error: "User already registered" });
-    }
-    // Hashing the password
-    const hashPassword = await bcrypt.hash(password, 10);
-    const newUser = await new User({
-      fullname,
-      email,
-      password: hashPassword,
-    });
-    await newUser.save();
-    if (newUser) {
-      createTokenAndSaveCookie(newUser._id, res);
-      res.status(201).json({
-        message: "User created successfully",
-        user: {
-          _id: newUser._id,
-          fullname: newUser.fullname,
-          email: newUser.email,
-        },
+    if (!fullname?.trim() || !email || !password || !confirmPassword) {
+      return res.status(400).json({
+        error: "All fields are required",
       });
     }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        error: "Passwords do not match",
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        error: "Password must be at least 8 characters",
+      });
+    }
+
+    const normalizedEmail = normalizeEmail(email);
+
+    const existingUser = await User.findOne({
+      email: normalizedEmail,
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        error: "User already registered",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await User.create({
+      fullname: fullname.trim(),
+      email: normalizedEmail,
+      password: hashedPassword,
+
+      // Normal signup user can login with password
+      passwordLoginEnabled: true,
+    });
+
+    createTokenAndSaveCookie(newUser._id, res);
+
+    return res.status(201).json({
+      message: "User created successfully",
+      user: publicUser(newUser),
+    });
+
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Internal server error" });
+    if (error.code === 11000) {
+      return res.status(409).json({
+        error: "User already registered",
+      });
+    }
+
+    console.error("Signup Error:", error);
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
+
+// ================= LOGIN =================
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
-
-    if (!user) {
+    if (!email || !password) {
       return res.status(400).json({
-        error: "Invalid user credential",
+        error: "Email and password are required",
       });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const normalizedEmail = normalizeEmail(email);
+
+    const user = await User.findOne({
+      email: normalizedEmail,
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        error: "Invalid user credentials",
+      });
+    }
+
+    // Check whether password login is enabled
+    if (!user.passwordLoginEnabled) {
+      return res.status(403).json({
+        error: "Please login with Google and set your password first",
+        code: "PASSWORD_NOT_SET",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     if (!isMatch) {
       return res.status(400).json({
-        error: "Invalid user credential",
+        error: "Invalid user credentials",
       });
     }
 
     createTokenAndSaveCookie(user._id, res);
 
-    res.status(201).json({
+    return res.status(200).json({
       message: "User logged in successfully",
-      user: {
-        _id: user._id,
-        fullname: user.fullname,
-        email: user.email,
-        profilePic: user.profilePic,
-        about: user.about,
-      },
+      user: publicUser(user),
     });
+
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Login Error:", error);
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
+
+// ================= SET PASSWORD =================
+
+export const setPassword = async (req, res) => {
+  const { password, confirmPassword } = req.body;
+
+  try {
+    if (!password || !confirmPassword) {
+      return res.status(400).json({
+        error: "Password and confirm password are required",
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        error: "Passwords do not match",
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        error: "Password must be at least 8 characters",
+      });
+    }
+
+    // Get logged-in user
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        error: "User not found",
+      });
+    }
+
+    // Password already enabled
+    if (user.passwordLoginEnabled) {
+      return res.status(409).json({
+        error: "Password login is already enabled",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    user.password = hashedPassword;
+    user.passwordLoginEnabled = true;
+
+    await user.save();
+
+    return res.status(200).json({
+      message: "Password set successfully",
+      user: publicUser(user),
+    });
+
+  } catch (error) {
+    console.error("Set Password Error:", error);
+
+    return res.status(500).json({
+      error: "Unable to set password",
+    });
+  }
+};
+
 
 export const logout = async (req, res) => {
   try {
