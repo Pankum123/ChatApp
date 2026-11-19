@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthProvider";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { signupUser } from "../api";
+import GoogleLogin from "./googleAuth/GoogleLogin";
 
 function Signup() {
   const [authUser, setAuthUser] = useAuth();
@@ -203,6 +204,7 @@ function Signup() {
               className="text-white bg-green-500 px-2 py-1 cursor-pointer rounded-lg"
             />
           </div>
+          <GoogleLogin />
         </form>
       </div>
     </>
