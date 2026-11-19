@@ -9,6 +9,7 @@ import { Toaster } from "react-hot-toast";
 import { Navigate, Route, Routes } from "react-router-dom";
 import CallWindow from "./components/call/CallWindow";
 import GroupCallWindow from "./components/groupCall/GroupCallWindow";
+import Home from "./home/Home";
 
 function App() {
   const [authUser, setAuthUser] = useAuth();
@@ -16,6 +17,12 @@ function App() {
   return (
     <>
       <Routes>
+
+        {/* Home Page */}
+        <Route
+          path="/home"
+          element={authUser ? <Navigate to="/" /> : <Home />}
+        />
         <Route
           path="/"
           element={
@@ -45,18 +52,18 @@ function App() {
                 </div>
               </div>
             ) : (
-              <Navigate to={"/login"} />
+              <Navigate to={"/home"} />
             )
           }
         />
-        <Route
-          path="/login"
-          element={authUser ? <Navigate to="/" /> : <Login />}
-        />
-        <Route
-          path="/signup"
-          element={authUser ? <Navigate to="/" /> : <Signup />}
-        />
+
+        {/* Redirect old routes */}
+        <Route path="/login" element={<Navigate to="/home" />} />
+        <Route path="/signup" element={<Navigate to="/home" />} />
+
+        {/* Unknown route */}
+        <Route path="*" element={<Navigate to="/home" />} />
+
       </Routes>
       {/* Global Calling Window */}
       {authUser && (

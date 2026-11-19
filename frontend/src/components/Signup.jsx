@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { signupUser } from "../api";
 import GoogleLogin from "./googleAuth/GoogleLogin";
 
-function Signup() {
+function Signup({ onSwitch }) {
   const [authUser, setAuthUser] = useAuth();
   const {
     register,
@@ -74,7 +74,7 @@ function Signup() {
 
   return (
     <>
-      <div className="flex h-screen items-center justify-center bg-blue-300">
+      <div className="flex items-center justify-center bg-blue-300">
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="border border-white bg-amber-100 px-6 py-2 rounded-md space-y-3 w-96"
@@ -191,12 +191,13 @@ function Signup() {
           <div className="flex justify-between text-black">
             <p>
               Have an account?
-              <Link
-                to="/login"
+              <button
+                type="button"
+                onClick={onSwitch}
                 className="text-blue-500 underline cursor-pointer ml-1"
               >
                 Login
-              </Link>
+              </button>
             </p>
             <input
               type="submit"
