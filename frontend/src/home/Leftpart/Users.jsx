@@ -3,7 +3,7 @@ import User from "./User";
 import useGetAllUsers from "../../features/chat/private/hooks/useGetAllUsers.jsx";
 import CreateGroup from "./Group/CreateGroup";
 import { createGroupAPI } from "../../shared/api.js";
-import useGetGroups from "../../context/Group/useGetGroups";
+import useGetGroups from "../../features/chat/group/hooks/useGetGroups.js";
 import GroupItem from "./Group/GroupItem";
 import { useSocketContext } from "../../shared/realtime/SocketContext.jsx";
 import useConversation from "../../zustand/useConversation.js";

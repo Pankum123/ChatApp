@@ -1,7 +1,7 @@
 
 import { useState } from "react";
-import useConversation from "../../zustand/useConversation.js";
-import { sendGroupMessageAPI } from "../../shared/api.js";
+import useConversation from "../../../../zustand/useConversation.js";
+import { sendGroupMessageAPI } from "../../../../shared/api.js";
 
 const useSendGroupMessage = () => {
   const [loading, setLoading] = useState(false);

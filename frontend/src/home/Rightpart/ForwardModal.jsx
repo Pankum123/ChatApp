@@ -4,7 +4,7 @@ import { MdClose } from "react-icons/md";
 import { IoArrowRedo } from "react-icons/io5";
 
 import useGetAllUsers from "../../features/chat/private/hooks/useGetAllUsers.jsx";
-import useGetGroups from "../../context/Group/useGetGroups.js";
+import useGetGroups from "../../features/chat/group/hooks/useGetGroups.js";
 
 import {
   forwardMessageAPI,

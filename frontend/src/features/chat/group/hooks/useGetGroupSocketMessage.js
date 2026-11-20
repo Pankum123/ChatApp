@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import useConversation from "../../zustand/useConversation.js";
+import useConversation from "../../../../zustand/useConversation.js";
 
 const useGetGroupSocketMessage = (socket) => {
   const { selectedGroup, setGroupMessages } = useConversation();

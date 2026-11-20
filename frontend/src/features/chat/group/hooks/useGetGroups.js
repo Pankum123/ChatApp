@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { getGroupsAPI } from "../../shared/api";
+import { getGroupsAPI } from "../../../../shared/api";
 
 
 function useGetGroups() {
