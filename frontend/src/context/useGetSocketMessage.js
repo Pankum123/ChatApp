@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useSocketContext } from "./SocketContext";
+import { useSocketContext } from "../shared/realtime/SocketContext.jsx";
 import useConversation from "../zustand/useConversation.js";
 import sound from "../assets/notification.mp3";
 const useGetSocketMessage = () => {

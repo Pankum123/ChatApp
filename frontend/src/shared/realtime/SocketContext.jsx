@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { useAuth } from "../features/auth/context/AuthProvider.jsx";
+import { useAuth } from "../../features/auth/context/AuthProvider.jsx";
 import io from "socket.io-client";
-import useGetGroupSocketMessage from "./Group/useGetGroupSocketMessage.js";
-import useConversation from "../zustand/useConversation.js";
+import useGetGroupSocketMessage from "../../context/Group/useGetGroupSocketMessage.js";
+import useConversation from "../../zustand/useConversation.js";
 
 const socketContext = createContext();
 

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import useConversation from "../../zustand/useConversation.js";
 import { getGroupMessagesAPI } from "../../shared/api.js";
-import { useSocketContext } from "../SocketContext.jsx";
+import { useSocketContext } from "../../shared/realtime/SocketContext.jsx";
 
 const useGetGroupMessages = () => {
   const [loading, setLoading] = useState(false);

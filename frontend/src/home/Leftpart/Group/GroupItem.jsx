@@ -1,6 +1,6 @@
 import React from "react";
 import useConversation from "../../../zustand/useConversation.js";
-import { useSocketContext } from "../../../context/SocketContext.jsx";
+import { useSocketContext } from "../../../shared/realtime/SocketContext.jsx";
 
 function GroupItem({ group }) {
   const { selectedGroup, setSelectedGroup } = useConversation();

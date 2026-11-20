@@ -5,7 +5,7 @@ import CreateGroup from "./Group/CreateGroup";
 import { createGroupAPI } from "../../shared/api.js";
 import useGetGroups from "../../context/Group/useGetGroups";
 import GroupItem from "./Group/GroupItem";
-import { useSocketContext } from "../../context/SocketContext.jsx";
+import { useSocketContext } from "../../shared/realtime/SocketContext.jsx";
 import useConversation from "../../zustand/useConversation.js";
 
 function Users() {

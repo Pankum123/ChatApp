@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import useConversation from "../../zustand/useConversation.js";
-import { useSocketContext } from "../../context/SocketContext.jsx";
+import { useSocketContext } from "../../shared/realtime/SocketContext.jsx";
 import { CiMenuFries } from "react-icons/ci";
 import profile from "../../../public/user.jpg";
 import UserProfile from "./UserProfile/UserProfile.jsx";

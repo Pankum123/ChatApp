@@ -4,7 +4,7 @@ import App from "./App.jsx";
 import "./index.css";
 import { AuthProvider } from "./features/auth/context/AuthProvider.jsx";
 import { BrowserRouter } from "react-router-dom";
-import { SocketProvider } from "./context/SocketContext.jsx";
+import { SocketProvider } from "./shared/realtime/SocketContext.jsx";
 import { CallProvider } from "./context/call/CallContext.jsx";
 import { GroupCallProvider } from "./context/call/group/GroupCallContext.jsx";
 

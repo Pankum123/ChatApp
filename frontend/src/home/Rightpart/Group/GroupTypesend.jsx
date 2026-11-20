@@ -3,7 +3,7 @@ import { IoSend } from "react-icons/io5";
 import { MdClose, MdReply } from "react-icons/md";
 
 import useSendGroupMessage from "../../../context/Group/useSendGroupMessage.js";
-import { useSocketContext } from "../../../context/SocketContext.jsx";
+import { useSocketContext } from "../../../shared/realtime/SocketContext.jsx";
 import useConversation from "../../../zustand/useConversation.js";
 import { editGroupMessageAPI } from "../../../shared/api.js";
 
