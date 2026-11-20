@@ -5,7 +5,7 @@ import Typesend from "./Typesend";
 import GroupChatuser from "./Group/GroupChatuser";
 import GroupMessages from "./Group/GroupMessages";
 import GroupTypesend from "./Group/GroupTypesend";
-import useConversation from "../../zustand/useConversation.js";
+import useConversation from "../../shared/zustand/useConversation.js";
 import { useAuth } from "../../features/auth/context/AuthProvider.jsx";
 import { CiMenuFries } from "react-icons/ci";
 

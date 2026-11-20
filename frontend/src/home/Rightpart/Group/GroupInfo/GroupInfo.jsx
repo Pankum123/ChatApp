@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import useConversation from "../../../../zustand/useConversation.js";
+import useConversation from "../../../../shared/zustand/useConversation.js";
 import { updateGroupImageAPI } from "../../../../shared/api.js";
 
 import AddMember from "./AddMember.jsx";

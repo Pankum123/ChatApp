@@ -3,7 +3,7 @@ import { IoSend } from "react-icons/io5";
 import { MdClose, MdReply } from "react-icons/md";
 import useSendMessage from "../../features/chat/private/hooks/useSendMessage.js";
 import { useSocketContext } from "../../shared/realtime/SocketContext.jsx";
-import useConversation from "../../zustand/useConversation.js";
+import useConversation from "../../shared/zustand/useConversation.js";
 import { editMessageAPI } from "../../shared/api.js";
 
 function Typesend() {

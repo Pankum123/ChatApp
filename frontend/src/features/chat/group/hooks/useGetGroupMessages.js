@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import useConversation from "../../../../zustand/useConversation.js";
+import useConversation from "../../../../shared/zustand/useConversation.js";
 import { getGroupMessagesAPI } from "../../../../shared/api.js";
 import { useSocketContext } from "../../../../shared/realtime/SocketContext.jsx";
 

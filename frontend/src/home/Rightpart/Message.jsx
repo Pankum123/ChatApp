@@ -11,7 +11,7 @@ import {
 } from "react-icons/md";
 import { IoArrowRedo } from "react-icons/io5";
 
-import useConversation from "../../zustand/useConversation.js";
+import useConversation from "../../shared/zustand/useConversation.js";
 import ForwardModal from "./ForwardModal.jsx";
 
 import {

@@ -1,5 +1,5 @@
 import React from "react";
-import useConversation from "../../zustand/useConversation.js";
+import useConversation from "../../shared/zustand/useConversation.js";
 import { useSocketContext } from "../../shared/realtime/SocketContext.jsx";
 import profile from "../../../public/user.jpg";
 

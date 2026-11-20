@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import useConversation from "../../zustand/useConversation.js";
+import useConversation from "../../shared/zustand/useConversation.js";
 import { useSocketContext } from "../../shared/realtime/SocketContext.jsx";
 import { CiMenuFries } from "react-icons/ci";
 import profile from "../../../public/user.jpg";

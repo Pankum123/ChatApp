@@ -11,7 +11,7 @@ import {
 } from "react-icons/md";
 import { IoArrowRedo } from "react-icons/io5";
 
-import useConversation from "../../../zustand/useConversation.js";
+import useConversation from "../../../shared/zustand/useConversation.js";
 import useGetGroupMessages from "../../../features/chat/group/hooks/useGetGroupMessages.js";
 import Loading from "../../../components/Loading.jsx";
 import ForwardModal from "../ForwardModal.jsx";

@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import useConversation from "../../../../zustand/useConversation.js";
+import useConversation from "../../../../shared/zustand/useConversation.js";
 import { removeGroupMemberAPI } from "../../../../shared/api.js";
 import useGetAllUsers from "../../../../features/chat/private/hooks/useGetAllUsers.jsx";
 

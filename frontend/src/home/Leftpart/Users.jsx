@@ -6,7 +6,7 @@ import { createGroupAPI } from "../../shared/api.js";
 import useGetGroups from "../../features/chat/group/hooks/useGetGroups.js";
 import GroupItem from "./Group/GroupItem";
 import { useSocketContext } from "../../shared/realtime/SocketContext.jsx";
-import useConversation from "../../zustand/useConversation.js";
+import useConversation from "../../shared/zustand/useConversation.js";
 
 function Users() {
   const [allUsers, loading] = useGetAllUsers();
