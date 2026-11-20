@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useAuth } from "../../context/AuthProvider";
+import { useAuth } from "../../features/auth/context/AuthProvider";
 import profile from "../../../public/user.jpg";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";

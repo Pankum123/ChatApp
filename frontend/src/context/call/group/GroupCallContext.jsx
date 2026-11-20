@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import { useSocketContext } from "../../SocketContext";
-import { useAuth } from "../../AuthProvider";
+import { useAuth } from "../../../features/auth/context/AuthProvider";
 
 const GroupCallContext = createContext(null);
 
