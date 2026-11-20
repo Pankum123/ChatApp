@@ -10,7 +10,7 @@ import {
   updateFullnameAPI,
   updateAboutAPI,
   setPasswordAPI,
-} from "../../api";
+} from "../../shared/api";
 
 import { FaPencilAlt } from "react-icons/fa";
 

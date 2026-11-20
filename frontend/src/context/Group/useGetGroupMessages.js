@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import useConversation from "../../zustand/useConversation.js";
-import { getGroupMessagesAPI } from "../../api.js";
+import { getGroupMessagesAPI } from "../../shared/api.js";
 import { useSocketContext } from "../SocketContext.jsx";
 
 const useGetGroupMessages = () => {

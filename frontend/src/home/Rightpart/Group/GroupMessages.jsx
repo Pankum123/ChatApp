@@ -19,7 +19,7 @@ import ForwardModal from "../ForwardModal.jsx";
 import {
   deleteGroupMessageForMeAPI,
   deleteGroupMessageForEveryoneAPI,
-} from "../../../api.js";
+} from "../../../shared/api.js";
 
 function GroupMessages() {
   const bottomRef = useRef(null);

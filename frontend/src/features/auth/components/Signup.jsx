@@ -4,7 +4,7 @@ import axios from "axios";
 import { useAuth } from "../context/AuthProvider";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { signupUser } from "../../../api";
+import { signupUser } from "../../../shared/api";
 import GoogleLogin from "./GoogleLogin";
 
 function Signup({ onSwitch }) {

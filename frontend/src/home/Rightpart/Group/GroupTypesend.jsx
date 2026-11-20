@@ -5,7 +5,7 @@ import { MdClose, MdReply } from "react-icons/md";
 import useSendGroupMessage from "../../../context/Group/useSendGroupMessage.js";
 import { useSocketContext } from "../../../context/SocketContext.jsx";
 import useConversation from "../../../zustand/useConversation.js";
-import { editGroupMessageAPI } from "../../../api.js";
+import { editGroupMessageAPI } from "../../../shared/api.js";
 
 function GroupTypesend() {
   const [message, setMessage] = useState("");

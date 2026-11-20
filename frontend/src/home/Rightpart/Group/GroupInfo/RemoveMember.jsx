@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import useConversation from "../../../../zustand/useConversation.js";
-import { removeGroupMemberAPI } from "../../../../api.js";
+import { removeGroupMemberAPI } from "../../../../shared/api.js";
 import useGetAllUsers from "../../../../context/useGetAllUsers.jsx";
 
 function RemoveMember({ group, onBack }) {

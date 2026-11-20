@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "../context/AuthProvider";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { loginUser } from "../../../api";
+import { loginUser } from "../../../shared/api";
 import GoogleLogin from "./GoogleLogin";
 
 function Login({ onSwitch }) {

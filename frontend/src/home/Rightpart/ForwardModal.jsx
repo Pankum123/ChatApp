@@ -9,7 +9,7 @@ import useGetGroups from "../../context/Group/useGetGroups.js";
 import {
   forwardMessageAPI,
   forwardGroupMessageAPI,
-} from "../../api.js";
+} from "../../shared/api.js";
 
 function ForwardModal({ message, sourceType = "private", onClose }) {
   const [allUsers, usersLoading] = useGetAllUsers();

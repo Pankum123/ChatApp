@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { leaveGroupAPI } from "../../../../api.js";
+import { leaveGroupAPI } from "../../../../shared/api.js";
 import useConversation from "../../../../zustand/useConversation.js";
 
 function LeaveGroup({ group, onLeaveSuccess }) {

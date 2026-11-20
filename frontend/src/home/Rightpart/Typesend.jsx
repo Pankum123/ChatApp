@@ -4,7 +4,7 @@ import { MdClose, MdReply } from "react-icons/md";
 import useSendMessage from "../../context/useSendMessage.js";
 import { useSocketContext } from "../../context/SocketContext.jsx";
 import useConversation from "../../zustand/useConversation.js";
-import { editMessageAPI } from "../../api.js";
+import { editMessageAPI } from "../../shared/api.js";
 
 function Typesend() {
   const [message, setMessage] = useState("");

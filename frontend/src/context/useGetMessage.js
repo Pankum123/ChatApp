@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import useConversation from "../zustand/useConversation.js";
 // import axios from "axios";
-import { getMessagesByConversation  } from '../api.js'
+import { getMessagesByConversation  } from '../shared/api.js'
 import { useSocketContext } from "./SocketContext.jsx";
 
 const useGetMessage = () => {

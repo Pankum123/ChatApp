@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { editGroupAPI } from "../../../../api.js";
+import { editGroupAPI } from "../../../../shared/api.js";
 import useConversation from "../../../../zustand/useConversation.js";
 
 function EditGroup({ group }) {

@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import useGetAllUsers from "../../../../context/useGetAllUsers.jsx";
 import useConversation from "../../../../zustand/useConversation.js";
-import { addGroupMemberAPI } from "../../../../api.js";
+import { addGroupMemberAPI } from "../../../../shared/api.js";
 
 function AddMember({ group, onBack }) {
   const [allUsers, loading] = useGetAllUsers();

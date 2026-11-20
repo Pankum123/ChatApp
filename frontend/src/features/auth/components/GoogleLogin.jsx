@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../utils/googleFirebase";
-import { googleLoginAPI } from "../../../api";
+import { googleLoginAPI } from "../../../shared/api";
 import { useAuth } from "../context/AuthProvider";
 import toast from "react-hot-toast";
 

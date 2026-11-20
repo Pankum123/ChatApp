@@ -17,7 +17,7 @@ import ForwardModal from "./ForwardModal.jsx";
 import {
   deleteMessageForMeAPI,
   deleteMessageForEveryoneAPI,
-} from "../../api.js";
+} from "../../shared/api.js";
 
 function Message({ message }) {
   const [showMenu, setShowMenu] = useState(false);

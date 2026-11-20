@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import User from "./User";
 import useGetAllUsers from "../../context/useGetAllUsers";
 import CreateGroup from "./Group/CreateGroup";
-import { createGroupAPI } from "../../api";
+import { createGroupAPI } from "../../shared/api.js";
 import useGetGroups from "../../context/Group/useGetGroups";
 import GroupItem from "./Group/GroupItem";
 import { useSocketContext } from "../../context/SocketContext.jsx";
