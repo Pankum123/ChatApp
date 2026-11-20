@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { MdClose } from "react-icons/md";
 import { IoArrowRedo } from "react-icons/io5";
 
-import useGetAllUsers from "../../context/useGetAllUsers.jsx";
+import useGetAllUsers from "../../features/chat/private/hooks/useGetAllUsers.jsx";
 import useGetGroups from "../../context/Group/useGetGroups.js";
 
 import {

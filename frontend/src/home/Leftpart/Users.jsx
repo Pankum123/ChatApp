@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import User from "./User";
-import useGetAllUsers from "../../context/useGetAllUsers";
+import useGetAllUsers from "../../features/chat/private/hooks/useGetAllUsers.jsx";
 import CreateGroup from "./Group/CreateGroup";
 import { createGroupAPI } from "../../shared/api.js";
 import useGetGroups from "../../context/Group/useGetGroups";

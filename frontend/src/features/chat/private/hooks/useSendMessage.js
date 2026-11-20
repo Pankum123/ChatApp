@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import useConversation from "../zustand/useConversation.js";
-import { sendMessageToConversation } from '../shared/api.js'
+import useConversation from "../../../../zustand/useConversation.js";
+import { sendMessageToConversation } from '../../../../shared/api.js'
 const useSendMessage = () => {
   const [loading, setLoading] = useState(false);
   const { messages, setMessage, selectedConversation, setReplyingMessage } = useConversation();

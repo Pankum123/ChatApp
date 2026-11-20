@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import useConversation from "../../../../zustand/useConversation.js";
 import { removeGroupMemberAPI } from "../../../../shared/api.js";
-import useGetAllUsers from "../../../../context/useGetAllUsers.jsx";
+import useGetAllUsers from "../../../../features/chat/private/hooks/useGetAllUsers.jsx";
 
 function RemoveMember({ group, onBack }) {
   const { setSelectedGroup } = useConversation();

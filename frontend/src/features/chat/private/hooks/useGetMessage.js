@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import useConversation from "../zustand/useConversation.js";
+import useConversation from "../../../../zustand/useConversation.js";
 // import axios from "axios";
-import { getMessagesByConversation  } from '../shared/api.js'
-import { useSocketContext } from "../shared/realtime/SocketContext.jsx";
+import { getMessagesByConversation  } from '../../../../shared/api.js'
+import { useSocketContext } from "../../../../shared/realtime/SocketContext.jsx";
 
 const useGetMessage = () => {
   const [loading, setLoading] = useState(false);
