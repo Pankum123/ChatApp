@@ -58,14 +58,8 @@ export const setPasswordAPI = async (password, confirmPassword) => {
 
 // Get all users API
 export const getAllUsers = async () => {
-  const token = Cookies.get("jwt"); // get token like in your hook
-  const res = await api.get("/user/allusers", {
-    credentials: "include",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return res;
+  const response = await api.get("/user/allusers");
+  return response;
 };
 
 
