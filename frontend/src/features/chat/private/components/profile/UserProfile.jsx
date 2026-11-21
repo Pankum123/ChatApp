@@ -1,6 +1,6 @@
 import React from "react";
 import { IoClose } from "react-icons/io5";
-import profile from "../../../../public/user.jpg";
+import profile from "../../../../../../public/user.jpg";
 
 function UserProfile({ user, onClose }) {
   if (!user) return null;
