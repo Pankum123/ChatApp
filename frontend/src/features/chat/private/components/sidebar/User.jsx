@@ -1,7 +1,7 @@
 import React from "react";
-import useConversation from "../../shared/zustand/useConversation.js";
-import { useSocketContext } from "../../shared/realtime/SocketContext.jsx";
-import profile from "../../../public/user.jpg";
+import useConversation from "../../../../../shared/zustand/useConversation.js";
+import { useSocketContext } from "../../../../../shared/realtime/SocketContext.jsx";
+import profile from "../../../../../../public/user.jpg";
 
 function User({ user }) {
   const { selectedConversation, setSelectedConversation } = useConversation();

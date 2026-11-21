@@ -3,13 +3,13 @@ import React, { useState } from "react";
 import { MdClose } from "react-icons/md";
 import { IoArrowRedo } from "react-icons/io5";
 
-import useGetAllUsers from "../../features/chat/private/hooks/useGetAllUsers.jsx";
-import useGetGroups from "../../features/chat/group/hooks/useGetGroups.js";
+import useGetAllUsers from "../../hooks/useGetAllUsers.jsx";
+import useGetGroups from "../../../group/hooks/useGetGroups.js";
 
 import {
   forwardMessageAPI,
   forwardGroupMessageAPI,
-} from "../../shared/api.js";
+} from "../../../../../shared/api.js";
 
 function ForwardModal({ message, sourceType = "private", onClose }) {
   const [allUsers, usersLoading] = useGetAllUsers();

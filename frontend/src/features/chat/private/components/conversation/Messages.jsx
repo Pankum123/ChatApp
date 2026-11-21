@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import Message from "./Message";
-import useGetMessage from "../../features/chat/private/hooks/useGetMessage.js";
-import Loading from "../../components/Loading.jsx";
-import useGetSocketMessage from "../../features/chat/private/hooks/useGetSocketMessage.js";
+import useGetMessage from "../../hooks/useGetMessage.js";
+import Loading from "../../../../../components/Loading.jsx";
+import useGetSocketMessage from "../../hooks/useGetSocketMessage.js";
 function Messages() {
   const { loading, messages } = useGetMessage();
   useGetSocketMessage(); // listing incoming messages

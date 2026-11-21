@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaSearch } from "react-icons/fa";
-import useGetAllUsers from "../../features/chat/private/hooks/useGetAllUsers";
-import useConversation from "../../shared/zustand/useConversation";
+import useGetAllUsers from "../../hooks/useGetAllUsers";
+import useConversation from "../../../../../shared/zustand/useConversation";
 import toast from "react-hot-toast";
 function Search() {
   const [search, setSearch] = useState("");

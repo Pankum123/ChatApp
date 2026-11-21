@@ -1,7 +1,7 @@
 import React from "react";
-import Search from "../../../home/Leftpart/Search";
-import Users from "../../../home/Leftpart/Users";
-import Profile from "../../../home/Leftpart/Profile";
+import Search from "../private/components/sidebar/Search";
+import Users from "../private/components/sidebar/Users";
+import Profile from "../private/components/sidebar/Profile";
 
 function Left() {
   return (

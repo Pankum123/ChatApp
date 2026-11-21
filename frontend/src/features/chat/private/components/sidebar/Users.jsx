@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import User from "./User";
-import useGetAllUsers from "../../features/chat/private/hooks/useGetAllUsers.jsx";
-import CreateGroup from "./Group/CreateGroup";
-import { createGroupAPI } from "../../shared/api.js";
-import useGetGroups from "../../features/chat/group/hooks/useGetGroups.js";
-import GroupItem from "./Group/GroupItem";
-import { useSocketContext } from "../../shared/realtime/SocketContext.jsx";
-import useConversation from "../../shared/zustand/useConversation.js";
+import useGetAllUsers from "../../hooks/useGetAllUsers.jsx";
+import CreateGroup from "../../../../../home/Leftpart/Group/CreateGroup.jsx";
+import { createGroupAPI } from "../../../../../shared/api.js";
+import useGetGroups from "../../../../chat/group/hooks/useGetGroups.js";
+import GroupItem from "../../../../../home/Leftpart/Group/GroupItem.jsx";
+import { useSocketContext } from "../../../../../shared/realtime/SocketContext.jsx";
+import useConversation from "../../../../../shared/zustand/useConversation.js";
 
 function Users() {
   const [allUsers, loading] = useGetAllUsers();

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useAuth } from "../../features/auth/context/AuthProvider";
-import profile from "../../../public/user.jpg";
+import { useAuth } from "../../../../auth/context/AuthProvider";
+import profile from "../../../../../../public/user.jpg";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 
@@ -10,7 +10,7 @@ import {
   updateFullnameAPI,
   updateAboutAPI,
   setPasswordAPI,
-} from "../../shared/api";
+} from "../../../../../shared/api";
 
 import { FaPencilAlt } from "react-icons/fa";
 

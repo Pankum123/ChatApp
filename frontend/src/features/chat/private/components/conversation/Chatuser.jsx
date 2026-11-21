@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import useConversation from "../../shared/zustand/useConversation.js";
-import { useSocketContext } from "../../shared/realtime/SocketContext.jsx";
+import useConversation from "../../../../../shared/zustand/useConversation.js";
+import { useSocketContext } from "../../../../../shared/realtime/SocketContext.jsx";
 import { CiMenuFries } from "react-icons/ci";
-import profile from "../../../public/user.jpg";
-import UserProfile from "./UserProfile/UserProfile.jsx";
-import CallButtons from "../../components/call/CallButtons.jsx";
+import profile from "../../../../../../public/user.jpg";
+import UserProfile from "../../../../../home/Rightpart/UserProfile/UserProfile.jsx";
+import CallButtons from "../../../../../components/call/CallButtons.jsx";
 
 function Chatuser() {
   const { selectedConversation } = useConversation();

@@ -11,13 +11,13 @@ import {
 } from "react-icons/md";
 import { IoArrowRedo } from "react-icons/io5";
 
-import useConversation from "../../shared/zustand/useConversation.js";
+import useConversation from "../../../../../shared/zustand/useConversation.js";
 import ForwardModal from "./ForwardModal.jsx";
 
 import {
   deleteMessageForMeAPI,
   deleteMessageForEveryoneAPI,
-} from "../../shared/api.js";
+} from "../../../../../shared/api.js";
 
 function Message({ message }) {
   const [showMenu, setShowMenu] = useState(false);

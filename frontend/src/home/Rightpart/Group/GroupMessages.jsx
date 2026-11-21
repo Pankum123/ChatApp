@@ -14,7 +14,7 @@ import { IoArrowRedo } from "react-icons/io5";
 import useConversation from "../../../shared/zustand/useConversation.js";
 import useGetGroupMessages from "../../../features/chat/group/hooks/useGetGroupMessages.js";
 import Loading from "../../../components/Loading.jsx";
-import ForwardModal from "../ForwardModal.jsx";
+import ForwardModal from "../../../features/chat/private/components/conversation/ForwardModal.jsx";
 
 import {
   deleteGroupMessageForMeAPI,
