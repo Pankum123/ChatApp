@@ -1,12 +1,12 @@
 import React from "react";
-import Chatuser from "./Chatuser";
-import Messages from "./Messages";
-import Typesend from "./Typesend";
-import GroupChatuser from "./Group/GroupChatuser";
-import GroupMessages from "./Group/GroupMessages";
-import GroupTypesend from "./Group/GroupTypesend";
-import useConversation from "../../shared/zustand/useConversation.js";
-import { useAuth } from "../../features/auth/context/AuthProvider.jsx";
+import Chatuser from "../../../home/Rightpart/Chatuser.jsx";
+import Messages from "../../../home/Rightpart/Messages.jsx";
+import Typesend from "../../../home/Rightpart/Typesend.jsx";
+import GroupChatuser from "../../../home/Rightpart/Group/GroupChatuser.jsx";
+import GroupMessages from "../../../home/Rightpart/Group/GroupMessages.jsx";
+import GroupTypesend from "../../../home/Rightpart/Group/GroupTypesend.jsx";
+import useConversation from "../../../shared/zustand/useConversation.js";
+import { useAuth } from "../../auth/context/AuthProvider.jsx";
 import { CiMenuFries } from "react-icons/ci";
 
 function Right() {

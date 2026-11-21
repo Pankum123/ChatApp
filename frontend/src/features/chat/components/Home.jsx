@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
-import Login from "../features/auth/components/Login";
-import Signup from "../features/auth/components/Signup";
+import Login from "../../auth/components/Login";
+import Signup from "../../auth/components/Signup";
 
 function Home() {
   const [isSignup, setIsSignup] = useState(false);
