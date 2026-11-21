@@ -7,8 +7,8 @@ import { useAuth } from "./features/auth/context/AuthProvider";
 import { Toaster } from "react-hot-toast";
 
 import { Navigate, Route, Routes } from "react-router-dom";
-import CallWindow from "./components/call/CallWindow";
-import GroupCallWindow from "./components/groupCall/GroupCallWindow";
+import CallWindow from "./features/calls/private/components/CallWindow";
+import GroupCallWindow from "./features/calls/group/components/GroupCallWindow";
 import Home from "./features/chat/components/Home";
 
 function App() {

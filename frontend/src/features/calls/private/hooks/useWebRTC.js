@@ -1,6 +1,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useCallContext } from "./CallContext";
+import { useCallContext } from "../context/CallContext";
 import useMediaStream from "./useMediaStream";
 
 const ICE_SERVERS = {

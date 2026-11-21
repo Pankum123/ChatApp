@@ -1,7 +1,7 @@
 
 import { useEffect, useRef } from "react";
-import { useCallContext } from "../../context/call/CallContext";
-import useWebRTC from "../../context/call/useWebRTC";
+import { useCallContext } from "../context/CallContext";
+import useWebRTC from "../hooks/useWebRTC";
 
 const CallWindow = () => {
   const {

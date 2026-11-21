@@ -1,6 +1,6 @@
 
 import { FiPhone, FiVideo } from "react-icons/fi";
-import { useCallContext } from "../../context/call/CallContext";
+import { useCallContext } from "../context/CallContext";
 
 const CallButtons = ({ receiverId }) => {
   const { call, startCall } = useCallContext();

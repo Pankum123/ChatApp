@@ -1,6 +1,6 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { useSocketContext } from "../../shared/realtime/SocketContext";
+import { useSocketContext } from "../../../../shared/realtime/SocketContext";
 
 const callContext = createContext(null);
 

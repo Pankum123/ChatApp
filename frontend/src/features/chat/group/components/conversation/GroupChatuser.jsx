@@ -3,7 +3,7 @@ import useConversation from "../../../../../shared/zustand/useConversation.js";
 import { useSocketContext } from "../../../../../shared/realtime/SocketContext.jsx";
 import { CiMenuFries } from "react-icons/ci";
 import GroupInfo from "../info/GroupInfo.jsx";
-import GroupCallButtons from "../../../../../components/groupCall/GroupCallButtons.jsx";
+import GroupCallButtons from "../../../../calls/group/components/GroupCallButtons.jsx";
 
 function GroupChatuser() {
   const { selectedGroup } = useConversation();

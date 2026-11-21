@@ -1,5 +1,5 @@
 import { FiPhone, FiVideo } from "react-icons/fi";
-import { useGroupCallContext } from "../../context/call/group/GroupCallContext";
+import { useGroupCallContext } from "../context/GroupCallContext";
 
 const GroupCallButtons = ({ groupId }) => {
   const {

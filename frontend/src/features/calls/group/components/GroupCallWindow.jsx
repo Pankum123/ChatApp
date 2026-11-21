@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
-import { useGroupCallContext } from "../../context/call/group/GroupCallContext";
-import useGroupMediaStream from "../../context/call/group/useGroupMediaStream";
-import useGroupWebRTC from "../../context/call/group/useGroupWebRTC";
+import { useGroupCallContext } from "../context/GroupCallContext";
+import useGroupMediaStream from "../hooks/useGroupMediaStream";
+import useGroupWebRTC from "../hooks/useGroupWebRTC";
 import ParticipantGrid from "./ParticipantGrid";
 import GroupCallControls from "./GroupCallControls";
 

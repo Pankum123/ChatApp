@@ -5,8 +5,8 @@ import {
   useEffect,
   useState,
 } from "react";
-import { useSocketContext } from "../../../shared/realtime/SocketContext";
-import { useAuth } from "../../../features/auth/context/AuthProvider";
+import { useSocketContext } from "../../../../shared/realtime/SocketContext";
+import { useAuth } from "../../../auth/context/AuthProvider";
 
 const GroupCallContext = createContext(null);
 

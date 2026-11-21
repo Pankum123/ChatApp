@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useGroupCallContext } from "./GroupCallContext";
+import { useGroupCallContext } from "../context/GroupCallContext";
 
 const ICE_SERVERS = {
   iceServers: [

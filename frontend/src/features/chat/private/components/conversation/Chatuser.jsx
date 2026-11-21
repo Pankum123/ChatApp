@@ -4,7 +4,7 @@ import { useSocketContext } from "../../../../../shared/realtime/SocketContext.j
 import { CiMenuFries } from "react-icons/ci";
 import profile from "../../../../../../public/user.jpg";
 import UserProfile from "../../../../../home/Rightpart/UserProfile/UserProfile.jsx";
-import CallButtons from "../../../../../components/call/CallButtons.jsx";
+import CallButtons from "../../../../calls/private/components/CallButtons.jsx";
 
 function Chatuser() {
   const { selectedConversation } = useConversation();
