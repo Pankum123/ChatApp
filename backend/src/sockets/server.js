@@ -5,14 +5,15 @@ import oneToOneSocket from "./oneToOneSocket.js";
 import groupSocket from "./groupSocket.js";
 import callSocket from "./callSocket.js";
 import groupCallSocket from "./groupCallSocket.js";
+import "dotenv/config";
 
 const app = express();
 const server = http.createServer(app);
 
 const allowedOrigins = [
-  "http://localhost:3001",
-  "https://chatapp-pankaj-j656.onrender.com"
-];
+  process.env.DEVELOPMENT_FRONTEND_URL,
+  process.env.PRODUCTION_FRONTEND_URL,
+].filter(Boolean);
 
 const io = new Server(server, {
   cors: {

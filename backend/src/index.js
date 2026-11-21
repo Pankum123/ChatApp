@@ -25,9 +25,9 @@ if (process.env.NODE_ENV !== "production") {
 // CORS middleware (before routes)
 // ----------------------
 const allowedOrigins = [
-  "http://localhost:3001",
-  "https://chatapp-pankaj-j656.onrender.com"
-];
+  process.env.DEVELOPMENT_FRONTEND_URL,
+  process.env.PRODUCTION_FRONTEND_URL,
+].filter(Boolean);
 
 app.use(cors({
   origin: function(origin, callback) {
