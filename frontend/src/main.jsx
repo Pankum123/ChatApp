@@ -2,11 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import "./index.css";
-import { AuthProvider } from "./context/AuthProvider.jsx";
+import { AuthProvider } from "./features/auth/context/AuthProvider.jsx";
 import { BrowserRouter } from "react-router-dom";
-import { SocketProvider } from "./context/SocketContext.jsx";
-import { CallProvider } from "./context/call/CallContext.jsx";
-import { GroupCallProvider } from "./context/call/group/GroupCallContext.jsx";
+import { SocketProvider } from "./shared/realtime/SocketContext.jsx";
+import { CallProvider } from "./features/calls/private/context/CallContext.jsx";
+import { GroupCallProvider } from "./features/calls/group/context/GroupCallContext.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>

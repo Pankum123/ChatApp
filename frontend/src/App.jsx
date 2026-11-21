@@ -1,15 +1,15 @@
 import React from "react";
-import Left from "./home/Leftpart/Left";
-import Right from "./home/Rightpart/Right";
-import Signup from "./components/Signup";
-import Login from "./components/Login";
-import { useAuth } from "./context/AuthProvider";
+import Left from "./features/chat/components/Left";
+import Right from "./features/chat/components/Right";
+import Signup from "./features/auth/components/Signup";
+import Login from "./features/auth/components/Login";
+import { useAuth } from "./features/auth/context/AuthProvider";
 import { Toaster } from "react-hot-toast";
 
 import { Navigate, Route, Routes } from "react-router-dom";
-import CallWindow from "./components/call/CallWindow";
-import GroupCallWindow from "./components/groupCall/GroupCallWindow";
-import Home from "./home/Home";
+import CallWindow from "./features/calls/private/components/CallWindow";
+import GroupCallWindow from "./features/calls/group/components/GroupCallWindow";
+import Home from "./features/chat/components/Home";
 
 function App() {
   const [authUser, setAuthUser] = useAuth();
