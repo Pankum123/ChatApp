@@ -1,8 +1,8 @@
 
 import React, { useState } from "react";
-import useGetAllUsers from "../../../../features/chat/private/hooks/useGetAllUsers.jsx";
-import useConversation from "../../../../shared/zustand/useConversation.js";
-import { addGroupMemberAPI } from "../../../../shared/api.js";
+import useGetAllUsers from "../../../private/hooks/useGetAllUsers.jsx";
+import useConversation from "../../../../../shared/zustand/useConversation.js";
+import { addGroupMemberAPI } from "../../../../../shared/api.js";
 
 function AddMember({ group, onBack }) {
   const [allUsers, loading] = useGetAllUsers();

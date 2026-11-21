@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { editGroupAPI } from "../../../../shared/api.js";
-import useConversation from "../../../../shared/zustand/useConversation.js";
+import { editGroupAPI } from "../../../../../shared/api.js";
+import useConversation from "../../../../../shared/zustand/useConversation.js";
 
 function EditGroup({ group }) {
   const [isEditing, setIsEditing] = useState(false);

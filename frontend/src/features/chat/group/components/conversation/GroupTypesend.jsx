@@ -2,10 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { IoSend } from "react-icons/io5";
 import { MdClose, MdReply } from "react-icons/md";
 
-import useSendGroupMessage from "../../../features/chat/group/hooks/useSendGroupMessage.js";
-import { useSocketContext } from "../../../shared/realtime/SocketContext.jsx";
-import useConversation from "../../../shared/zustand/useConversation.js";
-import { editGroupMessageAPI } from "../../../shared/api.js";
+import useSendGroupMessage from "../../hooks/useSendGroupMessage.js";
+import { useSocketContext } from "../../../../../shared/realtime/SocketContext.jsx";
+import useConversation from "../../../../../shared/zustand/useConversation.js";
+import { editGroupMessageAPI } from "../../../../../shared/api.js";
 
 function GroupTypesend() {
   const [message, setMessage] = useState("");

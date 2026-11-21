@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { deleteGroupAPI } from "../../../../shared/api";
+import { deleteGroupAPI } from "../../../../../shared/api";
 
 function DeleteGroup({ group, onBack }) {
   const [deleting, setDeleting] = useState(false);

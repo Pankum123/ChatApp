@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import useConversation from "../../../shared/zustand/useConversation.js";
-import { useSocketContext } from "../../../shared/realtime/SocketContext.jsx";
+import useConversation from "../../../../../shared/zustand/useConversation.js";
+import { useSocketContext } from "../../../../../shared/realtime/SocketContext.jsx";
 import { CiMenuFries } from "react-icons/ci";
-import GroupInfo from "./GroupInfo/GroupInfo.jsx";
-import GroupCallButtons from "../../../components/groupCall/GroupCallButtons.jsx";
+import GroupInfo from "../info/GroupInfo.jsx";
+import GroupCallButtons from "../../../../../components/groupCall/GroupCallButtons.jsx";
 
 function GroupChatuser() {
   const { selectedGroup } = useConversation();

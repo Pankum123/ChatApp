@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
-import useConversation from "../../../../shared/zustand/useConversation.js";
-import { updateGroupImageAPI } from "../../../../shared/api.js";
+import useConversation from "../../../../../shared/zustand/useConversation.js";
+import { updateGroupImageAPI } from "../../../../../shared/api.js";
 
 import AddMember from "./AddMember.jsx";
 import RemoveMember from "./RemoveMember.jsx";
@@ -8,7 +8,7 @@ import Members from "./Members.jsx";
 import DeleteGroup from "./DeleteGroup.jsx";
 import LeaveGroup from "./LeaveGroup.jsx";
 import EditGroup from "./EditGroup.jsx";
-import useGetAllUsers from "../../../../features/chat/private/hooks/useGetAllUsers.jsx";
+import useGetAllUsers from "../../../private/hooks/useGetAllUsers.jsx";
 
 function GroupInfo({ onClose }) {
   const { selectedGroup, setSelectedGroup } = useConversation();

@@ -11,15 +11,15 @@ import {
 } from "react-icons/md";
 import { IoArrowRedo } from "react-icons/io5";
 
-import useConversation from "../../../shared/zustand/useConversation.js";
-import useGetGroupMessages from "../../../features/chat/group/hooks/useGetGroupMessages.js";
-import Loading from "../../../components/Loading.jsx";
-import ForwardModal from "../../../features/chat/private/components/conversation/ForwardModal.jsx";
+import useConversation from "../../../../../shared/zustand/useConversation.js";
+import useGetGroupMessages from "../../hooks/useGetGroupMessages.js";
+import Loading from "../../../../../components/Loading.jsx";
+import ForwardModal from "../../../private/components/conversation/ForwardModal.jsx";
 
 import {
   deleteGroupMessageForMeAPI,
   deleteGroupMessageForEveryoneAPI,
-} from "../../../shared/api.js";
+} from "../../../../../shared/api.js";
 
 function GroupMessages() {
   const bottomRef = useRef(null);
