@@ -198,12 +198,12 @@ function Profile() {
   };
 
   return (
-    <div className="relative" ref={profileRef}>
+    <div className="relative shrink-0 px-2 text-white font-semibold bg-slate-800 rounded-md" ref={profileRef}>
 
       {/* Profile Button */}
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="ml-3 mt-2 focus:outline-none"
+        className="ml-2 mt-2 focus:outline-none"
       >
         <img
           src={profilePic || profile}
