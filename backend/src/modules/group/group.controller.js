@@ -48,14 +48,53 @@ export const getGroups = async (req, res) => {
       .populate("members", "fullname email")
       .populate("admin", "fullname email");
 
-    res.status(200).json(groups);
+    const groupsWithUnreadCount = await Promise.all(
+      groups.map(async (group) => {
+        const unreadCount = await GroupMessage.countDocuments({
+          groupId: group._id,
+          senderId: { $ne: userId },
+          readBy: { $ne: userId },
+          isDeleted: false,
+          deletedFor: { $nin: [userId] },
+        });
+
+        const lastMessage = await GroupMessage.findOne({
+          groupId: group._id,
+          deletedFor: { $nin: [userId] },
+        })
+          .sort({ createdAt: -1 })
+          .populate("senderId", "fullname");
+
+        return {
+          ...group.toObject(),
+          unreadCount,
+          lastMessage,
+        };
+      })
+    );
+
+    groupsWithUnreadCount.sort((a, b) => {
+      const dateA = a.lastMessage?.createdAt
+        ? new Date(a.lastMessage.createdAt).getTime()
+        : 0;
+
+      const dateB = b.lastMessage?.createdAt
+        ? new Date(b.lastMessage.createdAt).getTime()
+        : 0;
+
+      return dateB - dateA;
+    });
+
+    return res.status(200).json(groupsWithUnreadCount);
   } catch (error) {
-    console.log("Error in getGroups", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.log("Error in getGroups:", error);
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
 
-// Send Group Message
+
 export const sendGroupMessage = async (req, res) => {
   const uploadedAttachments = [];
 

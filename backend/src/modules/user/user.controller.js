@@ -2,6 +2,7 @@ import User from "./user.model.js";
 import bcrypt from "bcryptjs";
 import createTokenAndSaveCookie from "../../jwt/generateToken.js";
 import { v2 as cloudinary } from "cloudinary";
+import Message from "../message/message.model.js";
 
 // Normalize email
 const normalizeEmail = (email = "") => {
@@ -218,15 +219,59 @@ export const logout = async (req, res) => {
   }
 };
 
+
 export const allUsers = async (req, res) => {
   try {
     const loggedInUser = req.user._id;
-    const filteredUsers = await User.find({
+
+    const users = await User.find({
       _id: { $ne: loggedInUser },
     }).select("-password");
-    res.status(201).json(filteredUsers);
+
+    const usersWithUnreadCount = await Promise.all(
+      users.map(async (user) => {
+        const unreadCount = await Message.countDocuments({
+          senderId: user._id,
+          receiverId: loggedInUser,
+          status: { $ne: "read" },
+          isDeleted: false,
+          deletedFor: { $nin: [loggedInUser] },
+        });
+
+        const lastMessage = await Message.findOne({
+          $or: [
+            { senderId: loggedInUser, receiverId: user._id },
+            { senderId: user._id, receiverId: loggedInUser },
+          ],
+          deletedFor: { $nin: [loggedInUser] },
+        }).sort({ createdAt: -1 });
+
+        return {
+          ...user.toObject(),
+          unreadCount,
+          lastMessage,
+        };
+      })
+    );
+
+    usersWithUnreadCount.sort((a, b) => {
+      const dateA = a.lastMessage?.createdAt
+        ? new Date(a.lastMessage.createdAt).getTime()
+        : 0;
+
+      const dateB = b.lastMessage?.createdAt
+        ? new Date(b.lastMessage.createdAt).getTime()
+        : 0;
+
+      return dateB - dateA;
+    });
+
+    return res.status(200).json(usersWithUnreadCount);
   } catch (error) {
-    console.log("Error in allUsers Controller: " + error);
+    console.log("Error in allUsers Controller:", error);
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
 

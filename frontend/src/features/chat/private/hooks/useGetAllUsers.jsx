@@ -22,7 +22,7 @@ function useGetAllUsers() {
     getUsers();
   }, []);
 
-  return [allUsers, loading];
+  return [allUsers, loading, setAllUsers];
 }
 
 export default useGetAllUsers;
