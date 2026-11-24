@@ -2,6 +2,37 @@ import mongoose from "mongoose";
 import Group from "./group.model.js";
 import User from "../user/user.model.js";
 
+const attachmentSchema = new mongoose.Schema(
+  {
+    url: {
+      type: String,
+      required: true,
+    },
+    publicId: {
+      type: String,
+      required: true,
+    },
+    fileName: {
+      type: String,
+      required: true,
+    },
+    fileType: {
+      type: String,
+      required: true,
+    },
+    fileSize: {
+      type: Number,
+      required: true,
+    },
+    resourceType: {
+      type: String,
+      enum: ["image", "video", "raw"],
+      required: true,
+    },
+  },
+  { _id: false }
+);
+
 const groupMessageSchema = new mongoose.Schema(
   {
     groupId: {
@@ -16,7 +47,11 @@ const groupMessageSchema = new mongoose.Schema(
     },
     message: {
       type: String,
-      required: true,
+      default: "",
+    },
+    attachments: {
+      type: [attachmentSchema],
+      default: [],
     },
 
     status: {

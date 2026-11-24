@@ -55,20 +55,25 @@ export const getGroups = async (req, res) => {
   }
 };
 
-
 // Send Group Message
 export const sendGroupMessage = async (req, res) => {
+  const uploadedAttachments = [];
+
   try {
-    const { message, replyTo } = req.body;
+    const { message = "", replyTo } = req.body;
     const { id: groupId } = req.params;
     const senderId = req.user._id;
 
-    if (!message || !message.trim()) {
+    const textMessage =
+      typeof message === "string" ? message.trim() : "";
+
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
       return res.status(400).json({
-        error: "Message cannot be empty",
+        error: "Invalid group ID",
       });
     }
 
+    // Check group membership
     const group = await Group.findOne({
       _id: groupId,
       members: senderId,
@@ -80,7 +85,30 @@ export const sendGroupMessage = async (req, res) => {
       });
     }
 
-    // Validate replied message
+    // Normalize uploaded files
+    let files = req.files?.attachments || [];
+
+    if (!Array.isArray(files)) {
+      files = [files];
+    }
+
+    // Validate message content
+    if (!textMessage && files.length === 0) {
+      return res.status(400).json({
+        error: "Message or attachment is required",
+      });
+    }
+
+    // Maximum 5 attachments
+    if (files.length > 5) {
+      return res.status(400).json({
+        error: "Maximum 5 attachments allowed",
+      });
+    }
+
+    const MAX_FILE_SIZE = 20 * 1024 * 1024;
+
+    // Validate reply message before uploading
     if (replyTo) {
       if (!mongoose.Types.ObjectId.isValid(replyTo)) {
         return res.status(400).json({
@@ -100,10 +128,66 @@ export const sendGroupMessage = async (req, res) => {
       }
     }
 
+    // Upload attachments to Cloudinary
+    for (const file of files) {
+      const { name, mimetype, size, tempFilePath } = file;
+
+      if (size > MAX_FILE_SIZE) {
+        throw new Error(`File ${name} exceeds 20 MB limit`);
+      }
+
+      let resourceType;
+
+      if (
+        [
+          "image/jpeg",
+          "image/png",
+          "image/gif",
+          "image/webp",
+        ].includes(mimetype)
+      ) {
+        resourceType = "image";
+      } else if (
+        mimetype.startsWith("video/") ||
+        mimetype.startsWith("audio/")
+      ) {
+        resourceType = "video";
+      } else if (mimetype === "application/pdf") {
+        resourceType = "image";
+      } else {
+        throw new Error(`File type not supported: ${name}`);
+      }
+
+      const cloudResponse = await cloudinary.uploader.upload(
+        tempFilePath,
+        {
+          folder: "chatapp/group-chat",
+          resource_type: resourceType,
+          use_filename: true,
+          unique_filename: true,
+        }
+      );
+
+      if (!cloudResponse?.public_id) {
+        throw new Error(`Failed to upload ${name}`);
+      }
+
+      uploadedAttachments.push({
+        url: cloudResponse.secure_url,
+        publicId: cloudResponse.public_id,
+        fileName: name,
+        fileType: mimetype,
+        fileSize: size,
+        resourceType,
+      });
+    }
+
+    // Create group message
     const newGroupMessage = await GroupMessage.create({
       groupId,
       senderId,
-      message: message.trim(),
+      message: textMessage,
+      attachments: uploadedAttachments,
       replyTo: replyTo || null,
     });
 
@@ -120,17 +204,42 @@ export const sendGroupMessage = async (req, res) => {
         },
       });
 
-    // Send populated message to all connected group members
-    io.to(groupId).emit(
+    // Send message to all group members
+    io.to(groupId.toString()).emit(
       "newGroupMessage",
       populatedMessage
     );
 
-    res.status(201).json(populatedMessage);
+    return res.status(201).json(populatedMessage);
+
   } catch (error) {
-    console.log("Error in sendGroupMessage", error);
-    res.status(500).json({
-      error: "Internal server error",
+    console.log("Error in sendGroupMessage:", error);
+
+    // Cleanup uploaded files if message creation fails
+    await Promise.all(
+      uploadedAttachments.map(async (attachment) => {
+        try {
+          await cloudinary.uploader.destroy(
+            attachment.publicId,
+            {
+              resource_type: attachment.resourceType,
+            }
+          );
+        } catch (deleteError) {
+          console.log("Cloudinary cleanup error:", deleteError);
+        }
+      })
+    );
+
+    const isValidationError =
+      error.message.includes("exceeds 20 MB") ||
+      error.message.includes("not supported") ||
+      error.message.includes("Failed to upload");
+
+    return res.status(isValidationError ? 400 : 500).json({
+      error: isValidationError
+        ? error.message
+        : "Internal server error",
     });
   }
 };

@@ -138,15 +138,51 @@ export const getGroupMessagesAPI = async (groupId) => {
   return response;
 };
 
-export const sendGroupMessageAPI = async (groupId, message, replyTo = null) => {
-  if (!groupId) throw new Error("Group ID is required");
 
-  const response = await api.post(`/group/send/${groupId}`, {
-    message,
-    replyTo,
-  });
 
-  return response;
+export const sendGroupMessageAPI = async (
+  groupId,
+  message = "",
+  attachments = [],
+  replyTo = null
+) => {
+  if (!groupId) {
+    throw new Error("Group ID is required");
+  }
+
+  let payload;
+  let config = {};
+
+  if (attachments.length > 0) {
+    const formData = new FormData();
+
+    formData.append("message", message);
+
+    if (replyTo) {
+      formData.append("replyTo", replyTo);
+    }
+
+    attachments.forEach((file) => {
+      formData.append("attachments", file);
+    });
+
+    payload = formData;
+
+    config.headers = {
+      "Content-Type": undefined,
+    };
+  } else {
+    payload = {
+      message,
+      replyTo,
+    };
+  }
+
+  return api.post(
+    `/group/send/${groupId}`,
+    payload,
+    config
+  );
 };
 
 // ====== Add Member to Group API ======

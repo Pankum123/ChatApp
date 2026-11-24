@@ -8,6 +8,7 @@ import {
   MdEdit,
   MdDeleteOutline,
   MdArrowBack,
+  MdInsertDriveFile,
 } from "react-icons/md";
 import { IoArrowRedo } from "react-icons/io5";
 
@@ -20,6 +21,96 @@ import {
   deleteGroupMessageForMeAPI,
   deleteGroupMessageForEveryoneAPI,
 } from "../../../../../shared/api.js";
+
+// Group Attachment Preview Component
+function GroupAttachmentPreview({ attachment }) {
+  const {
+    url,
+    fileName,
+    fileType,
+    fileSize,
+  } = attachment;
+
+  const formattedSize =
+    typeof fileSize === "number"
+      ? `${(fileSize / (1024 * 1024)).toFixed(2)} MB`
+      : "";
+
+  // Image Preview
+  if (fileType?.startsWith("image/")) {
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        className="block mt-2"
+      >
+        <img
+          src={url}
+          alt={fileName || "Shared image"}
+          loading="lazy"
+          className="max-h-72 max-w-full rounded-lg object-contain"
+        />
+      </a>
+    );
+  }
+
+  // Video Preview
+  if (fileType?.startsWith("video/")) {
+    return (
+      <video
+        controls
+        preload="metadata"
+        className="mt-2 max-h-72 max-w-full rounded-lg"
+      >
+        <source src={url} type={fileType} />
+        Your browser does not support video playback.
+      </video>
+    );
+  }
+
+  // Audio Preview
+  if (fileType?.startsWith("audio/")) {
+    return (
+      <div className="mt-2 min-w-[220px] max-w-full">
+        <audio
+          controls
+          preload="metadata"
+          className="max-w-full"
+        >
+          <source src={url} type={fileType} />
+          Your browser does not support audio playback.
+        </audio>
+      </div>
+    );
+  }
+
+  // PDF and Other Documents
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      className="mt-2 flex items-center gap-3 rounded-lg bg-black/20 hover:bg-black/30 p-3 text-white"
+    >
+      <MdInsertDriveFile size={24} />
+
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-medium break-all">
+          {fileName || "Shared attachment"}
+        </span>
+
+        <span className="block text-xs text-gray-300">
+          {formattedSize}
+        </span>
+      </span>
+
+      <span className="text-xs underline">
+        Open
+      </span>
+    </a>
+  );
+}
 
 function GroupMessages() {
   const bottomRef = useRef(null);
@@ -172,7 +263,7 @@ function GroupMessages() {
   // Copy group message
   const handleCopy = async (messageId, messageText) => {
     try {
-      await navigator.clipboard.writeText(messageText);
+      await navigator.clipboard.writeText(messageText || "");
 
       setCopiedMessageId(messageId);
 
@@ -274,7 +365,7 @@ function GroupMessages() {
                   )}
 
                   <div
-                    className="relative group inline-block w-fit min-w-[65px] max-w-[85vw] group-message-menu"
+                    className={`relative group inline-block w-fit min-w-[65px] max-w-[85vw] group-message-menu`}
                     ref={activeMenu === message._id ? menuRef : null}
                   >
                     {/* Message bubble */}
@@ -301,7 +392,10 @@ function GroupMessages() {
                           <p className="text-gray-200 text-sm break-words">
                             {message.replyTo.isDeleted
                               ? "This message was deleted"
-                              : message.replyTo.message}
+                              : message.replyTo.message ||
+                                (message.replyTo.attachments?.length
+                                  ? "Attachment"
+                                  : "")}
                           </p>
                         </div>
                       )}
@@ -314,15 +408,33 @@ function GroupMessages() {
                         </div>
                       )}
 
-                      <span className="whitespace-pre-wrap [overflow-wrap:anywhere]">
-                        {message.message}
-
-                        {message.isEdited && !message.isDeleted && (
-                          <span className="ml-2 text-xs text-gray-200 italic">
-                            edited
-                          </span>
+                      {/* Attachments */}
+                      {!message.isDeleted &&
+                        message.attachments?.length > 0 && (
+                          <div className="flex flex-col gap-2 mt-2">
+                            {message.attachments.map(
+                              (attachment, index) => (
+                                <GroupAttachmentPreview
+                                  key={`${message._id}-${index}`}
+                                  attachment={attachment}
+                                />
+                              )
+                            )}
+                          </div>
                         )}
-                      </span>
+
+                      {/* Message Text */}
+                      {message.message && (
+                        <span className="whitespace-pre-wrap [overflow-wrap:anywhere]">
+                          {message.message}
+
+                          {message.isEdited && !message.isDeleted && (
+                            <span className="ml-2 text-xs text-gray-200 italic">
+                              edited
+                            </span>
+                          )}
+                        </span>
+                      )}
 
                       {/* Dropdown arrow */}
                       {!loadingMessageId && (

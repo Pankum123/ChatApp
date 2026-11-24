@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import useConversation from "../../../../shared/zustand/useConversation.js";
 import { sendGroupMessageAPI } from "../../../../shared/api.js";
@@ -8,13 +7,21 @@ const useSendGroupMessage = () => {
 
   const {
     selectedGroup,
-    groupMessages,
     setGroupMessages,
     setGroupReplyingMessage,
   } = useConversation();
 
-  const sendGroupMessage = async (message, replyTo = null) => {
-    if (!message.trim() || !selectedGroup?._id) return;
+  const sendGroupMessage = async (
+    message = "",
+    attachments = [],
+    replyTo = null
+  ) => {
+    if (
+      (!message.trim() && attachments.length === 0) ||
+      !selectedGroup?._id
+    ) {
+      return false;
+    }
 
     setLoading(true);
 
@@ -22,12 +29,13 @@ const useSendGroupMessage = () => {
       const res = await sendGroupMessageAPI(
         selectedGroup._id,
         message,
+        attachments,
         replyTo
       );
 
       const newMessage = res.data;
 
-      // Socket se same message dobara aaye to duplicate nahi hoga
+      // Avoid duplicate messages from socket
       setGroupMessages((prevMessages) => {
         const alreadyExists = prevMessages.some(
           (item) => item._id === newMessage._id
@@ -37,15 +45,26 @@ const useSendGroupMessage = () => {
 
         return [...prevMessages, newMessage];
       });
+
       setGroupReplyingMessage(null);
+
+      return true;
     } catch (error) {
-      console.log("Error in sending group message:", error);
+      console.log(
+        "Error in sending group message:",
+        error.response?.data?.error || error.message
+      );
+
+      return false;
     } finally {
       setLoading(false);
     }
   };
 
-  return { loading, sendGroupMessage };
+  return {
+    loading,
+    sendGroupMessage,
+  };
 };
 
 export default useSendGroupMessage;
