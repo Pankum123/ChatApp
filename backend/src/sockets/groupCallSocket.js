@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import Group from "../modules/group/group.model.js";
+import GroupMessage from "../modules/group/groupMessage.model.js";
 
 const activeGroupCalls = new Map();
 const userGroupCalls = new Map();
@@ -33,8 +34,67 @@ const getGroupMember = async (groupId, userId) => {
 const getParticipantIds = (call) =>
   Array.from(call.participants.keys());
 
+// ============================================
+// SAVE GROUP CALL HISTORY
+// ============================================
+
+const saveGroupCallHistory = async (io, call, status) => {
+  if (!call || call.historySaved) return;
+
+  call.historySaved = true;
+
+  try {
+    const endedAt = new Date();
+
+    const duration =
+      status === "completed" && call.everJoinedOther
+        ? Math.max(
+            0,
+            Math.floor(
+              (endedAt.getTime() - call.createdAt.getTime()) / 1000
+            )
+          )
+        : 0;
+
+    const groupMessage = await GroupMessage.create({
+      groupId: call.groupId,
+      senderId: call.startedById,
+      message: "",
+      messageType: "call",
+      call: {
+        callType: call.callType,
+        status,
+        duration,
+        hostId: call.startedById,
+        participantIds: Array.from(call.joinedParticipantIds),
+        startedAt: call.createdAt,
+        endedAt,
+      },
+    });
+
+    const populatedMessage = await GroupMessage.findById(
+      groupMessage._id
+    ).populate("senderId", "fullname email");
+
+    io.to(call.groupId).emit(
+      "newGroupMessage",
+      populatedMessage
+    );
+
+    console.log("Group call history saved:", status);
+  } catch (error) {
+    call.historySaved = false;
+    console.error("Save group call history error:", error);
+  }
+};
+
+// ============================================
+// REMOVE ACTIVE CALL
+// ============================================
+
 const removeCall = (callId) => {
   const call = activeGroupCalls.get(callId);
+
   if (!call) return null;
 
   activeGroupCalls.delete(callId);
@@ -48,12 +108,19 @@ const removeCall = (callId) => {
   return call;
 };
 
+// ============================================
+// GROUP CALL SOCKET
+// ============================================
+
 const groupCallSocket = (io, socket, userId) => {
   if (!isValidId(userId)) return;
 
   const currentUserId = normalizeId(userId);
 
-  // Start a new group call. Only actual group members can start it.
+  // ==========================================
+  // START GROUP CALL
+  // ==========================================
+
   socket.on("group-call:start", async ({ groupId, callType } = {}) => {
     try {
       if (!isValidId(groupId) || !["audio", "video"].includes(callType)) {
@@ -67,12 +134,14 @@ const groupCallSocket = (io, socket, userId) => {
       }
 
       const group = await getGroupMember(groupId, currentUserId);
+
       if (!group) {
         emitError(socket, "You are not a member of this group.", "NOT_GROUP_MEMBER");
         return;
       }
 
       const normalizedGroupId = String(group._id);
+
       const existingCall = Array.from(activeGroupCalls.values()).find(
         (item) => item.groupId === normalizedGroupId
       );
@@ -93,6 +162,7 @@ const groupCallSocket = (io, socket, userId) => {
 
       const callId = randomUUID();
       const callerDetails = toParticipant(caller);
+      const createdAt = new Date();
 
       const call = {
         callId,
@@ -100,8 +170,12 @@ const groupCallSocket = (io, socket, userId) => {
         groupName: group.groupName,
         callType,
         hostId: currentUserId,
+        startedById: currentUserId,
         participants: new Map([[currentUserId, callerDetails]]),
-        createdAt: new Date(),
+        joinedParticipantIds: new Set([currentUserId]),
+        createdAt,
+        everJoinedOther: false,
+        historySaved: false,
       };
 
       activeGroupCalls.set(callId, call);
@@ -116,9 +190,10 @@ const groupCallSocket = (io, socket, userId) => {
         participants: [callerDetails],
       });
 
-      // Invite all other current group members through their personal rooms.
+      // Invite all other current group members.
       for (const member of group.members) {
         const memberId = normalizeId(member._id);
+
         if (memberId === currentUserId) continue;
 
         io.to(memberId).emit("group-call:incoming", {
@@ -138,16 +213,21 @@ const groupCallSocket = (io, socket, userId) => {
     }
   });
 
-  // Accept an invitation and join the participant mesh.
+  // ==========================================
+  // JOIN GROUP CALL
+  // ==========================================
+
   socket.on("group-call:join", async ({ callId } = {}) => {
     try {
       const call = activeGroupCalls.get(callId);
+
       if (!call) {
         emitError(socket, "This group call is no longer available.", "CALL_NOT_FOUND");
         return;
       }
 
       const group = await getGroupMember(call.groupId, currentUserId);
+
       if (!group) {
         emitError(socket, "You are not a member of this group.", "NOT_GROUP_MEMBER");
         return;
@@ -182,7 +262,11 @@ const groupCallSocket = (io, socket, userId) => {
 
       if (!alreadyJoined) {
         const existingParticipantIds = getParticipantIds(call);
+
         call.participants.set(currentUserId, participant);
+        call.joinedParticipantIds.add(currentUserId);
+        call.everJoinedOther = true;
+
         userGroupCalls.set(currentUserId, callId);
 
         for (const participantId of existingParticipantIds) {
@@ -209,8 +293,13 @@ const groupCallSocket = (io, socket, userId) => {
     }
   });
 
+  // ==========================================
+  // REJECT GROUP CALL INVITATION
+  // ==========================================
+
   socket.on("group-call:reject", ({ callId } = {}) => {
     const call = activeGroupCalls.get(callId);
+
     if (!call || call.participants.has(currentUserId)) return;
 
     io.to(call.hostId).emit("group-call:rejected", {
@@ -219,47 +308,62 @@ const groupCallSocket = (io, socket, userId) => {
     });
   });
 
-  // Relay WebRTC signaling only between members of the same active call.
+  // ==========================================
+  // WEBRTC SIGNALING
+  // ==========================================
+
   const relaySignal = (eventName, fieldName, expectedType) => {
-    socket.on(eventName, ({ callId, targetUserId, [fieldName]: value } = {}) => {
-      const call = activeGroupCalls.get(callId);
-      const targetId = isValidId(targetUserId)
-        ? normalizeId(targetUserId)
-        : null;
+    socket.on(
+      eventName,
+      ({ callId, targetUserId, [fieldName]: value } = {}) => {
+        const call = activeGroupCalls.get(callId);
 
-      if (
-        !call ||
-        !targetId ||
-        targetId === currentUserId ||
-        !call.participants.has(currentUserId) ||
-        !call.participants.has(targetId) ||
-        !value ||
-        typeof value !== "object"
-      ) {
-        return;
+        const targetId = isValidId(targetUserId)
+          ? normalizeId(targetUserId)
+          : null;
+
+        if (
+          !call ||
+          !targetId ||
+          targetId === currentUserId ||
+          !call.participants.has(currentUserId) ||
+          !call.participants.has(targetId) ||
+          !value ||
+          typeof value !== "object"
+        ) {
+          return;
+        }
+
+        if (
+          expectedType &&
+          (value.type !== expectedType || typeof value.sdp !== "string")
+        ) {
+          return;
+        }
+
+        io.to(targetId).emit(eventName, {
+          callId,
+          fromUserId: currentUserId,
+          [fieldName]: value,
+        });
       }
-
-      if (
-        expectedType &&
-        (value.type !== expectedType || typeof value.sdp !== "string")
-      ) {
-        return;
-      }
-
-      io.to(targetId).emit(eventName, {
-        callId,
-        fromUserId: currentUserId,
-        [fieldName]: value,
-      });
-    });
+    );
   };
 
   relaySignal("group-call:offer", "offer", "offer");
   relaySignal("group-call:answer", "answer", "answer");
   relaySignal("group-call:ice-candidate", "candidate", null);
 
-  const leaveParticipant = (callId, reason = "participant_left") => {
+  // ==========================================
+  // LEAVE PARTICIPANT
+  // ==========================================
+
+  const leaveParticipant = async (
+    callId,
+    reason = "participant_left"
+  ) => {
     const call = activeGroupCalls.get(callId);
+
     if (!call || !call.participants.has(currentUserId)) return;
 
     call.participants.delete(currentUserId);
@@ -268,12 +372,18 @@ const groupCallSocket = (io, socket, userId) => {
       userGroupCalls.delete(currentUserId);
     }
 
+    // Save history when the last participant leaves.
     if (call.participants.size === 0) {
+      const status = call.everJoinedOther
+        ? "completed"
+        : "cancelled";
+
+      await saveGroupCallHistory(io, call, status);
       removeCall(callId);
       return;
     }
 
-    // If the host leaves, promote the first remaining participant.
+    // Promote another participant if the host leaves.
     if (call.hostId === currentUserId) {
       call.hostId = call.participants.keys().next().value;
     }
@@ -286,45 +396,78 @@ const groupCallSocket = (io, socket, userId) => {
     };
 
     for (const participantId of call.participants.keys()) {
-      io.to(participantId).emit("group-call:participant-left", payload);
+      io.to(participantId).emit(
+        "group-call:participant-left",
+        payload
+      );
     }
   };
 
-  socket.on("group-call:leave", ({ callId } = {}) => {
-    leaveParticipant(callId);
-  });
-
-  // Only the current host can end the call for everyone.
-  socket.on("group-call:end", ({ callId } = {}) => {
-    const call = activeGroupCalls.get(callId);
-    if (!call || call.hostId !== currentUserId) return;
-
-    for (const participantId of call.participants.keys()) {
-      if (participantId !== currentUserId) {
-        io.to(participantId).emit("group-call:ended", {
-          callId,
-          endedBy: currentUserId,
-        });
-      }
+  socket.on("group-call:leave", async ({ callId } = {}) => {
+    try {
+      await leaveParticipant(callId);
+    } catch (error) {
+      console.error("Group call leave error:", error);
     }
-
-    removeCall(callId);
-    socket.emit("group-call:ended", {
-      callId,
-      endedBy: currentUserId,
-    });
-
-    console.log("Group call ended:", callId);
   });
+
+  // ==========================================
+  // END GROUP CALL FOR EVERYONE
+  // ==========================================
+
+  socket.on("group-call:end", async ({ callId } = {}) => {
+    try {
+      const call = activeGroupCalls.get(callId);
+
+      if (!call || call.hostId !== currentUserId) return;
+
+      const status = call.everJoinedOther
+        ? "completed"
+        : "cancelled";
+
+      await saveGroupCallHistory(io, call, status);
+
+      for (const participantId of call.participants.keys()) {
+        if (participantId !== currentUserId) {
+          io.to(participantId).emit("group-call:ended", {
+            callId,
+            endedBy: currentUserId,
+          });
+        }
+      }
+
+      removeCall(callId);
+
+      socket.emit("group-call:ended", {
+        callId,
+        endedBy: currentUserId,
+      });
+
+      console.log("Group call ended:", callId);
+    } catch (error) {
+      console.error("Group call end error:", error);
+    }
+  });
+
+  // ==========================================
+  // DISCONNECT CLEANUP
+  // ==========================================
 
   socket.on("disconnect", async () => {
     try {
-      const remainingSockets = await io.in(currentUserId).fetchSockets();
+      const remainingSockets = await io
+        .in(currentUserId)
+        .fetchSockets();
+
       if (remainingSockets.length > 0) return;
 
       const callId = userGroupCalls.get(currentUserId);
+
       if (callId) {
-        leaveParticipant(callId, "participant_disconnected");
+        await leaveParticipant(
+          callId,
+          "participant_disconnected"
+        );
       }
     } catch (error) {
       console.error("Group call disconnect cleanup error:", error);

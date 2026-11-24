@@ -1,5 +1,6 @@
-
 import { randomUUID } from "node:crypto";
+import Conversation from "../modules/conversation/conversation.model.js";
+import Message from "../modules/message/message.model.js";
 
 // ============================================
 // ACTIVE CALL MANAGEMENT
@@ -16,6 +17,75 @@ const isValidUserId = (id) => {
     /^[a-f\d]{24}$/i.test(id)
   );
 };
+
+// ============================================
+// SAVE PRIVATE CALL HISTORY
+// ============================================
+
+const saveCallHistory = async (io, call, status) => {
+  try {
+    if (!call || call.historySaved) return;
+
+    // Mark immediately to prevent duplicate history.
+    call.historySaved = true;
+
+    const endedAt = new Date();
+
+    const duration =
+      call.acceptedAt && status === "completed"
+        ? Math.max(
+            0,
+            Math.floor(
+              (endedAt.getTime() - call.acceptedAt.getTime()) / 1000
+            )
+          )
+        : 0;
+
+    let conversation = await Conversation.findOne({
+      members: {
+        $all: [call.callerId, call.receiverId],
+      },
+    });
+
+    if (!conversation) {
+      conversation = await Conversation.create({
+        members: [call.callerId, call.receiverId],
+      });
+    }
+
+    const callMessage = await Message.create({
+      senderId: call.callerId,
+      receiverId: call.receiverId,
+      message: "",
+      messageType: "call",
+      call: {
+        callType: call.callType,
+        status,
+        duration,
+        callerId: call.callerId,
+        receiverId: call.receiverId,
+        startedAt: call.acceptedAt || call.createdAt,
+        endedAt,
+      },
+    });
+
+    conversation.messages.push(callMessage._id);
+    await conversation.save();
+
+    // Send call history to both users in real time.
+    io.to(call.callerId).emit("newMessage", callMessage);
+    io.to(call.receiverId).emit("newMessage", callMessage);
+
+    console.log("Private call history saved:", status);
+  } catch (error) {
+    console.error("Save call history error:", error);
+    if (call) call.historySaved = false;
+  }
+};
+
+// ============================================
+// REMOVE ACTIVE CALL
+// ============================================
 
 const removeCall = (callId) => {
   const call = activeCalls.get(callId);
@@ -55,7 +125,7 @@ const callSocket = (io, socket, userId) => {
   // 1. INITIATE CALL
   // ==========================================
 
-  socket.on("call:invite", ({ receiverId, callType } = {}) => {
+  socket.on("call:invite", async ({ receiverId, callType } = {}) => {
     try {
       if (!isValidUserId(receiverId)) {
         socket.emit("call:error", {
@@ -78,7 +148,7 @@ const callSocket = (io, socket, userId) => {
         return;
       }
 
-      // Caller already busy
+      // Caller already busy.
       if (userActiveCalls.has(currentUserId)) {
         socket.emit("call:error", {
           code: "CALLER_BUSY",
@@ -87,21 +157,46 @@ const callSocket = (io, socket, userId) => {
         return;
       }
 
-      // Receiver offline
+      // Receiver offline.
       const receiverRoom = io.sockets.adapter.rooms.get(targetUserId);
 
       if (!receiverRoom || receiverRoom.size === 0) {
+        const offlineCall = {
+          callId: randomUUID(),
+          callerId: currentUserId,
+          receiverId: targetUserId,
+          callType,
+          createdAt: new Date(),
+          acceptedAt: null,
+          historySaved: false,
+        };
+
+        await saveCallHistory(io, offlineCall, "missed");
+
         socket.emit("call:unavailable", {
           receiverId: targetUserId,
         });
+
         return;
       }
 
-      // Receiver already busy
+      // Receiver already busy.
       if (userActiveCalls.has(targetUserId)) {
+        const busyCall = {
+          callerId: currentUserId,
+          receiverId: targetUserId,
+          callType,
+          createdAt: new Date(),
+          acceptedAt: null,
+          historySaved: false,
+        };
+
+        await saveCallHistory(io, busyCall, "missed");
+
         socket.emit("call:busy", {
           receiverId: targetUserId,
         });
+
         return;
       }
 
@@ -114,6 +209,8 @@ const callSocket = (io, socket, userId) => {
         callType,
         status: "ringing",
         createdAt: new Date(),
+        acceptedAt: null,
+        historySaved: false,
         timeout: null,
       };
 
@@ -122,22 +219,22 @@ const callSocket = (io, socket, userId) => {
       userActiveCalls.set(currentUserId, callId);
       userActiveCalls.set(targetUserId, callId);
 
-      // Notify receiver
+      // Notify receiver.
       io.to(targetUserId).emit("call:incoming", {
         callId,
         callerId: currentUserId,
         callType,
       });
 
-      // Notify caller
+      // Notify caller.
       socket.emit("call:outgoing", {
         callId,
         receiverId: targetUserId,
         callType,
       });
 
-      // Ring timeout: 30 seconds
-      call.timeout = setTimeout(() => {
+      // Ring timeout: 30 seconds.
+      call.timeout = setTimeout(async () => {
         const currentCall = activeCalls.get(callId);
 
         if (!currentCall || currentCall.status !== "ringing") {
@@ -154,13 +251,14 @@ const callSocket = (io, socket, userId) => {
           callerId: currentCall.callerId,
         });
 
+        await saveCallHistory(io, currentCall, "missed");
+
         removeCall(callId);
 
         console.log("Call timed out:", callId);
       }, RING_TIMEOUT);
 
       console.log("Call initiated:", callId);
-
     } catch (error) {
       console.error("Call invite error:", error);
     }
@@ -183,6 +281,7 @@ const callSocket = (io, socket, userId) => {
       }
 
       call.status = "accepted";
+      call.acceptedAt = new Date();
 
       if (call.timeout) {
         clearTimeout(call.timeout);
@@ -195,7 +294,6 @@ const callSocket = (io, socket, userId) => {
       });
 
       console.log("Call accepted:", callId);
-
     } catch (error) {
       console.error("Call accept error:", error);
     }
@@ -205,7 +303,7 @@ const callSocket = (io, socket, userId) => {
   // 3. REJECT CALL
   // ==========================================
 
-  socket.on("call:reject", ({ callId } = {}) => {
+  socket.on("call:reject", async ({ callId } = {}) => {
     try {
       const call = activeCalls.get(callId);
 
@@ -222,10 +320,11 @@ const callSocket = (io, socket, userId) => {
         receiverId: currentUserId,
       });
 
+      await saveCallHistory(io, call, "rejected");
+
       removeCall(callId);
 
       console.log("Call rejected:", callId);
-
     } catch (error) {
       console.error("Call reject error:", error);
     }
@@ -254,7 +353,6 @@ const callSocket = (io, socket, userId) => {
         callId,
         offer,
       });
-
     } catch (error) {
       console.error("Call offer error:", error);
     }
@@ -283,7 +381,6 @@ const callSocket = (io, socket, userId) => {
         callId,
         answer,
       });
-
     } catch (error) {
       console.error("Call answer error:", error);
     }
@@ -293,56 +390,49 @@ const callSocket = (io, socket, userId) => {
   // 6. ICE CANDIDATE EXCHANGE
   // ==========================================
 
-  socket.on(
-    "call:ice-candidate",
-    ({ callId, candidate } = {}) => {
-      try {
-        const call = activeCalls.get(callId);
-
-        if (
-          !call ||
-          call.status !== "accepted" ||
-          !candidate ||
-          typeof candidate !== "object"
-        ) {
-          return;
-        }
-
-        let targetUserId;
-
-        if (call.callerId === currentUserId) {
-          targetUserId = call.receiverId;
-        } else if (call.receiverId === currentUserId) {
-          targetUserId = call.callerId;
-        } else {
-          return;
-        }
-
-        io.to(targetUserId).emit("call:ice-candidate", {
-          callId,
-          candidate,
-        });
-
-      } catch (error) {
-        console.error("ICE candidate error:", error);
-      }
-    }
-  );
-
-  // ==========================================
-  // 7. END CALL
-  // ==========================================
-
-  socket.on("call:end", ({ callId } = {}) => {
+  socket.on("call:ice-candidate", ({ callId, candidate } = {}) => {
     try {
       const call = activeCalls.get(callId);
 
       if (
         !call ||
-        ![
-          call.callerId,
-          call.receiverId,
-        ].includes(currentUserId)
+        call.status !== "accepted" ||
+        !candidate ||
+        typeof candidate !== "object"
+      ) {
+        return;
+      }
+
+      let targetUserId;
+
+      if (call.callerId === currentUserId) {
+        targetUserId = call.receiverId;
+      } else if (call.receiverId === currentUserId) {
+        targetUserId = call.callerId;
+      } else {
+        return;
+      }
+
+      io.to(targetUserId).emit("call:ice-candidate", {
+        callId,
+        candidate,
+      });
+    } catch (error) {
+      console.error("ICE candidate error:", error);
+    }
+  });
+
+  // ==========================================
+  // 7. END CALL
+  // ==========================================
+
+  socket.on("call:end", async ({ callId } = {}) => {
+    try {
+      const call = activeCalls.get(callId);
+
+      if (
+        !call ||
+        ![call.callerId, call.receiverId].includes(currentUserId)
       ) {
         return;
       }
@@ -358,10 +448,18 @@ const callSocket = (io, socket, userId) => {
         reason: "user_ended",
       });
 
+      const status =
+        call.status === "accepted"
+          ? "completed"
+          : currentUserId === call.callerId
+            ? "cancelled"
+            : "rejected";
+
+      await saveCallHistory(io, call, status);
+
       removeCall(callId);
 
       console.log("Call ended:", callId);
-
     } catch (error) {
       console.error("Call end error:", error);
     }
@@ -373,12 +471,12 @@ const callSocket = (io, socket, userId) => {
 
   socket.on("disconnect", async () => {
     try {
-      // Check if another socket of this user exists
+      // Check if another socket of this user exists.
       const remainingSockets = await io
         .in(currentUserId)
         .fetchSockets();
 
-      // Another tab/device is still connected
+      // Another tab/device is still connected.
       if (remainingSockets.length > 0) {
         return;
       }
@@ -402,13 +500,16 @@ const callSocket = (io, socket, userId) => {
         reason: "participant_disconnected",
       });
 
+      const status =
+        call.status === "accepted"
+          ? "completed"
+          : "missed";
+
+      await saveCallHistory(io, call, status);
+
       removeCall(callId);
 
-      console.log(
-        "Call cleaned after disconnect:",
-        callId
-      );
-
+      console.log("Call cleaned after disconnect:", callId);
     } catch (error) {
       console.error("Call disconnect cleanup error:", error);
     }

@@ -31,6 +31,45 @@ const attachmentSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const callSchema = new mongoose.Schema(
+  {
+    callType: {
+      type: String,
+      enum: ["audio", "video"],
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["completed", "missed", "rejected", "cancelled"],
+      required: true,
+    },
+    duration: {
+      type: Number,
+      default: 0,
+    },
+    callerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    receiverId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    startedAt: {
+      type: Date,
+      default: null,
+    },
+    endedAt: {
+      type: Date,
+      default: null,
+    },
+  },
+  { _id: false }
+);
+
+
 const messageSchema = new mongoose.Schema(
   {
     senderId: {
@@ -46,6 +85,15 @@ const messageSchema = new mongoose.Schema(
     message: {
       type: String,
       default: "",
+    },
+    messageType: {
+      type: String,
+      enum: ["text", "call"],
+      default: "text",
+    },
+    call: {
+      type: callSchema,
+      default: undefined,
     },
     attachments: {
       type: [attachmentSchema],

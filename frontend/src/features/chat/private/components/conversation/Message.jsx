@@ -13,6 +13,7 @@ import { IoArrowRedo } from "react-icons/io5";
 
 import useConversation from "../../../../../shared/zustand/useConversation.js";
 import ForwardModal from "./ForwardModal.jsx";
+import CallHistory from "../../../components/CallHistory.jsx";
 
 import {
   deleteMessageForMeAPI,
@@ -156,6 +157,16 @@ function Message({ message }) {
       document.removeEventListener("touchstart", handleOutsideClick);
     };
   }, []);
+
+  // Render private call history
+  if (message.messageType === "call" && message.call) {
+    return (
+      <CallHistory
+        call={message.call}
+        currentUserId={userId}
+      />
+    );
+  }
 
   // Open menu in available direction
   const handleMenuToggle = () => {

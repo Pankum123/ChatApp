@@ -16,6 +16,7 @@ import useConversation from "../../../../../shared/zustand/useConversation.js";
 import useGetGroupMessages from "../../hooks/useGetGroupMessages.js";
 import Loading from "../../../../../components/Loading.jsx";
 import ForwardModal from "../../../private/components/conversation/ForwardModal.jsx";
+import CallHistory from "../../../components/CallHistory.jsx";
 
 import {
   deleteGroupMessageForMeAPI,
@@ -353,6 +354,25 @@ function GroupMessages() {
             hour: "2-digit",
             minute: "2-digit",
           });
+
+          // Render group call history
+          if (message.messageType === "call" && message.call) {
+            return (
+              <div key={message._id}>
+                {!itsMe && (
+                  <div className="text-center text-xs text-gray-400 mt-2">
+                    {getSenderName(message.senderId)}
+                  </div>
+                )}
+
+                <CallHistory
+                  call={message.call}
+                  currentUserId={currentUserId}
+                  isGroup={true}
+                />
+              </div>
+            );
+          }
 
           return (
             <div key={message._id}>

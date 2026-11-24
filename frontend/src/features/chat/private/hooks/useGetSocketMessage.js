@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useSocketContext } from "../../../../shared/realtime/SocketContext.jsx";
 import useConversation from "../../../../shared/zustand/useConversation.js";
 import sound from "../../../../assets/notification.mp3";
+
 const useGetSocketMessage = () => {
   const { socket } = useSocketContext();
   const { setMessage } = useConversation();
@@ -9,36 +10,81 @@ const useGetSocketMessage = () => {
   useEffect(() => {
     if (!socket) return;
 
-    // Incoming message receive hone par
+    const authUser = JSON.parse(
+      localStorage.getItem("ChatApp") || "{}"
+    );
+
+    const currentUserId = String(authUser?.user?._id || "");
+
+    const getId = (value) => {
+      if (!value) return "";
+      return String(value._id || value);
+    };
+
+    // New private message aur call history receive karna
     const handleNewMessage = (newMessage) => {
-      const currentMessages = useConversation.getState().messages;
+      if (!newMessage?._id) return;
+
+      const senderId = getId(newMessage.senderId);
+      const receiverId = getId(newMessage.receiverId);
 
       const selectedConversation =
         useConversation.getState().selectedConversation;
 
-      // Sirf selected conversation ke messages add honge
-      if (
-        selectedConversation &&
-        newMessage.senderId === selectedConversation._id
-      ) {
-        // Naya message read hone ki confirmation
-        socket.emit("messagesRead", {
-          senderId: newMessage.senderId,
+      const selectedUserId = getId(selectedConversation?._id);
+
+      if (!selectedUserId || !currentUserId) return;
+
+      // Check karo message selected conversation ka hi hai
+      const isCurrentConversation =
+        (senderId === currentUserId &&
+          receiverId === selectedUserId) ||
+        (senderId === selectedUserId &&
+          receiverId === currentUserId);
+
+      if (!isCurrentConversation) return;
+
+      const currentMessages =
+        useConversation.getState().messages;
+
+      // Duplicate message prevent karo
+      const alreadyExists = currentMessages.some(
+        (message) =>
+          String(message._id) === String(newMessage._id)
+      );
+
+      if (alreadyExists) return;
+
+      // Incoming message ko delivered mark karo
+      if (receiverId === currentUserId) {
+        socket.emit("messageDelivered", {
+          messageId: newMessage._id,
         });
-        const notification = new Audio(sound);
-        notification.play();
 
-        setMessage([...currentMessages, newMessage]);
-
+        socket.emit("messagesRead", {
+          senderId,
+        });
       }
+
+      // Call history par notification sound nahi bajana
+      if (newMessage.messageType !== "call") {
+        const notification = new Audio(sound);
+        notification.play().catch(() => {});
+      }
+
+      setMessage([...currentMessages, newMessage]);
     };
 
-    // Message status update hone par
+    // Message status update
     const handleMessageStatusUpdated = (updatedMessage) => {
-      const currentMessages = useConversation.getState().messages;
+      const currentMessages =
+        useConversation.getState().messages;
 
       const updatedMessages = currentMessages.map((message) => {
-        if (message._id === updatedMessage.messageId) {
+        if (
+          String(message._id) ===
+          String(updatedMessage.messageId)
+        ) {
           return {
             ...message,
             status: updatedMessage.status,
@@ -55,10 +101,14 @@ const useGetSocketMessage = () => {
 
     // Delete for everyone realtime update
     const handleMessageDeleted = (deletedMessage) => {
-      const currentMessages = useConversation.getState().messages;
+      const currentMessages =
+        useConversation.getState().messages;
 
       const updatedMessages = currentMessages.map((message) => {
-        if (message._id === deletedMessage.messageId) {
+        if (
+          String(message._id) ===
+          String(deletedMessage.messageId)
+        ) {
           return {
             ...message,
             message: deletedMessage.message,
@@ -66,6 +116,7 @@ const useGetSocketMessage = () => {
             deletedAt: deletedMessage.deletedAt,
           };
         }
+
         return message;
       });
 
@@ -73,15 +124,27 @@ const useGetSocketMessage = () => {
     };
 
     socket.on("newMessage", handleNewMessage);
-    socket.on("messageStatusUpdated", handleMessageStatusUpdated);
-    socket.on("messageDeletedForEveryone", handleMessageDeleted);
+    socket.on(
+      "messageStatusUpdated",
+      handleMessageStatusUpdated
+    );
+    socket.on(
+      "messageDeletedForEveryone",
+      handleMessageDeleted
+    );
 
     return () => {
       socket.off("newMessage", handleNewMessage);
-      socket.off("messageStatusUpdated", handleMessageStatusUpdated);
-      socket.off("messageDeletedForEveryone", handleMessageDeleted);
+      socket.off(
+        "messageStatusUpdated",
+        handleMessageStatusUpdated
+      );
+      socket.off(
+        "messageDeletedForEveryone",
+        handleMessageDeleted
+      );
     };
-
   }, [socket, setMessage]);
 };
+
 export default useGetSocketMessage;

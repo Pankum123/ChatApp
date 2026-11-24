@@ -7,32 +7,39 @@ const useGetGroupSocketMessage = (socket) => {
   useEffect(() => {
     if (!socket) return;
 
-    const authUser = JSON.parse(localStorage.getItem("ChatApp"));
-    const currentUserId = authUser?.user?._id;
+    const authUser = JSON.parse(
+      localStorage.getItem("ChatApp") || "{}"
+    );
 
+    const currentUserId = String(authUser?.user?._id || "");
+
+    const getId = (value) => {
+      if (!value) return "";
+      return String(value._id || value);
+    };
+
+    // New group message aur group call history
     const handleNewGroupMessage = (newMessage) => {
-      const messageGroupId =
-        newMessage.groupId?._id || newMessage.groupId;
+      if (!newMessage?._id) return;
 
-      const senderId =
-        newMessage.senderId?._id || newMessage.senderId;
+      const messageGroupId = getId(newMessage.groupId);
+      const senderId = getId(newMessage.senderId);
+      const selectedGroupId = getId(selectedGroup?._id);
 
-      // Receiver hone par delivery confirmation bhejo,
-      // chahe koi group selected ho ya nahi.
-      if (String(senderId) !== String(currentUserId)) {
+      // Other members ke messages ki delivery confirmation
+      if (senderId !== currentUserId) {
         socket.emit("groupMessageDelivered", {
           messageId: newMessage._id,
         });
       }
 
-      // Sirf selected group ke messages UI mein dikhao.
-      if (String(messageGroupId) !== String(selectedGroup?._id)) {
-        return;
-      }
+      // Sirf selected group ke messages UI mein dikhao
+      if (messageGroupId !== selectedGroupId) return;
 
       setGroupMessages((prevMessages) => {
         const alreadyExists = prevMessages.some(
-          (message) => message._id === newMessage._id
+          (message) =>
+            String(message._id) === String(newMessage._id)
         );
 
         if (alreadyExists) return prevMessages;
@@ -40,18 +47,19 @@ const useGetGroupSocketMessage = (socket) => {
         return [...prevMessages, newMessage];
       });
 
-      // Selected group mein message read confirmation.
-      if (String(senderId) !== String(currentUserId)) {
+      // Selected group mein message read confirmation
+      if (senderId !== currentUserId) {
         socket.emit("groupMessagesRead", {
-          groupId: selectedGroup._id,
+          groupId: selectedGroupId,
         });
       }
     };
 
+    // Group message status update
     const handleGroupMessageStatus = (statusData) => {
       setGroupMessages((prevMessages) =>
         prevMessages.map((message) =>
-          message._id === statusData.messageId
+          String(message._id) === String(statusData.messageId)
             ? {
                 ...message,
                 status: statusData.status,
@@ -65,11 +73,11 @@ const useGetGroupSocketMessage = (socket) => {
       );
     };
 
-    // Receive deleted group message
+    // Group message deleted for everyone
     const handleGroupMessageDeleted = (deletedData) => {
       if (
-        String(deletedData.groupId) !==
-        String(selectedGroup?._id)
+        getId(deletedData.groupId) !==
+        getId(selectedGroup?._id)
       ) {
         return;
       }
@@ -88,12 +96,11 @@ const useGetGroupSocketMessage = (socket) => {
       );
     };
 
-
-    // Receive edited group message
+    // Group message edited
     const handleGroupMessageEdited = (editedData) => {
       if (
-        String(editedData.groupId) !==
-        String(selectedGroup?._id)
+        getId(editedData.groupId) !==
+        getId(selectedGroup?._id)
       ) {
         return;
       }
@@ -112,16 +119,27 @@ const useGetGroupSocketMessage = (socket) => {
       );
     };
 
-
     socket.on("newGroupMessage", handleNewGroupMessage);
-    socket.on("groupMessageStatusUpdated", handleGroupMessageStatus);
-    socket.on("groupMessageDeletedForEveryone",handleGroupMessageDeleted);
+    socket.on(
+      "groupMessageStatusUpdated",
+      handleGroupMessageStatus
+    );
+    socket.on(
+      "groupMessageDeletedForEveryone",
+      handleGroupMessageDeleted
+    );
     socket.on("groupMessageEdited", handleGroupMessageEdited);
 
     return () => {
       socket.off("newGroupMessage", handleNewGroupMessage);
-      socket.off("groupMessageStatusUpdated", handleGroupMessageStatus);
-      socket.off("groupMessageDeletedForEveryone",handleGroupMessageDeleted);
+      socket.off(
+        "groupMessageStatusUpdated",
+        handleGroupMessageStatus
+      );
+      socket.off(
+        "groupMessageDeletedForEveryone",
+        handleGroupMessageDeleted
+      );
       socket.off("groupMessageEdited", handleGroupMessageEdited);
     };
   }, [socket, selectedGroup?._id, setGroupMessages]);
