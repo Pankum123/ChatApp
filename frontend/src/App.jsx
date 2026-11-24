@@ -27,17 +27,14 @@ function App() {
           path="/"
           element={
             authUser ? (
-              // <div className="flex h-screen">
-              //   <Left />
-              //   <Right />
-              // </div>
+        
               <div className="drawer lg:drawer-open">
                 <input
                   id="my-drawer-2"
                   type="checkbox"
                   className="drawer-toggle"
                 />
-                <div className="drawer-content flex flex-col items-center justify-center">
+                <div className="drawer-content h-screen min-h-0 overflow-hidden flex flex-col">
                   <Right />
                 </div>
                 <div className="drawer-side">
@@ -46,7 +43,7 @@ function App() {
                     aria-label="close sidebar"
                     className="drawer-overlay"
                   ></label>
-                  <ul className="menu w-80 min-h-full bg-black text-base-content">
+                  <ul className="menu w-80 h-screen min-h-0 flex flex-col flex-nowrap overflow-hidden p-0 bg-black text-base-content">
                     <Left />
                   </ul>
                 </div>

@@ -30,7 +30,7 @@ function GroupChatuser() {
       : "";
 
   return (
-    <div className="relative z-40 flex h-[8vh] items-center justify-center gap-4 rounded-md bg-slate-800">
+    <div className="relative z-40 flex h-16 shrink-0 items-center justify-center gap-4 bg-slate-800">
       <label
         htmlFor="my-drawer-2"
         className="btn btn-ghost drawer-button absolute left-5 z-10 lg:hidden"

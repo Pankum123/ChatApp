@@ -5,16 +5,23 @@ import Profile from "../private/components/sidebar/Profile";
 
 function Left() {
   return (
-    <div className="w-full bg-gray-900 text-gray-300">
-      <Search />
-      <div
-        className=" flex-1  overflow-y-auto"
-        style={{ minHeight: "calc(84vh - 10vh)" }}
-      >
+    <div className="w-full h-full min-h-0 flex flex-col overflow-hidden bg-gray-900 text-gray-300">
+
+      {/* Fixed Search */}
+      <div className="shrink-0">
+        <Search />
+      </div>
+
+      {/* Messages Heading Fixed, User List Scrollable */}
+      <div className="flex-1 min-h-0 overflow-hidden">
         <Users />
       </div>
-      {/* <Logout /> */}
-      <Profile/>
+
+      {/* Fixed Profile */}
+      <div className="shrink-0">
+        <Profile />
+      </div>
+
     </div>
   );
 }

@@ -13,40 +13,45 @@ function Right() {
   const { selectedConversation, selectedGroup } = useConversation();
 
   return (
-    <div className="w-full bg-slate-900 text-gray-300">
-      <div>
-        {!selectedConversation && !selectedGroup ? (
-          <NoChatSelected />
-        ) : selectedConversation ? (
-          <>
-            {/* Private Chat - Existing UI */}
+    <div className="w-full h-screen min-h-0 flex flex-col overflow-hidden bg-slate-900 text-gray-300">
+
+      {!selectedConversation && !selectedGroup ? (
+        <NoChatSelected />
+      ) : selectedConversation ? (
+        <>
+          {/* Private Chat Header */}
+          <div className="shrink-0">
             <Chatuser />
+          </div>
 
-            <div
-              className="flex-1 overflow-y-auto"
-              style={{ maxHeight: "calc(92vh - 8vh)" }}
-            >
-              <Messages />
-            </div>
+          {/* Private Messages - Scrollable */}
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+            <Messages />
+          </div>
 
+          {/* Private Message Input - Fixed Bottom */}
+          <div className="shrink-0">
             <Typesend />
-          </>
-        ) : (
-          <>
-            {/* Group Chat - New UI */}
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Group Chat Header */}
+          <div className="shrink-0">
             <GroupChatuser />
+          </div>
 
-            <div
-              className="flex-1 overflow-y-auto"
-              style={{ maxHeight: "calc(92vh - 8vh)" }}
-            >
-              <GroupMessages />
-            </div>
+          {/* Group Messages - Scrollable */}
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+            <GroupMessages />
+          </div>
 
+          {/* Group Message Input - Fixed Bottom */}
+          <div className="shrink-0">
             <GroupTypesend />
-          </>
-        )}
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -57,27 +62,25 @@ const NoChatSelected = () => {
   const [authUser] = useAuth();
 
   return (
-    <>
-      <div className="relative">
-        <label
-          htmlFor="my-drawer-2"
-          className="btn btn-ghost drawer-button lg:hidden absolute left-5"
-        >
-          <CiMenuFries className="text-white text-xl" />
-        </label>
+    <div className="relative flex-1 min-h-0 flex items-center justify-center">
 
-        <div className="flex h-screen items-center justify-center">
-          <h1 className="text-center">
-            Welcome{" "}
-            <span className="font-semibold text-xl">
-              {authUser.user.fullname}
-            </span>
-            <br />
-            No chat selected, please start conversation by selecting anyone to
-            your contacts
-          </h1>
-        </div>
-      </div>
-    </>
+      <label
+        htmlFor="my-drawer-2"
+        className="btn btn-ghost drawer-button lg:hidden absolute left-5 top-4"
+      >
+        <CiMenuFries className="text-white text-xl" />
+      </label>
+
+      <h1 className="text-center px-4">
+        Welcome{" "}
+        <span className="font-semibold text-xl">
+          {authUser.user.fullname}
+        </span>
+        <br />
+        No chat selected, please start conversation by selecting anyone to
+        your contacts
+      </h1>
+
+    </div>
   );
 };

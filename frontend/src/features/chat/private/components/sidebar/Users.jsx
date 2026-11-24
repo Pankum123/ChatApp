@@ -346,9 +346,10 @@ function Users() {
   };
 
   return (
-    <div>
-      {/* Sidebar Header */}
-      <div className="px-4 py-2 flex items-center justify-between text-white font-semibold bg-slate-800 rounded-md">
+    <div className="h-full min-h-0 flex flex-col">
+
+      {/* Sidebar Header - Fixed */}
+      <div className="shrink-0 px-4 py-2 flex items-center justify-between text-white font-semibold bg-slate-800 rounded-md">
         <h1>Messages</h1>
 
         <button
@@ -363,11 +364,8 @@ function Users() {
         </button>
       </div>
 
-      {/* Combined Chat List */}
-      <div
-        className="py-2 flex-1 overflow-y-auto"
-        style={{ maxHeight: "calc(84vh - 10vh)" }}
-      >
+      {/* Combined Chat List - Scrollable */}
+      <div className="flex-1 min-h-0 overflow-y-auto py-2">
         {combinedChats.map((chat) =>
           chat.chatType === "group" ? (
             <GroupItem
@@ -391,8 +389,11 @@ function Users() {
           onCreate={handleCreateGroup}
         />
       )}
+
     </div>
   );
+
+
 }
 
 export default Users;

@@ -26,7 +26,7 @@ function Chatuser() {
 
   return (
     <>
-      <div className="relative flex items-center h-[8%] justify-between px-4 bg-slate-800 hover:bg-slate-700 duration-300 rounded-md">
+      <div className="relative flex h-16 shrink-0 items-center justify-between px-4 bg-slate-800 hover:bg-slate-700 duration-300">
 
         {/* Mobile Menu Button */}
         <label
