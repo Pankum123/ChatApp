@@ -1,10 +1,17 @@
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+} from "react";
 
-import { createContext, useContext, useEffect, useState } from "react";
 import { useSocketContext } from "../../../../shared/realtime/SocketContext";
 
 const callContext = createContext(null);
 
 // Custom hook
+// eslint-disable-next-line react-refresh/only-export-components
 export const useCallContext = () => {
   return useContext(callContext);
 };
@@ -14,13 +21,56 @@ export const CallProvider = ({ children }) => {
 
   const [call, setCall] = useState(null);
 
+  const ringtoneRef = useRef(null);
+
   // WebRTC signaling data
   const [remoteOffer, setRemoteOffer] = useState(null);
   const [remoteAnswer, setRemoteAnswer] = useState(null);
   const [remoteIceCandidates, setRemoteIceCandidates] = useState([]);
 
+  // Stop incoming ringtone
+  const stopRingtone = () => {
+    const ringtone = ringtoneRef.current;
+
+    if (ringtone) {
+      ringtone.pause();
+      ringtone.currentTime = 0;
+    }
+  };
+
+  // Play incoming ringtone
+  const playRingtone = () => {
+    const ringtone = ringtoneRef.current;
+
+    if (!ringtone) return;
+
+    ringtone.currentTime = 0;
+
+    ringtone.play().catch((error) => {
+      console.warn("Ringtone playback blocked:", error);
+    });
+  };
+
+  // Initialize ringtone
+  useEffect(() => {
+    const ringtone = new Audio("/sounds/incoming-ringtone.mp3");
+
+    ringtone.loop = true;
+    ringtone.volume = 1;
+
+    ringtoneRef.current = ringtone;
+
+    return () => {
+      ringtone.pause();
+      ringtone.currentTime = 0;
+      ringtoneRef.current = null;
+    };
+  }, []);
+
   // Reset call data
   const clearCallState = () => {
+    stopRingtone();
+
     setCall(null);
     setRemoteOffer(null);
     setRemoteAnswer(null);
@@ -32,6 +82,8 @@ export const CallProvider = ({ children }) => {
 
     // Incoming call
     const handleIncomingCall = (data) => {
+      stopRingtone();
+
       setCall({
         ...data,
         role: "receiver",
@@ -41,10 +93,14 @@ export const CallProvider = ({ children }) => {
       setRemoteOffer(null);
       setRemoteAnswer(null);
       setRemoteIceCandidates([]);
+
+      playRingtone();
     };
 
     // Outgoing call response
     const handleOutgoingCall = (data) => {
+      stopRingtone();
+
       setCall({
         ...data,
         role: "caller",
@@ -54,6 +110,8 @@ export const CallProvider = ({ children }) => {
 
     // Call accepted
     const handleCallAccepted = (data) => {
+      stopRingtone();
+
       setCall((prev) => {
         if (!prev) return prev;
 
@@ -71,6 +129,8 @@ export const CallProvider = ({ children }) => {
 
     // Call rejected
     const handleCallRejected = (data) => {
+      stopRingtone();
+
       setCall((prev) => {
         if (!prev) return prev;
 
@@ -87,6 +147,8 @@ export const CallProvider = ({ children }) => {
 
     // Receiver is busy
     const handleCallBusy = (data) => {
+      stopRingtone();
+
       setCall((prev) => {
         if (!prev) return prev;
 
@@ -100,6 +162,8 @@ export const CallProvider = ({ children }) => {
 
     // Receiver unavailable
     const handleCallUnavailable = (data) => {
+      stopRingtone();
+
       setCall((prev) => {
         if (!prev) return prev;
 
@@ -113,6 +177,8 @@ export const CallProvider = ({ children }) => {
 
     // Ring timeout
     const handleCallTimeout = (data) => {
+      stopRingtone();
+
       setCall((prev) => {
         if (!prev) return prev;
 
@@ -129,6 +195,8 @@ export const CallProvider = ({ children }) => {
 
     // Call ended
     const handleCallEnded = (data) => {
+      stopRingtone();
+
       setCall((prev) => {
         if (!prev) return prev;
 
@@ -145,6 +213,8 @@ export const CallProvider = ({ children }) => {
 
     // Backend error
     const handleCallError = (data) => {
+      stopRingtone();
+
       setCall((prev) => ({
         ...(prev || {}),
         status: "error",
@@ -187,8 +257,10 @@ export const CallProvider = ({ children }) => {
     socket.on("call:answer", handleAnswer);
     socket.on("call:ice-candidate", handleIceCandidate);
 
-    // Cleanup only calling listeners
+    // Cleanup
     return () => {
+      stopRingtone();
+
       socket.off("call:incoming", handleIncomingCall);
       socket.off("call:outgoing", handleOutgoingCall);
       socket.off("call:accepted", handleCallAccepted);
@@ -240,6 +312,8 @@ export const CallProvider = ({ children }) => {
   const acceptCall = () => {
     if (!socket || !call?.callId) return;
 
+    stopRingtone();
+
     socket.emit("call:accept", {
       callId: call.callId,
     });
@@ -253,6 +327,8 @@ export const CallProvider = ({ children }) => {
   // Reject incoming call
   const rejectCall = () => {
     if (!socket || !call?.callId) return;
+
+    stopRingtone();
 
     socket.emit("call:reject", {
       callId: call.callId,
@@ -296,6 +372,8 @@ export const CallProvider = ({ children }) => {
 
   // End current call
   const endCall = () => {
+    stopRingtone();
+
     if (!socket || !call?.callId) {
       clearCallState();
       return;
