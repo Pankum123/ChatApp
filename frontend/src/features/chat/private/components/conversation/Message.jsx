@@ -19,6 +19,90 @@ import {
   deleteMessageForEveryoneAPI,
 } from "../../../../../shared/api.js";
 
+// Attachment Preview Component
+function AttachmentPreview({ attachment }) {
+  const { url, fileName, fileType, fileSize } = attachment;
+
+  const formattedSize = Number.isFinite(fileSize)
+    ? `${(fileSize / (1024 * 1024)).toFixed(2)} MB`
+    : "";
+
+  // Image
+  if (fileType?.startsWith("image/")) {
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        className="block mt-2"
+      >
+        <img
+          src={url}
+          alt={fileName || "Shared image"}
+          loading="lazy"
+          className="max-h-72 max-w-full rounded-lg object-contain"
+        />
+      </a>
+    );
+  }
+
+  // Video
+  if (fileType?.startsWith("video/")) {
+    return (
+      <video
+        controls
+        preload="metadata"
+        className="mt-2 max-h-72 max-w-full rounded-lg"
+      >
+        <source src={url} type={fileType} />
+        Your browser does not support video playback.
+      </video>
+    );
+  }
+
+  // Audio
+  if (fileType?.startsWith("audio/")) {
+    return (
+      <div className="mt-2 min-w-[220px] max-w-full">
+        <audio
+          controls
+          preload="metadata"
+          className="max-w-full"
+        >
+          <source src={url} type={fileType} />
+          Your browser does not support audio playback.
+        </audio>
+      </div>
+    );
+  }
+
+  // PDF and other documents
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      className="mt-2 flex items-center gap-3 rounded-lg bg-black/20 hover:bg-black/30 p-3 text-white"
+    >
+      <MdContentCopy size={22} />
+
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-medium break-all">
+          {fileName || "Download attachment"}
+        </span>
+
+        <span className="block text-xs text-gray-300">
+          {formattedSize}
+        </span>
+      </span>
+
+      <span className="text-xs underline">
+        Open
+      </span>
+    </a>
+  );
+}
+
 function Message({ message }) {
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
@@ -237,15 +321,38 @@ function Message({ message }) {
                 </div>
               )}
 
-              <span className="whitespace-pre-wrap [overflow-wrap:anywhere]">
-                {message.message}
+              {/* Message content */}
+              {message.isDeleted ? (
+                <span className="italic text-gray-300">
+                  This message was deleted
+                </span>
+              ) : (
+                <>
+                  {message.message && (
+                    <span className="whitespace-pre-wrap [overflow-wrap:anywhere]">
+                      {message.message}
 
-                {message.isEdited && !message.isDeleted && (
-                  <span className="ml-2 text-xs text-gray-200 italic">
-                    edited
-                  </span>
-                )}
-              </span>
+                      {message.isEdited && (
+                        <span className="ml-2 text-xs text-gray-200 italic">
+                          edited
+                        </span>
+                      )}
+                    </span>
+                  )}
+
+                  {/* Attachments */}
+                  {message.attachments?.length > 0 && (
+                    <div className="mt-1 space-y-2">
+                      {message.attachments.map((attachment, index) => (
+                        <AttachmentPreview
+                          key={`${attachment.publicId || attachment.url}-${index}`}
+                          attachment={attachment}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
 
               {/* Dropdown arrow */}
               {!loading && (
@@ -297,7 +404,8 @@ function Message({ message }) {
                     <button
                       type="button"
                       onClick={handleCopy}
-                      className="flex items-center justify-between w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                      disabled={!message.message}
+                      className="flex items-center justify-between w-full px-4 py-3 text-white hover:bg-[#2a3942] disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <span className="flex items-center gap-3">
                         <MdContentCopy size={21} />
@@ -319,16 +427,19 @@ function Message({ message }) {
                       Forward
                     </button>
 
-                    {itsMe && !message.isDeleted && (
-                      <button
-                        type="button"
-                        onClick={handleEdit}
-                        className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
-                      >
-                        <MdEdit size={21} />
-                        Edit
-                      </button>
-                    )}
+                    {itsMe &&
+                      !message.isDeleted &&
+                      message.message &&
+                      !message.attachments?.length && (
+                        <button
+                          type="button"
+                          onClick={handleEdit}
+                          className="flex items-center gap-3 w-full px-4 py-3 text-white hover:bg-[#2a3942]"
+                        >
+                          <MdEdit size={21} />
+                          Edit
+                        </button>
+                      )}
 
                     <div className="border-t border-gray-700 my-1" />
 
@@ -417,4 +528,3 @@ function Message({ message }) {
 }
 
 export default Message;
-

@@ -71,10 +71,49 @@ export const getMessagesByConversation = async (conversationId) => {
 };
 
 // ====== Messages API ======
-export const sendMessageToConversation = async (conversationId, message, replyTo = null) => {
-  if (!conversationId) throw new Error("Conversation ID is required");
-  const res = await api.post(`/message/send/${conversationId}`, { message, replyTo });
-  return res;
+export const sendMessageToConversation = async (
+  conversationId,
+  message = "",
+  attachments = [],
+  replyTo = null
+) => {
+  if (!conversationId) {
+    throw new Error("Conversation ID is required");
+  }
+
+  let payload;
+  let config = {};
+
+  if (attachments.length > 0) {
+    const formData = new FormData();
+
+    formData.append("message", message);
+
+    if (replyTo) {
+      formData.append("replyTo", replyTo);
+    }
+
+    attachments.forEach((file) => {
+      formData.append("attachments", file);
+    });
+
+    payload = formData;
+
+    config.headers = {
+      "Content-Type": undefined,
+    };
+  } else {
+    payload = {
+      message,
+      replyTo,
+    };
+  }
+
+  return api.post(
+    `/message/send/${conversationId}`,
+    payload,
+    config
+  );
 };
 
 
