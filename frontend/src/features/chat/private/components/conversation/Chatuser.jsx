@@ -26,54 +26,54 @@ function Chatuser() {
 
   return (
     <>
-      <div className="relative flex h-16 shrink-0 items-center justify-between px-4 bg-slate-800 hover:bg-slate-700 duration-300">
+      <div className="relative flex h-16 shrink-0 items-center justify-center px-4 bg-slate-800 hover:bg-slate-700 duration-300">
 
         {/* Mobile Menu Button */}
         <label
           htmlFor="my-drawer-2"
-          className="btn btn-ghost drawer-button lg:hidden"
+          className="btn btn-ghost drawer-button absolute left-5 lg:hidden"
         >
           <CiMenuFries className="text-white text-xl" />
         </label>
 
-        {/* User Profile and Status */}
-        <div className="flex space-x-3 items-center">
-          <button
-            type="button"
-            onClick={() => setShowProfile(true)}
-            className="flex items-center gap-3 cursor-pointer text-left"
-            title="View Profile"
-          >
-            <div className="avatar">
-              <div className="w-16 rounded-full">
-                <img
-                  src={profilePic || profile}
-                  alt="Profile"
-                  className="object-cover"
-                />
-              </div>
+        {/* User Profile - Center */}
+        <button
+          type="button"
+          onClick={() => setShowProfile(true)}
+          className="flex items-center gap-3 cursor-pointer text-center"
+          title="View Profile"
+        >
+          <div className="avatar">
+            <div className="w-14 rounded-full">
+              <img
+                src={profilePic || profile}
+                alt="Profile"
+                className="object-cover"
+              />
             </div>
+          </div>
 
-            <div>
-              <h1 className="text-xl">
-                {selectedConversation.fullname}
-              </h1>
+          <div className="text-left">
+            <h1 className="text-xl font-semibold">
+              {selectedConversation.fullname}
+            </h1>
 
-              <span
-                className={`text-sm ${
-                  typingUsers.includes(selectedConversation._id)
-                    ? "text-green-400"
-                    : "text-gray-400"
-                }`}
-              >
-                {getOnlineUsersStatus(selectedConversation._id)}
-              </span>
-            </div>
-          </button>
-        </div>
+            <span
+              className={`text-sm ${
+                typingUsers.includes(selectedConversation._id)
+                  ? "text-green-400"
+                  : "text-gray-400"
+              }`}
+            >
+              {getOnlineUsersStatus(selectedConversation._id)}
+            </span>
+          </div>
+        </button>
 
         {/* Audio and Video Call Buttons */}
-        <CallButtons receiverId={selectedConversation._id} />
+        <div className="absolute right-4">
+          <CallButtons receiverId={selectedConversation._id} />
+        </div>
 
       </div>
 
