@@ -502,6 +502,7 @@ export const forwardMessage = async (req, res) => {
       senderId,
       receiverId,
       message: originalMessage.message,
+      attachments: originalMessage.attachments || [],
       isForwarded: true,
     });
 

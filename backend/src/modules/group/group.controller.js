@@ -1081,6 +1081,7 @@ export const forwardGroupMessage = async (req, res) => {
       groupId,
       senderId,
       message: originalMessage.message,
+      attachments: originalMessage.attachments || [],
       isForwarded: true,
     });
 
