@@ -1,8 +1,6 @@
 import React from "react";
 import Left from "./features/chat/components/Left";
 import Right from "./features/chat/components/Right";
-import Signup from "./features/auth/components/Signup";
-import Login from "./features/auth/components/Login";
 import { useAuth } from "./features/auth/context/AuthProvider";
 import { Toaster } from "react-hot-toast";
 
@@ -12,44 +10,49 @@ import GroupCallWindow from "./features/calls/group/components/GroupCallWindow";
 import Home from "./features/chat/components/Home";
 
 function App() {
-  const [authUser, setAuthUser] = useAuth();
-  console.log(authUser);
+  const [authUser] = useAuth();
+
   return (
     <>
       <Routes>
-
         {/* Home Page */}
         <Route
           path="/home"
           element={authUser ? <Navigate to="/" /> : <Home />}
         />
+
+        {/* Chat Page */}
         <Route
           path="/"
           element={
             authUser ? (
-        
-              <div className="drawer lg:drawer-open">
+              <div className="drawer lg:drawer-open h-dvh min-h-0 overflow-hidden">
                 <input
                   id="my-drawer-2"
                   type="checkbox"
                   className="drawer-toggle"
                 />
-                <div className="drawer-content h-screen min-h-0 overflow-hidden flex flex-col">
+
+                {/* Main Chat Area */}
+                <div className="drawer-content h-dvh min-h-0 overflow-hidden flex flex-col">
                   <Right />
                 </div>
-                <div className="drawer-side">
+
+                {/* Sidebar */}
+                <div className="drawer-side h-dvh min-h-0 overflow-hidden">
                   <label
                     htmlFor="my-drawer-2"
                     aria-label="close sidebar"
                     className="drawer-overlay"
                   ></label>
-                  <ul className="menu w-80 h-screen min-h-0 flex flex-col flex-nowrap overflow-hidden p-0 bg-black text-base-content">
+
+                  <ul className="menu w-80 h-dvh min-h-0 flex flex-col flex-nowrap overflow-hidden p-0 bg-black text-base-content">
                     <Left />
                   </ul>
                 </div>
               </div>
             ) : (
-              <Navigate to={"/home"} />
+              <Navigate to="/home" />
             )
           }
         />
@@ -60,8 +63,8 @@ function App() {
 
         {/* Unknown route */}
         <Route path="*" element={<Navigate to="/home" />} />
-
       </Routes>
+
       {/* Global Calling Window */}
       {authUser && (
         <>
@@ -69,6 +72,7 @@ function App() {
           <GroupCallWindow />
         </>
       )}
+
       <Toaster />
     </>
   );

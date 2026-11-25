@@ -13,8 +13,7 @@ function Right() {
   const { selectedConversation, selectedGroup } = useConversation();
 
   return (
-    <div className="w-full h-screen min-h-0 flex flex-col overflow-hidden bg-slate-900 text-gray-300">
-
+    <div className="w-full h-full min-h-0 flex flex-col overflow-hidden bg-slate-900 text-gray-300">
       {!selectedConversation && !selectedGroup ? (
         <NoChatSelected />
       ) : selectedConversation ? (
@@ -63,7 +62,6 @@ const NoChatSelected = () => {
 
   return (
     <div className="relative flex-1 min-h-0 flex items-center justify-center">
-
       <label
         htmlFor="my-drawer-2"
         className="btn btn-ghost drawer-button lg:hidden absolute left-5 top-4"
@@ -80,7 +78,6 @@ const NoChatSelected = () => {
         No chat selected, please start conversation by selecting anyone to
         your contacts
       </h1>
-
     </div>
   );
 };
