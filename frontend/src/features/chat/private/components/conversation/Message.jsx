@@ -128,7 +128,7 @@ function Message({ message }) {
   const itsMe = String(senderId) === String(userId);
 
   const chatName = itsMe ? "chat-end" : "chat-start";
-  const chatColor = itsMe ? "bg-blue-500" : "";
+  const chatColor = itsMe ? "!bg-blue-500" : "!bg-[#202c33]";
 
   const createdAt = new Date(message.createdAt);
 
@@ -274,8 +274,8 @@ function Message({ message }) {
             {/* Message bubble */}
             <div
               id={`message-${message._id}`}
-              className={`chat-bubble !w-fit !min-w-[65px] !max-w-[85vw] relative inline-block text-white pr-8 break-words ${chatColor} ${
-                message.isDeleted ? "italic text-gray-300" : ""
+              className={`chat-bubble !w-fit !min-w-[65px] !max-w-[85vw] !bg-opacity-100 !text-white relative inline-block pr-8 break-words ${chatColor} ${
+                message.isDeleted ? "italic !text-gray-300" : ""
               }`}
             >
               {/* Replied Message Preview */}
