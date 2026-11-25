@@ -26,25 +26,25 @@ function Chatuser() {
 
   return (
     <>
-      <div className="relative flex h-16 shrink-0 items-center justify-center px-4 bg-slate-800 hover:bg-slate-700 duration-300">
+      <div className="flex h-16 w-full shrink-0 items-center gap-2 px-2 sm:px-4 bg-slate-800 hover:bg-slate-700 duration-300">
 
         {/* Mobile Menu Button */}
         <label
           htmlFor="my-drawer-2"
-          className="btn btn-ghost drawer-button absolute left-5 lg:hidden"
+          className="btn btn-ghost drawer-button shrink-0 lg:hidden"
         >
           <CiMenuFries className="text-white text-xl" />
         </label>
 
-        {/* User Profile - Center */}
+        {/* User Profile */}
         <button
           type="button"
           onClick={() => setShowProfile(true)}
-          className="flex items-center gap-3 cursor-pointer text-center"
+          className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3 cursor-pointer text-left"
           title="View Profile"
         >
-          <div className="avatar">
-            <div className="w-14 rounded-full">
+          <div className="avatar shrink-0">
+            <div className="w-10 sm:w-14 rounded-full">
               <img
                 src={profilePic || profile}
                 alt="Profile"
@@ -53,13 +53,13 @@ function Chatuser() {
             </div>
           </div>
 
-          <div className="text-left">
-            <h1 className="text-xl font-semibold">
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-base sm:text-xl font-semibold">
               {selectedConversation.fullname}
             </h1>
 
             <span
-              className={`text-sm ${
+              className={`block truncate text-xs sm:text-sm ${
                 typingUsers.includes(selectedConversation._id)
                   ? "text-green-400"
                   : "text-gray-400"
@@ -71,7 +71,7 @@ function Chatuser() {
         </button>
 
         {/* Audio and Video Call Buttons */}
-        <div className="absolute right-4">
+        <div className="flex shrink-0 items-center">
           <CallButtons receiverId={selectedConversation._id} />
         </div>
 
