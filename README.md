@@ -216,7 +216,7 @@ Follow these steps to run ChatApp locally.
 ### 1. Clone the Repository
 
 ```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
+git clone https://github.com/Pankum123/ChatApp.git
 
 cd ChatApp
 ```
