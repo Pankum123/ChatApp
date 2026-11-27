@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Login from "../../auth/components/Login";
 import Signup from "../../auth/components/Signup";
@@ -70,10 +69,8 @@ function Home() {
   return (
     <div className="min-h-screen md:h-screen w-full bg-slate-950 overflow-x-hidden md:overflow-hidden">
       <div className="min-h-screen md:h-screen flex flex-col md:flex-row">
-
         {/* LEFT SIDE */}
         <section className="w-full md:w-1/2 md:h-screen md:overflow-y-auto md:overflow-x-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-blue-800 text-white px-5 sm:px-8 md:px-10 py-6 md:py-8 flex flex-col">
-
           {/* Logo */}
           <div className="flex items-center gap-3 mb-7 md:mb-12 shrink-0">
             <div className="w-11 h-11 rounded-xl bg-blue-500 flex items-center justify-center text-2xl shadow-lg shadow-blue-500/30">
@@ -139,7 +136,6 @@ function Home() {
         <section className="hidden md:flex md:w-1/2 md:h-screen md:shrink-0 bg-slate-950 justify-center items-center p-8">
           {authCard}
         </section>
-
       </div>
     </div>
   );
