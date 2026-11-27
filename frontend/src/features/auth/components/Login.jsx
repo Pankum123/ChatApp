@@ -49,7 +49,7 @@ function Login({ onSwitch }) {
         <h2 className="text-xl text-black font-bold">Login</h2>
 
         {/* Email */}
-        <label className="input input-bordered flex items-center gap-2 !bg-white !text-black">
+        <label className="input input-bordered flex items-center gap-2 !bg-gray-100 !text-gray-900">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 16 16"
@@ -63,7 +63,7 @@ function Login({ onSwitch }) {
           <input
             type="email"
             autoComplete="email"
-            className="grow min-w-0 !bg-white !text-black placeholder:!text-gray-500"
+            className="grow min-w-0 !bg-gray-100 !text-gray-900 placeholder:!text-gray-500"
             placeholder="Email"
             {...register("email", { required: true })}
           />
@@ -76,7 +76,7 @@ function Login({ onSwitch }) {
         )}
 
         {/* Password */}
-        <label className="input input-bordered flex items-center gap-2 !bg-white !text-black">
+        <label className="input input-bordered flex items-center gap-2 !bg-gray-100 !text-gray-900">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 16 16"
@@ -93,7 +93,7 @@ function Login({ onSwitch }) {
           <input
             type="password"
             autoComplete="current-password"
-            className="grow min-w-0 !bg-white !text-black placeholder:!text-gray-500"
+            className="grow min-w-0 !bg-gray-100 !text-gray-900 placeholder:!text-gray-500"
             placeholder="Password"
             {...register("password", { required: true })}
           />

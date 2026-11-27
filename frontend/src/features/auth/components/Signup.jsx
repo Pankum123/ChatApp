@@ -58,7 +58,7 @@ function Signup({ onSwitch }) {
         <h2 className="text-xl text-black font-bold">Signup</h2>
 
         {/* Fullname */}
-        <label className="input input-bordered flex items-center gap-2 !bg-white !text-black">
+        <label className="input input-bordered flex items-center gap-2 !bg-gray-100 !text-gray-900">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 16 16"
@@ -71,7 +71,7 @@ function Signup({ onSwitch }) {
           <input
             type="text"
             autoComplete="name"
-            className="grow min-w-0 !bg-white !text-black placeholder:!text-gray-500"
+            className="grow min-w-0 !bg-gray-100 !text-gray-900 placeholder:!text-gray-500"
             placeholder="Fullname"
             {...register("fullname", { required: true })}
           />
@@ -84,7 +84,7 @@ function Signup({ onSwitch }) {
         )}
 
         {/* Email */}
-        <label className="input input-bordered flex items-center gap-2 !bg-white !text-black">
+        <label className="input input-bordered flex items-center gap-2 !bg-gray-100 !text-gray-900">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 16 16"
@@ -98,7 +98,7 @@ function Signup({ onSwitch }) {
           <input
             type="email"
             autoComplete="email"
-            className="grow min-w-0 !bg-white !text-black placeholder:!text-gray-500"
+            className="grow min-w-0 !bg-gray-100 !text-gray-900 placeholder:!text-gray-500"
             placeholder="Email"
             {...register("email", { required: true })}
           />
@@ -111,7 +111,7 @@ function Signup({ onSwitch }) {
         )}
 
         {/* Password */}
-        <label className="input input-bordered flex items-center gap-2 !bg-white !text-black">
+        <label className="input input-bordered flex items-center gap-2 !bg-gray-100 !text-gray-900">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 16 16"
@@ -128,7 +128,7 @@ function Signup({ onSwitch }) {
           <input
             type="password"
             autoComplete="new-password"
-            className="grow min-w-0 !bg-white !text-black placeholder:!text-gray-500"
+            className="grow min-w-0 !bg-gray-100 !text-gray-900 placeholder:!text-gray-500"
             placeholder="Password"
             {...register("password", { required: true })}
           />
@@ -141,7 +141,7 @@ function Signup({ onSwitch }) {
         )}
 
         {/* Confirm Password */}
-        <label className="input input-bordered flex items-center gap-2 !bg-white !text-black">
+        <label className="input input-bordered flex items-center gap-2 !bg-gray-100 !text-gray-900">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 16 16"
@@ -158,7 +158,7 @@ function Signup({ onSwitch }) {
           <input
             type="password"
             autoComplete="new-password"
-            className="grow min-w-0 !bg-white !text-black placeholder:!text-gray-500"
+            className="grow min-w-0 !bg-gray-100 !text-gray-900 placeholder:!text-gray-500"
             placeholder="Confirm Password"
             {...register("confirmPassword", {
               required: true,
