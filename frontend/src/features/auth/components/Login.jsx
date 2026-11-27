@@ -63,7 +63,7 @@ const onSubmit = async (data) => {
       <div className="flex items-center justify-center bg-blue-300">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="border border-white bg-amber-100 px-6 py-2 rounded-md space-y-3 w-96"
+          className="border border-white px-6 py-2 rounded-md space-y-3 w-96"
         >
           <h1 className="text-2xl text-center text-black">
             Chat<span className="text-green-500 font-semibold">App</span>
