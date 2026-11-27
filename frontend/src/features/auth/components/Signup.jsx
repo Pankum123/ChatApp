@@ -45,154 +45,117 @@ function Signup({ onSwitch }) {
     }
   };
 
+  const inputClass =
+    "w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 [color-scheme:light]";
+
   return (
-    <div className="w-full">
+    <div className="w-full px-3 py-4">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="box-border w-full max-w-sm mx-auto space-y-3 rounded-md border border-white bg-amber-100 px-5 sm:px-6 py-4"
+        className="mx-auto w-full max-w-xs space-y-3 rounded-xl border border-gray-100 bg-white p-5 shadow-lg shadow-gray-200/50 [color-scheme:light]"
       >
-        <h1 className="text-2xl text-black text-center">
-          Chat<span className="text-green-500 font-semibold">App</span>
-        </h1>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Chat<span className="text-green-500">App</span>
+          </h1>
+          <p className="mt-1 text-xs text-gray-500">
+            Create your account.
+          </p>
+        </div>
 
-        <h2 className="text-xl text-black font-bold">Signup</h2>
-
-        {/* Fullname */}
-        <label className="input input-bordered flex items-center gap-2 !bg-gray-100 !text-gray-900">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-            fill="currentColor"
-            className="w-4 h-4 opacity-70"
-          >
-            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" />
-          </svg>
-
+        <div>
+          <label className="mb-1 block text-xs font-semibold text-gray-700">
+            Full name
+          </label>
           <input
             type="text"
             autoComplete="name"
-            className="grow min-w-0 !bg-gray-100 !text-gray-900 placeholder:!text-gray-500"
-            placeholder="Fullname"
+            placeholder="Enter full name"
+            className={inputClass}
             {...register("fullname", { required: true })}
           />
-        </label>
+          {errors.fullname && (
+            <p className="mt-1 text-xs text-red-500">
+              Full name is required
+            </p>
+          )}
+        </div>
 
-        {errors.fullname && (
-          <span className="text-red-500 text-sm font-semibold">
-            This field is required
-          </span>
-        )}
-
-        {/* Email */}
-        <label className="input input-bordered flex items-center gap-2 !bg-gray-100 !text-gray-900">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-            fill="currentColor"
-            className="w-4 h-4 opacity-70"
-          >
-            <path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
-            <path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
-          </svg>
-
+        <div>
+          <label className="mb-1 block text-xs font-semibold text-gray-700">
+            Email
+          </label>
           <input
             type="email"
             autoComplete="email"
-            className="grow min-w-0 !bg-gray-100 !text-gray-900 placeholder:!text-gray-500"
-            placeholder="Email"
+            placeholder="Enter email"
+            className={inputClass}
             {...register("email", { required: true })}
           />
-        </label>
+          {errors.email && (
+            <p className="mt-1 text-xs text-red-500">
+              Email is required
+            </p>
+          )}
+        </div>
 
-        {errors.email && (
-          <span className="text-red-500 text-sm font-semibold">
-            This field is required
-          </span>
-        )}
-
-        {/* Password */}
-        <label className="input input-bordered flex items-center gap-2 !bg-gray-100 !text-gray-900">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-            fill="currentColor"
-            className="w-4 h-4 opacity-70"
-          >
-            <path
-              fillRule="evenodd"
-              d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
-              clipRule="evenodd"
-            />
-          </svg>
-
+        <div>
+          <label className="mb-1 block text-xs font-semibold text-gray-700">
+            Password
+          </label>
           <input
             type="password"
             autoComplete="new-password"
-            className="grow min-w-0 !bg-gray-100 !text-gray-900 placeholder:!text-gray-500"
-            placeholder="Password"
+            placeholder="Create password"
+            className={inputClass}
             {...register("password", { required: true })}
           />
-        </label>
+          {errors.password && (
+            <p className="mt-1 text-xs text-red-500">
+              Password is required
+            </p>
+          )}
+        </div>
 
-        {errors.password && (
-          <span className="text-red-500 text-sm font-semibold">
-            This field is required
-          </span>
-        )}
-
-        {/* Confirm Password */}
-        <label className="input input-bordered flex items-center gap-2 !bg-gray-100 !text-gray-900">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-            fill="currentColor"
-            className="w-4 h-4 opacity-70"
-          >
-            <path
-              fillRule="evenodd"
-              d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
-              clipRule="evenodd"
-            />
-          </svg>
-
+        <div>
+          <label className="mb-1 block text-xs font-semibold text-gray-700">
+            Confirm password
+          </label>
           <input
             type="password"
             autoComplete="new-password"
-            className="grow min-w-0 !bg-gray-100 !text-gray-900 placeholder:!text-gray-500"
-            placeholder="Confirm Password"
+            placeholder="Confirm password"
+            className={inputClass}
             {...register("confirmPassword", {
               required: true,
               validate: validatePasswordMatch,
             })}
           />
-        </label>
-
-        {errors.confirmPassword && (
-          <span className="text-red-500 text-sm font-semibold">
-            {errors.confirmPassword.message ||
-              "This field is required"}
-          </span>
-        )}
-
-        {/* Text & Button */}
-        <div className="flex items-center justify-between gap-3 text-black">
-          <p className="text-sm">
-            Have an account?
-            <button
-              type="button"
-              onClick={onSwitch}
-              className="text-blue-500 underline cursor-pointer ml-1"
-            >
-              Login
-            </button>
-          </p>
-
-          <input
-            type="submit"
-            value="Signup"
-            className="text-white bg-green-500 px-3 py-1 cursor-pointer rounded-lg"
-          />
+          {errors.confirmPassword && (
+            <p className="mt-1 text-xs text-red-500">
+              {errors.confirmPassword.message ||
+                "Confirm password is required"}
+            </p>
+          )}
         </div>
+
+        <button
+          type="submit"
+          className="w-full rounded-lg bg-green-500 py-2.5 text-sm font-semibold text-white transition hover:bg-green-600 active:scale-[0.98]"
+        >
+          Signup
+        </button>
+
+        <p className="text-center text-xs text-gray-500">
+          Already have an account?
+          <button
+            type="button"
+            onClick={onSwitch}
+            className="ml-1 font-semibold text-green-600 hover:underline"
+          >
+            Login
+          </button>
+        </p>
 
         <GoogleLogin />
       </form>
