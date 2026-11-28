@@ -26,12 +26,18 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (authUser) {
       const socket = io(BACKEND_URL, {
-        query: {
-          userId: authUser.user._id,
-        },
+        withCredentials: true,
       });
 
       setSocket(socket);
+
+      socket.on("connect", () => {
+        console.log("Socket connected:", socket.id);
+      });
+
+      socket.on("connect_error", (error) => {
+        console.error("Socket connection failed:", error.message);
+      });
 
       socket.on("getOnlineUsers", (users) => {
         setOnlineUsers(users);
@@ -106,7 +112,7 @@ export const SocketProvider = ({ children }) => {
       setTypingUsers([]);
       setGroupTypingUsers([]);
     }
-  }, [authUser]);
+  }, [authUser, BACKEND_URL]);
   return (
     <socketContext.Provider value={{ socket, onlineUsers, typingUsers, groupTypingUsers }}>
       {children}
